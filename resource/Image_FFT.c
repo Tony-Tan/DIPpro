@@ -4,11 +4,10 @@
  中心化，根据傅里叶性质的平移性质
  */
 void FFT_Shift(double * src,int size_w,int size_h){
-    for(int i=0;i<size_w;i++){
-        for(int j=0;j<size_h;j++){
+    for(int j=0;j<size_h;j++)
+        for(int i=0;i<size_w;i++){
             if((i+j)%2)
-                src[i*size_w+j]=-src[i*size_w+j];
-        }
+                src[j*size_w+i]=-src[j*size_w+i];
         
     }
     
@@ -23,10 +22,9 @@ void ImageFFT(IplImage * src,Complex * dst){
     int width=src->width;
     int height=src->height;
     double *image_data=(double*)malloc(sizeof(double)*width*height);
-    for(int i=0;i<width;i++){
-        for(int j=0;j<height;j++){
-            image_data[i*width+j]=GETPIX(src, i, j);
-        }
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            image_data[j*width+i]=GETPIX(src, j, i);
         
     }
     FFT_Shift(image_data,width, height);//图像中心化
@@ -45,7 +43,7 @@ void Nomalsize(double *src,double *dst,int size_w,int size_h){
     }
     double step=255.0/(max-min);
     //printf("%d",test);
-    printf("max:%lf   min:%lf\n",max,min);
+    //printf("max:%lf   min:%lf\n",max,min);
     for(int i=0;i<size_w*size_h;i++){
         dst[i]=(src[i]-min)*step;
         dst[i]*=45.9*log((double)(1+dst[i]));
@@ -62,17 +60,17 @@ void getAmplitudespectrum(Complex * src,int size_w,int size_h,IplImage *dst){
     double real=0.0;
     double imagin=0.0;
     
-    for(int i=0;i<size_w;i++)
-        for(int j=0;j<size_h;j++){
-            real=src[i*size_w+j].real;
-            imagin=src[i*size_w+j].imagin;
-            despe[i*size_w+j]=sqrt(real*real+imagin*imagin);
+    for(int j=0;j<size_h;j++)
+        for(int i=0;i<size_w;i++){
+            real=src[j*size_w+i].real;
+            imagin=src[j*size_w+i].imagin;
+            despe[j*size_w+i]=sqrt(real*real+imagin*imagin);
             
         }
     Nomalsize(despe, despe, size_w, size_h);
-    for(int i=0;i<size_w;i++)
-        for(int j=0;j<size_h;j++){
-            cvSetReal2D(dst, i, j, despe[i*size_w+j]);
+    for(int j=0;j<size_h;j++)
+        for(int i=0;i<size_w;i++){
+            cvSetReal2D(dst, j, i, despe[j*size_w+i]);
             
         }
     free(despe);
@@ -94,14 +92,14 @@ void ImageIFFT(Complex *src,IplImage *dst,int size_w,int size_h){
     if(temp_d==NULL)
         exit(0);
     IFFT2D(temp_c,temp,size_w,size_h);
-    for(int i=0;i<size_w;i++)
-        for(int j=0;j<size_h;j++){
-            temp_d[i*size_h+j]=temp[i*size_h+j].real;
+    for(int j=0;j<size_h;j++)
+        for(int i=0;i<size_w;i++){
+            temp_d[j*size_w+i]=temp[j*size_w+i].real;
         }
     FFT_Shift(temp_d, size_w, size_h);
-    for(int i=0;i<size_w;i++)
-        for(int j=0;j<size_h;j++){
-            cvSetReal2D(dst, i, j, temp_d[i*size_h+j]);
+    for(int j=0;j<size_h;j++)
+        for(int i=0;i<size_w;i++){
+            cvSetReal2D(dst, j, i, temp_d[j*size_w+i]);
         }
     free(temp);
     free(temp_c);

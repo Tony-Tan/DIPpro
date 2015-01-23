@@ -78,29 +78,31 @@ void InitMappingTable(void * arry,int size,int Data_type){
  直方图均衡
  */
 void HistogramEqualization(IplImage *src,IplImage *dst){
-    double GrayValue[256];
+    int GrayValue[256];
     InitMappingTable(GrayMappingTable,256,TABLE_CHAR);
     InitMappingTable(GrayValue,256,TABLE_INT);
-    unsigned char min=256,max=0;
+    int min=256,max=0;
     for(int i=0;i<src->width;i++)
         for(int j=0;j<src->height;j++){
-            int tempv=GETPIX(src, i, j);
+            int tempv=GETPIX(src, j, i);
             GrayValue[tempv]++;
             max=tempv>=max?tempv:max;
             min=tempv<min?tempv:min;
             
         }
-    for(int i=1;i<256;i++)
+    
+    for(int i=1;i<=max;i++)
         GrayValue[i]+=GrayValue[i-1];
     int Size=src->width*src->height;
-    for(int i=min;i<256;i++){
+    for(int i=min;i<=max;i++){
+        //GrayMappingTable[i]=(unsigned char)255.*(GrayValue[i]-GrayValue[min])/(Size-GrayValue[min]);
         GrayMappingTable[i]=(unsigned char)255.*(GrayValue[i]-GrayValue[min])/(Size-GrayValue[min]);
-        printf("%d->%d\n",i,(unsigned char)GrayMappingTable[i]);
+        //printf("%d->%d\n",i,(unsigned char)GrayMappingTable[i]);
         
     }
     
     for(int i=0;i<src->width;i++)
         for(int j=0;j<src->height;j++)
-            SETPIX(dst,i,j,GrayMappingTable[GETPIX(src, i, j)]);
+            SETPIX(dst,j,i,GrayMappingTable[GETPIX(src, j ,i)]);
     
 }

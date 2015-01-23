@@ -13,8 +13,14 @@
 #define GETPIXF(image,x,y) ((double) ((double *)(image->imageData))[(x)*image->width+(y)])
 #define SETPIXF(image,x,y,value) ((((double *)(image->imageData))[(x)*image->width+y])=((double)value))
 
-
-
+#define ILPF 1
+#define BLPF 2
+#define GLPF 3
+#define IHPF 4
+#define BHPF 5
+#define GHPF 6
+#define HOMPF 7
+#define HFEPF 8
 
 
 #endif
