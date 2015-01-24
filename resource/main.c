@@ -23,9 +23,9 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.jpg", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/testwhite.jpg", 0);
     IplImage *dst =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    double power=FrequencyFiltering(src,dst,HFEPF,50 ,1,1,GHPF,0,1);
+    double power=FrequencyFiltering(src,dst,GHPF,20,0,0,0,0,1);
     //Complex a[512*512];
     //ImageFFT(src, a);
     //getAmplitudespectrum(a, 512, 512, dst);
@@ -33,7 +33,7 @@ int main(int argc, const char * argv[]) {
     cvNamedWindow("dst", 1);
     cvShowImage("dst", dst);
    // HistogramEqualization(dst,dst);
-   // cvSaveImage("/Users/Tony/DIPImage/testfir_ILPF_10_h.jpg", dst, 0);
+    cvSaveImage("/Users/Tony/DIPImage/testehite_.jpg", dst, 0);
     printf("Power is:%lf%%\n",power*100);
     cvNamedWindow("src", 1);
     cvShowImage("src", src);
