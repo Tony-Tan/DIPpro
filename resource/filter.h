@@ -4,7 +4,7 @@
 
 #include "highpassfilter.h"
 #include "lowpassfilter.h"
-#include "bandpassfilter.h"
+
 #include "fr.h"
 #include "Fourer.h"
 #include "Image_FFT.h"

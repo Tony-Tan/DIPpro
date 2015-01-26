@@ -1,3 +1,11 @@
+//
+//  highpassfilter
+//  高频滤波
+//  Created by 谭升 on 14/12/23.
+//  tony.sheng.tan@gmail.com
+//  Copyright (c) 2014年 谭升. All rights reserved.
+//
+
 #include "highpassfilter.h"
 static double Distance(int x,int y,int c_x,int c_y){
     

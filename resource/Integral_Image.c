@@ -1,3 +1,10 @@
+//
+//  Integral_Image
+//  积分图像
+//  Created by 谭升 on 14/12/23.
+//  tony.sheng.tan@gmail.com
+//  Copyright (c) 2014年 谭升. All rights reserved.
+//
 #include "Integral_Image.h"
 /*
  图像积分，即一个像素点等于其左上方全部像素值之和

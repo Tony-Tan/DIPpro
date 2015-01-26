@@ -1,3 +1,10 @@
+//
+//  Homomorphicfilter
+//  同态滤波
+//  tony.sheng.tan@gmail.com
+//  Created by 谭升 on 14/11/28.
+//  Copyright (c) 2014年 谭升. All rights reserved.
+//
 #include "Homomorphicfilter.h"
 
 static double Distance(int x,int y,int c_x,int c_y){

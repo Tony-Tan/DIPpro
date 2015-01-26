@@ -1,3 +1,10 @@
+//
+//  GrayMorphology
+//  灰度图像形态学
+//  tony.sheng.tan@gmail.com
+//  Created by 谭升 on 14/11/28.
+//  Copyright (c) 2014年 谭升. All rights reserved.
+//
 #include <cv.h>
 #include <highgui.h>
 #include <stdio.h>
@@ -50,7 +57,7 @@ void G_Translation(IplImage *src ,IplImage *dst,double SEvalue,Position *d,int i
     int dstwidth=dst->width;
     int dstheight=dst->height;
     if(istoFindMin)
-        One(temp);
+        G_One(temp);
     else
         cvZero(temp);
     for(int i=0;i<srcwidth;i++){
@@ -124,9 +131,9 @@ void Dilate_Gray(IplImage *src,IplImage *dst,IplImage *se,Position *center){
                 d.x=center->x-i;
                 d.y=center->y-j;
                 if(SEissmooth)
-                    Translation(temp, temp, 0.0, &d,TOFINDMAX);
+                    G_Translation(temp, temp, 0.0, &d,TOFINDMAX);
                 else
-                    Translation(temp, temp, value, &d,TOFINDMAX);
+                    G_Translation(temp, temp, value, &d,TOFINDMAX);
                 MaxPix(temp, temp_last, temp_last);
             }
         }
@@ -159,9 +166,9 @@ void Erode_Gray(IplImage *src,IplImage *dst,IplImage *se,Position *center){
                 d.x=i-center->x;
                 d.y=j-center->y;
                 if(SEissmooth)
-                    Translation(temp, temp, 0.0, &d,TOFINDMIN);
+                    G_Translation(temp, temp, 0.0, &d,TOFINDMIN);
                 else
-                    Translation(temp, temp, -1.0*value, &d,TOFINDMIN);
+                    G_Translation(temp, temp, -1.0*value, &d,TOFINDMIN);
                 MinPix(temp, temp_last, temp_last);
                 
             }
@@ -241,9 +248,9 @@ void Erode_Gray_g(IplImage *src,IplImage *ground,IplImage *dst,IplImage *se,Posi
                 d.x=i-center->x;
                 d.y=j-center->y;
                 if(SEissmooth)
-                    Translation(temp, temp, 0.0, &d,TOFINDMIN);
+                    G_Translation(temp, temp, 0.0, &d,TOFINDMIN);
                 else
-                    Translation(temp, temp, -1.0*value, &d,TOFINDMIN);
+                    G_Translation(temp, temp, -1.0*value, &d,TOFINDMIN);
                 MinPix(temp, temp_last, temp_last);
                 
             }
@@ -278,9 +285,9 @@ void Dilate_Gray_g(IplImage *src,IplImage *ground,IplImage *dst,IplImage *se,Pos
                 d.x=center->x-i;
                 d.y=center->y-j;
                 if(SEissmooth)
-                    Translation(temp, temp, 0.0, &d,TOFINDMAX);
+                    G_Translation(temp, temp, 0.0, &d,TOFINDMAX);
                 else
-                    Translation(temp, temp, value, &d,TOFINDMAX);
+                    G_Translation(temp, temp, value, &d,TOFINDMAX);
                 MaxPix(temp, temp_last, temp_last);
             }
         }
