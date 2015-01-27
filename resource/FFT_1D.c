@@ -1,7 +1,7 @@
 //
 //  1D.c
 //  Fourer
-//
+//  tony.sheng.tan@gmail.com
 //  Created by 谭升 on 14/11/25.
 //  Copyright (c) 2014年 谭升. All rights reserved.
 //
@@ -310,8 +310,5 @@ void IFFT(Complex * src,Complex * dst,int size_n){
             dst[i].imagin=(1./size_n)*src[i].imagin;
             dst[i].real=(1./size_n)*src[i].real;
         }
-    
-    
-    
     
 }

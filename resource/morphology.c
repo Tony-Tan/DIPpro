@@ -1,3 +1,10 @@
+//
+//  Morphology
+//  二值图像形态学处理
+//  Created by 谭升 on 14/12/23.
+//  tony.sheng.tan@gmail.com
+//  Copyright (c) 2014年 谭升. All rights reserved.
+//
 #include <cv.h>
 #include <highgui.h>
 #include <stdio.h>

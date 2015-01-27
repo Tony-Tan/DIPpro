@@ -1,7 +1,6 @@
 //
-//  main.c
 //  Adaboost
-//
+//  tony.sheng.tan@gmail.com
 //  Created by 谭升 on 14/11/28.
 //  Copyright (c) 2014年 谭升. All rights reserved.
 //

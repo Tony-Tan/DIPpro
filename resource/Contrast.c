@@ -1,3 +1,10 @@
+//
+//  图像增强
+//  Contrast
+//  tony.sheng.tan@gmail.com
+//  Created by 谭升 on 14/11/25.
+//  Copyright (c) 2014年 谭升. All rights reserved.
+//
 #include "Contrast.h"
 static char GrayMappingTable[256];
 

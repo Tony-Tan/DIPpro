@@ -1,3 +1,10 @@
+//
+//  Image_FFT
+//  快速傅里叶变换
+//  tony.sheng.tan@gmail.com
+//  Created by 谭升 on 14/11/28.
+//  Copyright (c) 2014年 谭升. All rights reserved.
+//
 #include "Image_FFT.h"
 
 /*
