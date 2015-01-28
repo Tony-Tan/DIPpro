@@ -16,4 +16,5 @@ void MeanMask(double *mask,int width,int height);
 double BilateralWindow(double *window,int width,int height,double deta_d,double deta_r);
 void BilateralFilter(IplImage *src,IplImage *dst,int width,int height,double deta_d,double deta_r);
 void Smooth(IplImage *src,IplImage *dst,int Smooth_type,int width,int height);
+void MeanFilter(IplImage *src,IplImage *dst,int width,int height);
 #endif

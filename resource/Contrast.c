@@ -103,7 +103,8 @@ void HistogramEqualization(IplImage *src,IplImage *dst){
     int Size=src->width*src->height;
     for(int i=min;i<=max;i++){
         //GrayMappingTable[i]=(unsigned char)255.*(GrayValue[i]-GrayValue[min])/(Size-GrayValue[min]);
-        GrayMappingTable[i]=(unsigned char)255.*(GrayValue[i]-GrayValue[min])/(Size-GrayValue[min]);
+        if(Size-GrayValue[min]!=0)
+           GrayMappingTable[i]=(unsigned char)255.*(GrayValue[i]-GrayValue[min])/(Size-GrayValue[min]);
         //printf("%d->%d\n",i,(unsigned char)GrayMappingTable[i]);
         
     }

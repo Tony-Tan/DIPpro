@@ -42,13 +42,6 @@ void GaussianFilter(IplImage *src,IplImage *dst,int width,int height,double deta
         }
     }
     GaussianMask(mask, width, height, deta);
-    for(int j=0;j<height;j++){
-        for(int i=0;i<width;i++){
-            printf("%lf ",mask[j*width+i]);
-        
-        }
-        printf("\n");
-    }
     RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
     for(int j=0;j<src->height;j++){
         for(int i=0;i<src->width;i++){
@@ -67,6 +60,24 @@ void MeanMask(double *mask,int width,int height){
         mask[i]=meanvalue;
     
 
+}
+void MeanFilter(IplImage *src,IplImage *dst,int width,int height){
+    double * pixarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double * dstarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double * mask=(double *)malloc(sizeof(double)*width*height);
+    for(int j=0;j<src->height;j++){
+        for(int i=0;i<src->width;i++){
+            pixarry[j*src->width+i]=cvGetReal2D(src, j, i);
+        }
+    }
+    MeanMask(mask, width, height);
+    RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
+    for(int j=0;j<src->height;j++){
+        for(int i=0;i<src->width;i++){
+            cvSetReal2D( dst,j,i,dstarry[j*src->width+i]);
+        }
+    }
+    
 }
 //////////////////////////////////中值滤波及其相关函数/////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +159,7 @@ int findMedian(int *hist,int *movein,int *moveout,int movesize,int *cursor,int m
             }
         }
     }else if((*cursor)>t){
-            for(int i=median-1;i>0;i--){
+            for(int i=median-1;i>=0;i--){
                 (*cursor)-=hist[i];
                 if(*cursor<=t){
                     return i;
