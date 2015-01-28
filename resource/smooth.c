@@ -8,10 +8,7 @@
 #include "smooth.h"
 #include "convolution.h"
 #define GRAY_LEVEL 256
-<<<<<<< HEAD
-=======
 
->>>>>>> develp
 static double Distance(int x,int y,int c_x,int c_y){
     return sqrt((x-c_x)*(x-c_x)+(y-c_y)*(y-c_y));
 }
@@ -46,29 +43,15 @@ void GaussianFilter(IplImage *src,IplImage *dst,int width,int height,double deta
         }
     }
     GaussianMask(mask, width, height, deta);
-<<<<<<< HEAD
-    for(int j=0;j<height;j++){
-        for(int i=0;i<width;i++){
-            printf("%lf ",mask[j*width+i]);
-        
-        }
-        printf("\n");
-    }
-=======
->>>>>>> develp
     RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
     for(int j=0;j<src->height;j++){
         for(int i=0;i<src->width;i++){
             cvSetReal2D( dst,j,i,dstarry[j*src->width+i]);
         }
     }
-<<<<<<< HEAD
-
-=======
     free(pixarry);
     free(dstarry);
     free(mask);
->>>>>>> develp
 }
 //////////////////////////////////////均值滤波模板生成/////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -81,8 +64,6 @@ void MeanMask(double *mask,int width,int height){
     
 
 }
-<<<<<<< HEAD
-=======
 void MeanFilter(IplImage *src,IplImage *dst,int width,int height){
     double * pixarry=(double *)malloc(sizeof(double)*src->width*src->height);
     double * dstarry=(double *)malloc(sizeof(double)*src->width*src->height);
@@ -103,7 +84,6 @@ void MeanFilter(IplImage *src,IplImage *dst,int width,int height){
     free(dstarry);
     free(mask);
 }
->>>>>>> develp
 //////////////////////////////////中值滤波及其相关函数/////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 /*
@@ -184,11 +164,7 @@ int findMedian(int *hist,int *movein,int *moveout,int movesize,int *cursor,int m
             }
         }
     }else if((*cursor)>t){
-<<<<<<< HEAD
-            for(int i=median-1;i>0;i--){
-=======
             for(int i=median-1;i>=0;i--){
->>>>>>> develp
                 (*cursor)-=hist[i];
                 if(*cursor<=t){
                     return i;
@@ -304,13 +280,6 @@ void BilateralFilter(IplImage *src,IplImage *dst,int width,int height,double det
 }
 
 
-<<<<<<< HEAD
-////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-=======
 ////////////////////////////////NoLinearMeanFilter//////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 void HarmonicAve(double *src,int width,int height){
@@ -460,7 +429,6 @@ void RobustSmoothFilter(IplImage *src,IplImage *dst,int width,int height){
 }
 ////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
->>>>>>> develp
 void Smooth(IplImage *src,IplImage *dst,int Smooth_type,int width,int height){
 
 

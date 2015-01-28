@@ -24,11 +24,7 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-<<<<<<< HEAD
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.jpg", 0);
-=======
     IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena_robust.jpg", 0);
->>>>>>> develp
     IplImage *dst =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     IplImage *cvdst =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     //double power=FrequencyFiltering(src,dst,GHPF,20,0,0,0,0,1);
@@ -36,22 +32,6 @@ int main(int argc, const char * argv[]) {
     //ImageFFT(src, a);
     //getAmplitudespectrum(a, 512, 512, dst);
     //cvSaveImage("/Users/Tony/DIPImage/testfir_ILPF_10.jpg", dst, 0);
-<<<<<<< HEAD
-    //MedianFilter(src, dst,13,13);
-    //cvSmooth(src, cvdst, CV_MEDIAN, 13, 13, 0, 0);
-    cvSmooth(src, cvdst, CV_GAUSSIAN,3,3,0,0);
-    //BilateralFilter(src,dst,11,11,3,30);
-    GaussianFilter(src,dst,3,3,2);
-    cvNamedWindow("dst", 1);
-    cvShowImage("dst", dst);
-    //cvSub(cvdst,dst,cvdst,NULL);
-    //HistogramEqualization(cvdst, cvdst);
-    cvNamedWindow("cvdst", 1);
-    cvShowImage("cvdst", cvdst);
-    //HistogramEqualization(dst,dst);
-    
-    //printf("Power is:%lf%%\n",power*100);
-=======
     //MedianFilter(src, dst,3,3);
     //MeanFilter(src, dst,  7, 7);
     //NoLinearMeanFilter(src, dst, 3, 3, NLMF_MASK_G, NLMF_FUN_G, 1.0);
@@ -70,7 +50,6 @@ int main(int argc, const char * argv[]) {
     //cvShowImage("cvdst", cvdst);
     //HistogramEqualization(dst,dst);
   
->>>>>>> develp
     cvNamedWindow("src", 1);
     cvShowImage("src", src);
     cvWaitKey(0);
