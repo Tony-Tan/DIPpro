@@ -1,7 +1,2 @@
-#Xcode
 .DS_Store
-CMakeCache.txt
-*/CMakeFiles/*
-*/CMakeScripts/*
-*.xcodeproj
-cmake_install.cmake
+build/

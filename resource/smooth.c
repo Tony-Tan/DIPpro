@@ -8,6 +8,10 @@
 #include "smooth.h"
 #include "convolution.h"
 #define GRAY_LEVEL 256
+<<<<<<< HEAD
+=======
+
+>>>>>>> develp
 static double Distance(int x,int y,int c_x,int c_y){
     return sqrt((x-c_x)*(x-c_x)+(y-c_y)*(y-c_y));
 }
@@ -42,6 +46,7 @@ void GaussianFilter(IplImage *src,IplImage *dst,int width,int height,double deta
         }
     }
     GaussianMask(mask, width, height, deta);
+<<<<<<< HEAD
     for(int j=0;j<height;j++){
         for(int i=0;i<width;i++){
             printf("%lf ",mask[j*width+i]);
@@ -49,13 +54,21 @@ void GaussianFilter(IplImage *src,IplImage *dst,int width,int height,double deta
         }
         printf("\n");
     }
+=======
+>>>>>>> develp
     RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
     for(int j=0;j<src->height;j++){
         for(int i=0;i<src->width;i++){
             cvSetReal2D( dst,j,i,dstarry[j*src->width+i]);
         }
     }
+<<<<<<< HEAD
 
+=======
+    free(pixarry);
+    free(dstarry);
+    free(mask);
+>>>>>>> develp
 }
 //////////////////////////////////////均值滤波模板生成/////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -68,6 +81,29 @@ void MeanMask(double *mask,int width,int height){
     
 
 }
+<<<<<<< HEAD
+=======
+void MeanFilter(IplImage *src,IplImage *dst,int width,int height){
+    double * pixarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double * dstarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double * mask=(double *)malloc(sizeof(double)*width*height);
+    for(int j=0;j<src->height;j++){
+        for(int i=0;i<src->width;i++){
+            pixarry[j*src->width+i]=cvGetReal2D(src, j, i);
+        }
+    }
+    MeanMask(mask, width, height);
+    RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
+    for(int j=0;j<src->height;j++){
+        for(int i=0;i<src->width;i++){
+            cvSetReal2D( dst,j,i,dstarry[j*src->width+i]);
+        }
+    }
+    free(pixarry);
+    free(dstarry);
+    free(mask);
+}
+>>>>>>> develp
 //////////////////////////////////中值滤波及其相关函数/////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 /*
@@ -148,7 +184,11 @@ int findMedian(int *hist,int *movein,int *moveout,int movesize,int *cursor,int m
             }
         }
     }else if((*cursor)>t){
+<<<<<<< HEAD
             for(int i=median-1;i>0;i--){
+=======
+            for(int i=median-1;i>=0;i--){
+>>>>>>> develp
                 (*cursor)-=hist[i];
                 if(*cursor<=t){
                     return i;
@@ -264,11 +304,163 @@ void BilateralFilter(IplImage *src,IplImage *dst,int width,int height,double det
 }
 
 
+<<<<<<< HEAD
 ////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 
 
 
+=======
+////////////////////////////////NoLinearMeanFilter//////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
+void HarmonicAve(double *src,int width,int height){
+    for(int i=0;i<width*height;i++)
+        if(src[i]!=0)
+            src[i]=1.0/src[i];
+
+}
+void uHarmonicAve(double *src,int width,int height){
+    for(int i=0;i<width*height;i++)
+        if(src[i]!=0)
+            src[i]=1.0/src[i];
+
+}
+void GeometricMean(double *src,int width,int height){
+    for(int i=0;i<width*height;i++)
+        if(src[i]!=0)
+            src[i]=log(src[i]);
+
+}
+void uGeometricMean(double *src,int width,int height){
+    for(int i=0;i<width*height;i++)
+        if(src[i]!=0)
+            src[i]=exp(src[i]);
+    
+}
+void NoLinearMeanFilter(IplImage *src,IplImage *dst,int width,int height,int Mask_type,int function_type,double param){
+    double * pixarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double * dstarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double * mask=(double *)malloc(sizeof(double)*width*height);
+    for(int j=0;j<src->height;j++)
+        for(int i=0;i<src->width;i++){
+            pixarry[j*src->width+i]=cvGetReal2D(src, j, i);
+        
+        }
+    //变换函数
+    switch (function_type) {
+        case NLMF_FUN_A:
+            break;
+        case NLMF_FUN_G:
+            GeometricMean(pixarry,src->width,src->height);
+            break;
+        case NLMF_FUN_H:
+            HarmonicAve(pixarry,src->width,src->height);
+            break;
+        default:
+            break;
+    }
+    
+    
+    //均值为同态，高斯不是
+    switch (Mask_type) {
+        case NLMF_MASK_G:
+        {
+            GaussianMask(mask, width, height, param);
+            RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
+            break;
+        }
+        case NLMF_MASK_M:
+        {
+            MeanMask(mask, width, height);
+            RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
+            break;
+        }
+        default:
+            for(int i=0;i<src->width*src->height;i++)
+                dstarry[i]=pixarry[i];
+            break;
+    }
+    
+    //函数反变换
+    switch (function_type) {
+        case NLMF_FUN_A:
+            break;
+        case NLMF_FUN_G:
+            uGeometricMean(dstarry,src->width,src->height);
+            break;
+        case NLMF_FUN_H:
+            uHarmonicAve(dstarry,src->width,src->height);
+            break;
+        default:
+            break;
+    }
+    for(int j=0;j<src->height;j++){
+        for(int i=0;i<src->width;i++){
+            cvSetReal2D( dst,j,i,dstarry[j*src->width+i]);
+        }
+    }
+    free(pixarry);
+    free(dstarry);
+    free(mask);
+}
+
+
+
+///////////////////////////////robust smoothing filter//////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
+void findMaxMin(double *src,int width,int height,double *max,double *min){
+    int mid=width*height/2;
+    double max_t=-1,min_t=256;
+    for(int i=0;i<width*height;i++){
+        if(i!=mid){
+            max_t=src[i]>max_t&&src[i]<255?src[i]:max_t;
+            min_t=src[i]<min_t?src[i]:min_t;
+            
+        }
+        //printf("%lf\n",src[i]);
+    }
+    *min=min_t;
+    *max=max_t;
+
+}
+void RobustSmoothFilter(IplImage *src,IplImage *dst,int width,int height){
+    double * pixarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double * dstarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double * mask=(double *)malloc(sizeof(double)*width*height);
+    double max,min;
+    for(int j=0;j<src->height;j++)
+        for(int i=0;i<src->width;i++){
+            pixarry[j*src->width+i]=cvGetReal2D(src, j, i);
+        }
+    for(int j=height/2;j<src->height-height/2;j++)
+        for(int i=width/2;i<src->width-width/2;i++){
+            for(int m=0;m<height;m++)
+                for(int n=0;n<width;n++){
+                    mask[m*width+n]=pixarry[(j-height/2+m)*src->width+(i-width/2+n)];
+                }
+            findMaxMin(mask, width, height, &max, &min);
+            //printf("max:%d,min:%d,pix:%d\n",(int)max,(int)min,(int)pixarry[j*src->width+i]);
+            if(pixarry[j*src->width+i]>max)
+                dstarry[j*src->width+i]=max;
+            else if(pixarry[j*src->width+i]<min)
+                dstarry[j*src->width+i]=min;
+            else
+                dstarry[j*src->width+i]=pixarry[j*src->width+i];
+            //printf("max:%d,min:%d,srcpix:%d,dstpix:%d\n",(int)max,(int)min,(int)pixarry[j*src->width+i],(int)dstarry[j*src->width+i]);
+        }
+    for(int j=0;j<src->height;j++)
+        for(int i=0;i<src->width;i++){
+            cvSetReal2D( dst,j,i,dstarry[j*src->width+i]);
+        }
+    
+    free(pixarry);
+    free(dstarry);
+    free(mask);
+
+}
+////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
+>>>>>>> develp
 void Smooth(IplImage *src,IplImage *dst,int Smooth_type,int width,int height){
 
 
