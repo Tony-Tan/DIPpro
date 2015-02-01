@@ -25,12 +25,13 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/moon2.jpg", 0);
-    IplImage *dst =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *dstcv =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/hist2.jpg", 0);
+    IplImage *dst1 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    IplImage *dst2 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
 
     double* srcarry=(double *)malloc(sizeof(double)*src->width*src->height);
-    double* dstarry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double* dst1arry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double* dst2arry=(double *)malloc(sizeof(double)*src->width*src->height);
     for (int j=0;j<src->height; j++) {
         for(int i=0;i<src->width;i++)
             srcarry[j*src->width+i]=cvGetReal2D(src, j, i);
@@ -51,7 +52,7 @@ int main(int argc, const char * argv[]) {
     //cvSaveImage("/Users/Tony/DIPImage/gau_lena_7.jpg", dst, 0);
     //cvSmooth(src, cvdst, CV_MEDIAN, 13, 13, 0, 0);
     //cvSmooth(src, cvdst, CV_BLUR,15,15,0,0);
-    UnsharpMasking(srcarry,dstarry,src->width,src->height,SMOOTH_GAUSSIAN,7,7,2.0,2.0);
+    //UnsharpMasking(srcarry,dstarry,src->width,src->height,SMOOTH_GAUSSIAN,7,7,2.0,2.0);
     //SobelSharpen(srcarry,dstarry,src->width,src->height,1);
     //Sobel(srcarry, dstarry, src->width, src->height);
     //LaplaceSharpen(srcarry, dstarry, src->width, src->height,0,0.5);
@@ -59,21 +60,34 @@ int main(int argc, const char * argv[]) {
     //MeanFilter(src, dst,  5, 5);
     //Laplace(srcarry,dstarry,src->width,src->height,3);
     ////////////////////////////////////////////////////////
-    //HistogramEqualization(src,dst);
+    HistogramEqualization(srcarry,dst1arry,src->width,src->height);
+    
+    //SobelSharpen(srcarry, dst1arry, src->width, src->height, 1);
+    //Sobel(srcarry, dst2arry, src->width,src->height);
+    //RobertSharpen(srcarry, dst1arry, src->width, src->height, 1);
+    //Robert(srcarry, dst2arry, src->width,src->height);
     for (int j=0;j<src->height; j++) {
         for(int i=0;i<src->width;i++)
-            cvSetReal2D(dst, j, i,dstarry[j*src->width+i]);
+            cvSetReal2D(dst1, j, i,dst1arry[j*src->width+i]);
     }
-    cvSaveImage("/Users/Tony/DIPImage/usm_g_7722.jpg",dst, 0);
+    for (int j=0;j<src->height; j++) {
+        for(int i=0;i<src->width;i++)
+            cvSetReal2D(dst2, j, i,dst2arry[j*src->width+i]);
+    }
+    //cvSaveImage("/Users/Tony/DIPImage/sample_sobel_sharpen.jpg",dst1, 0);
+    //cvSaveImage("/Users/Tony/DIPImage/sample_sobel_edge.jpg",dst2, 0);
+    //cvSub(dst2,dst1,dst2,NULL);
     cvNamedWindow("src", 1);
     cvShowImage("src", src);
-    cvNamedWindow("dst", 1);
-    cvShowImage("dst", dst);
+    cvNamedWindow("dst1", 1);
+    cvShowImage("dst1", dst1);
+    cvNamedWindow("dst2", 1);
+    cvShowImage("dst2", dst2);
     //cvSub( dstcv,dst, dstcv, NULL);
     //HistogramEqualization(dstcv,dstcv);
     //cvNamedWindow("dstsub", 1);
     //cvShowImage("dstsub", dstcv);
-    //cvSub(dst,cvdst,cvdst,NULL);
+    
     //HistogramEqualization(cvdst, cvdst);
     //cvNamedWindow("dst2", 1);
     //cvShowImage("dst2", dst2);
@@ -82,6 +96,8 @@ int main(int argc, const char * argv[]) {
     
     cvWaitKey(0);
     free(srcarry);
+    free(dst1arry);
+    free(dst2arry);
     return 0;
 }
 

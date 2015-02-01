@@ -14,4 +14,6 @@ void UnsharpMasking(double *src,double *dst,int width,int height,int smooth_type
 void Sobel(double *src,double *dst,int width,int height);
 void SobelSharpen(double *src,double *dst,int width,int height,double c);
 void Laplace(double *src,double *dst,int width,int height,int mask_type);
+void Robert(double *src,double *dst,int width,int height);
+void RobertSharpen(double *src,double *dst,int width,int height,double c);
 #endif

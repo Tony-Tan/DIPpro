@@ -25,7 +25,7 @@ unsigned char ContrastTable[MAX_PVALUE];//映射表
 
 void ContrastStretch(IplImage *src,IplImage *dst,int method,double p0,double p1,int p2,int p3);
 void InitMappingTable(void * arry,int size,int Data_type);
-void HistogramEqualization(IplImage *src,IplImage *dst);
+void HistogramEqualization(double *src,double *dst,int width,int height);
 
 
 
