@@ -6,12 +6,13 @@
 //  Copyright (c) 2014年 谭升. All rights reserved.
 //
 #include "Contrast.h"
-static double GrayMappingTable[256];
 
-unsigned char ContrastTable[MAX_PVALUE];//映射表
+
+
 
 void ContrastStretch(IplImage *src,IplImage *dst,int method,double p0,double p1,int p2,int p3){
     /////////////////////////////////////////生成映射表////////////////////////////////////////////
+    unsigned char ContrastTable[MAX_PVALUE];//映射表
     if(method==CONTRASTFUNC0){//图像翻转
         for(int i=0;i<MAX_PVALUE;i++)
             ContrastTable[i]=MAX_PVALUE-1-i;
@@ -71,47 +72,4 @@ void ContrastStretch(IplImage *src,IplImage *dst,int method,double p0,double p1,
 
 
 
-void InitMappingTable(void * arry,int size,int Data_type){
-    if(Data_type==TABLE_INT)
-        for(int i=0;i<size;i++)
-            ((int*)arry)[i]=0;
-    else if(Data_type==TABLE_CHAR)
-        for(int i=0;i<size;i++)
-            ((char*)arry)[i]=0;
-    
-    
-}
-/*
- 直方图均衡
- */
-void HistogramEqualization(double *src,double *dst,int width,int height){
-    int GrayValue[256];
-    InitMappingTable(GrayMappingTable,256,TABLE_CHAR);
-    InitMappingTable(GrayValue,256,TABLE_INT);
-    int min=256,max=0;
-    for(int i=0;i<width;i++)
-        for(int j=0;j<height;j++){
-            //int tempv=GETPIX(src, j, i);
-            int tempv=src[j*width+i];
-            GrayValue[tempv]++;
-            max=tempv>=max?tempv:max;
-            min=tempv<min?tempv:min;
-            
-        }
-    
-    for(int i=1;i<=max;i++)
-        GrayValue[i]+=GrayValue[i-1];
-    int Size=width*height;
-    for(int i=min;i<=max;i++){
-        //GrayMappingTable[i]=(unsigned char)255.*(GrayValue[i]-GrayValue[min])/(Size-GrayValue[min]);
-        if(Size-GrayValue[min]!=0)
-           GrayMappingTable[i]=(unsigned char)255.*(GrayValue[i]-GrayValue[min])/(Size-GrayValue[min]);
-        printf("%d->%d\n",i,(unsigned char)GrayMappingTable[i]);
-        
-    }
-    
-    for(int j=0;j<height;j++)
-        for(int i=0;i<width;i++)
-            dst[j*width+i]=GrayMappingTable[(int)src[j*width+i]];
-    
-}
+
