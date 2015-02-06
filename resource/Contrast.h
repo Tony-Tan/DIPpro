@@ -3,8 +3,7 @@
 #include <cv.h>
 #include <highgui.h>
 #include <stdio.h>
-#include <math.h>
-#include "fr.h"
+#include "mathematic.h"
 
 #define CONTRASTFUNC0 -1	//翻转
 #define CONTRASTFUNC1 0		//分段
@@ -22,8 +21,7 @@
 
 unsigned char ContrastTable[MAX_PVALUE];//映射表
 
-void ContrastStretch(IplImage *src,IplImage *dst,int method,double p0,double p1,int p2,int p3);
-
+void ContrastStretch(double *src,double *dst,int width,int height,int method,double p0,double p1,int p2,int p3);
 
 
 

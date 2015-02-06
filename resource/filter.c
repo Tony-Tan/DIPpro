@@ -1,18 +1,5 @@
 #include "filter.h"
 
-static void showfilter(double *filter,int width,int height){
-    IplImage *show=cvCreateImage(cvSize(width, height),8,1);
-    for(int i=0;i<width;i++)
-        for(int j=0;j<height;j++){
-            cvSetReal2D(show, j, i, filter[i*width+j]*255.0);
-        }
-    cvNamedWindow("Filter", 1);
-    cvShowImage("Filter", show);
-    cvWaitKey(0);
-    cvSaveImage("/Users/Tony/DIPImage/ILPF_50.jpg", show, 0);
-    cvReleaseImage(&show);
-    
-}
 double getPower(Complex *src,int totalsize){
     double power=0.0;
     double real;

@@ -10,7 +10,7 @@
 
 
 
-void ContrastStretch(IplImage *src,IplImage *dst,int method,double p0,double p1,int p2,int p3){
+void ContrastStretch(double *src,double *dst,int width,int height,int method,double p0,double p1,int p2,int p3){
     /////////////////////////////////////////生成映射表////////////////////////////////////////////
     unsigned char ContrastTable[MAX_PVALUE];//映射表
     if(method==CONTRASTFUNC0){//图像翻转
@@ -59,11 +59,9 @@ void ContrastStretch(IplImage *src,IplImage *dst,int method,double p0,double p1,
     }
     
     ///////////////////////////////重新映射/////////////////////////////////////////////
-    //for(int i=0;i<256;i++)
-    //       printf("%d->%d\n",i,ContrastTable[i]);
-    for(int i=0;i<src->width;i++)
-        for(int j=0;j<src->height;j++)
-            SETPIX(dst,i,j,ContrastTable[GETPIX(src,i,j)]);
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++)
+            dst[j*width+i]= ContrastTable[(int)src[j*width+i]];
     
 }
 

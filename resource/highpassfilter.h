@@ -1,8 +1,10 @@
 #ifndef HIGHPASSFILTER_H
 #define HIGHPASSFILTER_H
-#include <math.h>
-#include "fr.h"
-static double Distance(int x,int y,int c_x,int c_y);
+#include "mathematic.h"
+#define IHPF 4
+#define BHPF 5
+#define GHPF 6
+
 void IdealHPFilter(double *Filter,int width,int height,double cut_off_frequency);
 void ButterworthHPFilter(double *Filter,int width,int height,double cut_off_frequency,int n);
 void GaussianHPFilter(double *Filter,int width,int height,double cut_off_frequency);

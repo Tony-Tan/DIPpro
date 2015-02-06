@@ -31,7 +31,7 @@ void ImageFFT(IplImage * src,Complex * dst){
     double *image_data=(double*)malloc(sizeof(double)*width*height);
     for(int j=0;j<height;j++)
         for(int i=0;i<width;i++){
-            image_data[j*width+i]=GETPIX(src, j, i);
+            image_data[j*width+i]=cvGetReal2D(src, j, i);
         
     }
     FFT_Shift(image_data,width, height);//图像中心化

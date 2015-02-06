@@ -102,8 +102,6 @@ void HistogramSpecification(double *src,double *dst,int* hist,int width,int heig
     EqualizationHist(hist, histMap);
     int histMap_[GRAY_LEVEL];
     InitHistogram(histMap_);
-    
-    fillMaptable(histMap);
     for(int i=0;i<GRAY_LEVEL;i++)
         histMap_[(int)histMap[i]]=i;
     double dstMap[GRAY_LEVEL];
@@ -112,9 +110,6 @@ void HistogramSpecification(double *src,double *dst,int* hist,int width,int heig
     }
     
     fillMaptable(dstMap);
-    for(int i=0;i<GRAY_LEVEL;i++)
-        if(src_hist[i]!=0)
-            printf("%d->%lf\n",i,dstMap[i]);
     for(int i=0;i<width;i++)
         for(int j=0;j<height;j++)
             dst[j*width+i]=dstMap[(int)src[j*width+i]];

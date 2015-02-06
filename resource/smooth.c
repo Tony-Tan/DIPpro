@@ -6,12 +6,10 @@
 //  Copyright (c) 2015年 谭升. All rights reserved.
 //
 #include "smooth.h"
-#include "convolution.h"
-#define GRAY_LEVEL 256
 
-static double Distance(int x,int y,int c_x,int c_y){
-    return sqrt((x-c_x)*(x-c_x)+(y-c_y)*(y-c_y));
-}
+
+
+
 //////////////////////////////////////高斯滤波模板生成/////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 void GaussianMask(double *mask,int width,int height,double deta){

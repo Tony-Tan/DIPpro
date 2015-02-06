@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "Fourer.h"
-#include "fr.h"
 void FFT_Shift(double * src,int size_w,int size_h);
 void ImageFFT(IplImage * src,Complex * dst);
 void Nomalsize(double *src,double *dst,int size_w,int size_h);

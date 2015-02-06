@@ -7,10 +7,6 @@
 //
 
 #include "highpassfilter.h"
-static double Distance(int x,int y,int c_x,int c_y){
-    
-    return sqrt((x-c_x)*(x-c_x)+(y-c_y)*(y-c_y));
-}
 
 
 void IdealHPFilter(double *Filter,int width,int height,double cut_off_frequency){

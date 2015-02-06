@@ -108,14 +108,14 @@ void ComplexRelevant(Complex* src,Complex *dst,Complex *mask,
 void RealConvolution(double *src,double *dst,double *mask,
                      int width,int height,int m_width,int m_height){
     RotateRealMatrix(mask,m_width,m_height);
-    RealRelevant(src, dst, mask, width, height, m_width, m_width);
+    RealRelevant(src, dst, mask, width, height, m_width, m_height);
 
 
 }
 void ComplexCovolution(Complex* src,Complex *dst,Complex *mask,
                        int width,int height,int m_width,int m_height){
     RotateComplexMatrix(mask,m_width,m_height);
-    ComplexRelevant(src, dst, mask, width, height, m_width, m_width);
+    ComplexRelevant(src, dst, mask, width, height, m_width,m_height);
 
 
 }

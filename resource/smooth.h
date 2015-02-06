@@ -1,9 +1,11 @@
 #ifndef SMOOTH_H
 #define SMOOTH_H
-#include "convolution.h"
-#include <math.h>
 #include <stdlib.h>
+#include <cv.h>
+#include "convolution.h"
+#include "mathematic.h"
 
+#define GRAY_LEVEL 256
 #define SMOOTH_GAUSSIAN 0
 #define SMOOTH_MEDIAN 1
 #define SMOOTH_BILATERAL 2
@@ -13,7 +15,6 @@
 #define NLMF_FUN_G 2
 #define NLMF_MASK_M 0
 #define NLMF_MASK_G 1
-static double Distance(int x,int y,int c_x,int c_y);
 void MedianFilter(double *src,double *dst,int width,int height,int m_width,int m_height);
 void GaussianMask(double *mask,int width,int height,double deta);
 void GaussianFilter(double *src,double *dst,int width,int height,int m_width,int m_height,double deta);

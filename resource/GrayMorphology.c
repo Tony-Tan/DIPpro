@@ -14,25 +14,21 @@
 #define isSIZEEQU(x,y) (((x)->width)==((y)->width)&&((x)->height)==((y)->height))
 
 //判断结构元是否平滑
-int isSmooth(IplImage *src){
-    int width=src->width;
-    int height=src->height;
-    for(int i=0;i<width;i++)
-        for(int j=0;j<height;j++){
-            int v=cvGetReal2D(src,j,i);
+int isSmooth(double *src,int width,int height){
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            int v=src[j*width+i];
             if(v!=255.0&&v!=0.0)
                 return 0;
         }
     return 1;
 }
 //判断两幅图像是否相等
-int isEqu(IplImage *src1,IplImage *src2){
-    if(!isSIZEEQU(src1, src2))
-        return 0;
-    for(int i=0;i<src1->width;i++)
-        for(int j=0;j<src1->height;j++){
-            double v1=cvGetReal2D(src1, j, i);
-            double v2=cvGetReal2D(src2, j, i);
+int isEqu(double *src1,double *src2,int width,int height){
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            double v1=src1[j*width+i];
+            double v2=src2[j*width+i];
             if(v1!=v2)
                 return 0;
         }
@@ -40,310 +36,297 @@ int isEqu(IplImage *src1,IplImage *src2){
 
 }
 //将图像全部设置为1
-void G_One(IplImage *src){
-    int width=src->width;
-    int height=src->height;
-    for(int i=0;i<width;i++)
-        for(int j=0;j<height;j++)
-            cvSetReal2D(src, j, i, 255.0);
+void G_One(double *src,int width,int height){
+    for(int i=0;i<width*height;i++)
+        src[i]=1.0;
 
 
 }
+void G_Zero(double *src,int width,int height){
+    for(int i=0;i<width*height;i++)
+        src[i]=0.0;
+    
+    
+}
 //位移，如果非平滑SE将加上sevalue，即对应的灰度值
-void G_Translation(IplImage *src ,IplImage *dst,double SEvalue,Position *d,int istoFindMin){
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    int srcwidth=src->width;
-    int srcheight=src->height;
-    int dstwidth=dst->width;
-    int dstheight=dst->height;
+void G_Translation(double *src,double *dst,int width,int height,double SEvalue,Position *d,int istoFindMin){
+    double *temp=(double*)malloc(sizeof(double)*height*width);
+   
     if(istoFindMin)
-        G_One(temp);
+        G_One(temp,width,height);
     else
-        cvZero(temp);
-    for(int i=0;i<srcwidth;i++){
-        for(int j=0;j<srcheight;j++){
+        G_Zero(temp,width,height);
+    for(int j=0;j<height;j++){
+        for(int i=0;i<width;i++){
+        
             int target_x=i+d->x;
             int target_y=j+d->y;
             if(target_x>=0&&target_y>=0&&
-               target_x<dstwidth&&target_y<dstheight){
-                double value=cvGetReal2D(src, j, i)+SEvalue;
+               target_x<width&&target_y<height){
+                double value=src[j*width+i]+SEvalue;
+                //cvGetReal2D(src, j, i)+SEvalue;
                 value=(value>=255.0?255.0:value);
-                cvSetReal2D(temp, target_y, target_x, value);
+                temp[target_y*width+target_x]=value;
             }
         }
     }
-    cvCopy(temp, dst, NULL);
-    
-    cvReleaseImage(&temp);
+    //cvCopy(temp, dst, NULL);
+    matrixCopy(temp,dst,width,height);
+    free(&temp);
 }
 //找出两幅等大图像中同一位置中相对较大的像素值
-void MaxPix(IplImage *src1 ,IplImage *src2,IplImage *dst){
-    if(!isSIZEEQU(src1, src2)||!isSIZEEQU(src1, dst)){
-        printf("MaxPix wrong: src size not equ!\n");
-        exit(1);
-    }
-    int width=src1->width;
-    int height=src1->height;
-    for(int i=0;i<width;i++)
-        for(int j=0;j<height;j++){
-            double value1=cvGetReal2D(src1, j,i);
-            double value2=cvGetReal2D(src2, j,i);
-            value1>value2?cvSetReal2D(dst, j,i,value1):cvSetReal2D(dst, j, i, value2);
+void MaxPix(double *src1 ,double *src2,double *dst,int width,int height){
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            double value1=src1[j*width+i];//cvGetReal2D(src1, j,i);
+            double value2=src2[j*width+i];//cvGetReal2D(src2, j,i);
+            dst[j*width+i]=value1>=value2?value1:value2;
         }
 
 }
 //找出两幅等大图像中同一位置中相对较小的像素值
-void MinPix(IplImage *src1 ,IplImage *src2,IplImage *dst){
-    if(!isSIZEEQU(src1, src2)||!isSIZEEQU(src1, dst)){
-        printf("MaxPix wrong: src size not equ!\n");
-        exit(1);
-    }
-    int width=src1->width;
-    int height=src1->height;
-    for(int i=0;i<width;i++)
-        for(int j=0;j<height;j++){
-            double value1=cvGetReal2D(src1, j,i);
-            double value2=cvGetReal2D(src2, j,i);
-            value1<value2?cvSetReal2D(dst, j, i, value1):cvSetReal2D(dst, j, i, value2);
+void MinPix(double *src1 ,double *src2,double *dst,int width,int height){
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            double value1=src1[j*width+i];//cvGetReal2D(src1, j,i);
+            double value2=src2[j*width+i];//cvGetReal2D(src2, j,i);
+            dst[j*width+i]=value1<=value2?value1:value2;
         }
     
 }
 //灰度图像膨胀
-void Dilate_Gray(IplImage *src,IplImage *dst,IplImage *se,Position *center){
-    int SEissmooth=isSmooth(se);
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+void Dilate_Gray(double *src,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    int SEissmooth=isSmooth(se,sewidth,seheight);
+    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    double *temp=(double*)(malloc(sizeof(double)*width*height));
+    double *temp_last=(double*)(malloc(sizeof(double)*width*height));
     Position centerde;
-    centerde.x=se->width/2;
-    centerde.y=se->height/2;
+    centerde.x=sewidth/2;
+    centerde.y=seheight/2;
     if(center==NULL){
         center=&centerde;
     }
-    int sewidth=se->width;
-    int seheight=se->height;
-    cvCopy(src,temp_last,NULL);
-    for(int i=0;i<sewidth;i++)
-        for(int j=0;j<seheight;j++){
-            cvCopy(src,temp,NULL);
-            double value=cvGetReal2D(se, j, i);
+    matrixCopy(src,temp_last,width,height);
+    for(int j=0;j<seheight;j++)
+        for(int i=0;i<sewidth;i++){
+            matrixCopy(src,temp,width,height);
+            double value=se[j*width+i];//cvGetReal2D(se, j, i);
             if(value!=0.0){
                 Position d;
                 d.x=center->x-i;
                 d.y=center->y-j;
                 if(SEissmooth)
-                    G_Translation(temp, temp, 0.0, &d,TOFINDMAX);
+                    G_Translation(temp, temp,width,height, 0.0, &d,TOFINDMAX);
                 else
-                    G_Translation(temp, temp, value, &d,TOFINDMAX);
-                MaxPix(temp, temp_last, temp_last);
+                    G_Translation(temp, temp,width,height, value, &d,TOFINDMAX);
+                MaxPix(temp, temp_last, temp_last,width,height);
             }
         }
-    cvCopy(temp_last, dst, NULL);
-    cvReleaseImage(&temp);
-    cvReleaseImage(&temp_last);
+    matrixCopy(temp_last, dst,width,height);
+    free(temp);
+    free(temp_last);
 
 }
 //灰度图像腐蚀
-void Erode_Gray(IplImage *src,IplImage *dst,IplImage *se,Position *center){
-    int SEissmooth=isSmooth(se);
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+void Erode_Gray(double *src,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    int SEissmooth=isSmooth(se,sewidth,seheight);
+    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    double *temp=(double*)(malloc(sizeof(double)*width*height));
+    double *temp_last=(double*)(malloc(sizeof(double)*width*height));
     Position centerde;
-    centerde.x=se->width/2;
-    centerde.y=se->height/2;
+    centerde.x=sewidth/2;
+    centerde.y=seheight/2;
     if(center==NULL){
         center=&centerde;
     }
-    int sewidth=se->width;
-    int seheight=se->height;
-    cvCopy(src,temp_last,NULL);
-    for(int i=0;i<sewidth;i++)
-        for(int j=0;j<seheight;j++){
-            cvCopy(src,temp,NULL);
-            double value=cvGetReal2D(se, j, i);
+    matrixCopy(src,temp_last,width,height);
+    for(int j=0;j<seheight;j++)
+        for(int i=0;i<sewidth;i++){
+            matrixCopy(src,temp,width,height);
+            double value=se[j*width+i];//cvGetReal2D(se, j, i);
             if(value!=0.0){
                 Position d;
                 
                 d.x=i-center->x;
                 d.y=j-center->y;
                 if(SEissmooth)
-                    G_Translation(temp, temp, 0.0, &d,TOFINDMIN);
+                    G_Translation(temp, temp,width,height, 0.0, &d,TOFINDMAX);
                 else
-                    G_Translation(temp, temp, -1.0*value, &d,TOFINDMIN);
-                MinPix(temp, temp_last, temp_last);
-                
+                    G_Translation(temp, temp,width,height, -1.0*value, &d,TOFINDMAX);
+                MaxPix(temp, temp_last, temp_last,width,height);
             }
         }
-    cvCopy(temp_last, dst, NULL);
-    cvReleaseImage(&temp);
-    cvReleaseImage(&temp_last);
+    matrixCopy(temp_last, dst,width,height);
+    free(temp);
+    free(temp_last);
+
     
 }
 //开操作
-void Open_Gray(IplImage *src,IplImage *dst,IplImage *se,Position *center){
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    Erode_Gray(src, temp, se, center);
-    Dilate_Gray(temp, temp, se, center);
-    cvCopy(temp, dst, NULL);
-    cvReleaseImage(&temp);
-
+void Open_Gray(double *src,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    double *temp=(double*)malloc(sizeof(double)*width*height);
+    Erode_Gray(src, temp,width,height, se,sewidth,seheight, center);
+    Dilate_Gray(temp, temp, width,height,se, sewidth,seheight,center);
+    matrixCopy(temp,dst,width,height);
+    free(temp);
 }
 //闭操作
-void Close_Gray(IplImage *src,IplImage *dst,IplImage *se,Position *center){
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    Dilate_Gray(src, temp, se, center);
-    Erode_Gray(temp, temp, se, center);
-    cvCopy(temp, dst, NULL);
-    cvReleaseImage(&temp);
+void Close_Gray(double *src,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    double *temp=(double*)malloc(sizeof(double)*width*height);
+    Dilate_Gray(src, temp,width,height, se,sewidth,seheight, center);
+    Erode_Gray(temp, temp, width,height,se, sewidth,seheight,center);
+    matrixCopy(temp,dst,width,height);
+    free(temp);
     
 }
 //灰度梯度形态学提取
-void Gard_Gray(IplImage *src,IplImage *dst,IplImage *se,Position *center){
-    IplImage *temp_dilate=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *temp_erode=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    Dilate_Gray(src, temp_dilate, se, center);
-    Erode_Gray(src, temp_erode, se, center);
-    cvSub(temp_dilate, temp_erode, dst, NULL);
-    cvReleaseImage(&temp_erode);
-    cvReleaseImage(&temp_dilate);
-
+void Gard_Gray(double *src,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    //IplImage *temp_dilate=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    //IplImage *temp_erode=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    double *temp_dilate=(double *)malloc(sizeof(double)*width*height);
+    double *temp_erode=(double *)malloc(sizeof(double)*width*height);
+    
+    Dilate_Gray(src, temp_dilate,width,height,se,sewidth,seheight, center);
+    Erode_Gray(src, temp_erode,width,height,se,sewidth,seheight, center);
+    matrixSub(temp_dilate,temp_erode,width,height);
+    //cvSub(temp_dilate, temp_erode, dst, NULL);
+    //cvReleaseImage(&temp_erode);
+    //cvReleaseImage(&temp_dilate);
+    free(temp_dilate);
+    free(temp_erode);
 
 }
 //顶帽操作
-void TopHat(IplImage *src,IplImage *dst,IplImage *se,Position *center){
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    Open_Gray(src, temp, se, center);
-    cvSub( src,temp, dst, NULL);
-    cvReleaseImage(&temp);
+void TopHat(double *src,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+    Open_Gray(src, temp,width,height,se,sewidth,seheight,center);
+    matrixSub(src,temp,dst,width,height);
+    free(temp);
+    
 
 }
 //底帽操作
-void BottomHat(IplImage *src,IplImage *dst,IplImage *se,Position *center){
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    Close_Gray(src, temp, se, center);
-    cvSub(temp,src, dst, NULL);
-    cvReleaseImage(&temp);
-    
+void BottomHat(double *src,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+    Close_Gray(src, temp,width,height,se,sewidth,seheight,center);
+    matrixSub(temp,src,dst,width,height);
+    free(temp);
 }
 //测地腐蚀
-void Erode_Gray_g(IplImage *src,IplImage *ground,IplImage *dst,IplImage *se,Position *center){
-    int SEissmooth=isSmooth(se);
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+void Erode_Gray_g(double *src,double *ground,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    int SEissmooth=isSmooth(se,sewidth,seheight);
+    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    double *temp=(double*)malloc(sizeof(double)*width*height);
+    double *temp_last=(double*)malloc(sizeof(double)*width*height);
     Position centerde;
-    centerde.x=se->width/2;
-    centerde.y=se->height/2;
+    centerde.x=sewidth/2;
+    centerde.y=seheight/2;
     if(center==NULL){
         center=&centerde;
     }
-    int sewidth=se->width;
-    int seheight=se->height;
-    cvCopy(src,temp_last,NULL);
-    for(int i=0;i<sewidth;i++)
-        for(int j=0;j<seheight;j++){
-            cvCopy(src,temp,NULL);
-            double value=cvGetReal2D(se, j, i);
+    //cvCopy(src,temp_last,NULL);
+    matrixCopy(src,temp_last,width,height);
+    for(int j=0;j<seheight;j++)
+        for(int i=0;i<sewidth;i++){
+            //cvCopy(src,temp,NULL);
+            matrixCopy(src,temp,width,height);
+            double value=se[j*sewidth+i];
+            //cvGetReal2D(se, j, i);
             if(value!=0.0){
                 Position d;
                 
                 d.x=i-center->x;
                 d.y=j-center->y;
                 if(SEissmooth)
-                    G_Translation(temp, temp, 0.0, &d,TOFINDMIN);
+                    G_Translation(temp, temp,width,height, 0.0, &d,TOFINDMIN);
                 else
-                    G_Translation(temp, temp, -1.0*value, &d,TOFINDMIN);
-                MinPix(temp, temp_last, temp_last);
+                    G_Translation(temp, temp,width,height, -1.0*value, &d,TOFINDMIN);
+                MinPix(temp, temp_last, temp_last,width,height);
                 
             }
         }
-    MaxPix(temp_last,ground,temp_last);
-    cvCopy(temp_last, dst, NULL);
-    cvReleaseImage(&temp);
-    cvReleaseImage(&temp_last);
+    MaxPix(temp_last,ground,temp_last,width,height);
+    //cvCopy(temp_last, dst, NULL);
+    matrixCopy(temp_last,dst,width,height);
+    //cvReleaseImage(&temp);
+    free(temp);
+    free(temp_last);
+    //cvReleaseImage(&temp_last);
 
 
 }
 //测地膨胀
-void Dilate_Gray_g(IplImage *src,IplImage *ground,IplImage *dst,IplImage *se,Position *center){
-    int SEissmooth=isSmooth(se);
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+void Dilate_Gray_g(double *src,double *ground,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
+    int SEissmooth=isSmooth(se,sewidth,seheight);
+    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    double *temp=(double*)malloc(sizeof(double)*width*height);
+    double *temp_last=(double*)malloc(sizeof(double)*width*height);
     Position centerde;
-    centerde.x=se->width/2;
-    centerde.y=se->height/2;
+    centerde.x=sewidth/2;
+    centerde.y=seheight/2;
     if(center==NULL){
         center=&centerde;
     }
-    int sewidth=se->width;
-    int seheight=se->height;
-    cvCopy(src,temp_last,NULL);
-    for(int i=0;i<sewidth;i++)
-        for(int j=0;j<seheight;j++){
-            cvCopy(src,temp,NULL);
-            double value=cvGetReal2D(se, j, i);
+    //cvCopy(src,temp_last,NULL);
+    matrixCopy(src,temp_last,width,height);
+    for(int j=0;j<seheight;j++)
+        for(int i=0;i<sewidth;i++){
+            //cvCopy(src,temp,NULL);
+            matrixCopy(src,temp,width,height);
+            double value=se[j*sewidth+i];
+            //cvGetReal2D(se, j, i);
             if(value!=0.0){
                 Position d;
                 d.x=center->x-i;
                 d.y=center->y-j;
                 if(SEissmooth)
-                    G_Translation(temp, temp, 0.0, &d,TOFINDMAX);
+                    G_Translation(temp, temp,width,height, 0.0, &d,TOFINDMAX);
                 else
-                    G_Translation(temp, temp, value, &d,TOFINDMAX);
-                MaxPix(temp, temp_last, temp_last);
+                    G_Translation(temp, temp,width,height, value, &d,TOFINDMAX);
+                MaxPix(temp, temp_last, temp_last,width,height);
             }
         }
-    MinPix(temp_last, ground, temp_last);
-    cvCopy(temp_last, dst, NULL);
-    cvReleaseImage(&temp);
-    cvReleaseImage(&temp_last);
+    MinPix(temp_last, ground, temp_last,width,height);
+    matrixCopy(temp_last,dst,width,height);
+    //cvReleaseImage(&temp);
+    free(temp);
+    free(temp_last);
+    //cvReleaseImage(&temp_last);
 }
 //重建开操作
-void Rebuild_Open(IplImage *src,IplImage *dst,IplImage *ground,IplImage *erodeSE,IplImage *dilateSE,int eroden){
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    cvCopy(src, temp, NULL);
+void Rebuild_Open(double *src,double *dst,double *ground,int width,int height,double *erodeSE,int esewidth,int eseheight,double *dilateSE,int dsewidth,int dseheight,int eroden){
+    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    double *temp=(double*)malloc(sizeof(double)*width*height);
+    double *temp_last=(double*)malloc(sizeof(double)*width*height);
+    //cvCopy(src, temp, NULL);
+    matrixCopy(src,temp,width,height);
     for(int i=0;i<eroden;i++){
-        Erode_Gray(temp, temp, erodeSE, NULL);
+        Erode_Gray(temp, temp, width,height,erodeSE,esewidth,eseheight,NULL);
     }
-    
-    while(!isEqu(temp, temp_last)){
-        cvCopy(temp, temp_last, NULL);
-        Dilate_Gray_g(temp, ground, temp, dilateSE, NULL);
+    while(!isEqu(temp, temp_last,width,height)){
+        //cvCopy(temp, temp_last, NULL);
+        matrixCopy(temp,temp_last,width,height);
+        Dilate_Gray_g(temp, ground, temp,width,height, dilateSE,dsewidth,dseheight, NULL);
         
     }
-    cvCopy(temp, dst, NULL);
-    cvReleaseImage(&temp);
-    cvReleaseImage(&temp_last);
+    matrixCopy(temp_last,dst,width,height);
+    //cvReleaseImage(&temp);
+    free(temp);
+    free(temp_last);
     
 }
-//重建闭操作，这段没测试
-void Rebuild_Close(IplImage *src,IplImage *dst,IplImage *ground,IplImage *dilateSE,IplImage *erodeSE,int dilaten){
-    IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    cvCopy(src, temp, NULL);
-    for(int i=0;i<dilaten;i++){
-        Dilate_Gray(temp, temp, dilateSE, NULL);
-    }
-    
-    while(!isEqu(temp, temp_last)){
-        cvCopy(temp, temp_last, NULL);
-        Erode_Gray(temp, temp, erodeSE, NULL);
-        MinPix(temp, ground, temp);
-        
-    }
-    cvCopy(temp, dst, NULL);
-    cvReleaseImage(&temp);
-    cvReleaseImage(&temp_last);
-    
-}
-//重建顶帽操作
-void Rebuild_Tophat(IplImage *src,IplImage *dst,IplImage *ground,IplImage *dilateSE,IplImage *erodeSE,int eroden){
-    Rebuild_Open(src,dst,ground,erodeSE,dilateSE,eroden);
-    cvSub(src, dst, dst, NULL);
 
+//重建顶帽操作
+void Rebuild_Tophat(double *src,double *dst,double *ground,int width,int height,double *dilateSE,int dsewidth,int dseheight,double *erodeSE,int esewidth,int eseheight,int eroden){
+    //Rebuild_Open(src,dst,ground,erodeSE,dilateSE,eroden);
+    Rebuild_Open(src,dst,ground,width,height,erodeSE,esewidth,eseheight,dilateSE,dsewidth,dseheight,eroden);
+    //cvSub(src, dst, dst, NULL);
+    matrixSub(src,dst,dst,width,height);
 }
-//重建底帽操作
-void Rebuild_Bottomhat(IplImage *src,IplImage *dst,IplImage *ground,IplImage *dilateSE,IplImage *erodeSE,int dilaten){
-    Rebuild_Close(src,dst,ground,dilateSE,erodeSE,dilaten);
-    cvSub(src, dst, dst, NULL);
-    
-}
+
+

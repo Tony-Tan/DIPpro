@@ -19,20 +19,20 @@ void Inte_Image(IplImage * src,IplImage *dst){
     int width=src->width;
     int height=src->height;
     double value;
-    for(int i=1;i<width;i++)
-        for(int j=1;j<height;j++){
-            value=GETPIX(src, i-1, j)+GETPIX(src, i, j-1);
-            SETPIXF(dst, i, j, value);
+    for(int j=1;j<height;j++)
+        for(int i=1;i<width;i++){
+            value=cvGetReal2D(src,j,i-1)+cvGetReal2D(src, j-1, i);
+            cvSetReal2D(dst,j,i, value);
         }
     for(int i=1;i<width;i++){
-        value=GETPIX(src, i, 0)+GETPIX(src, i-1, 0);
-        SETPIXF(dst, i, 0, value);
+        value=cvGetReal2D(src,0, i)+cvGetReal2D(src, 0, i-1);
+        cvSetReal2D(dst,  0, i,value);
     }
     for(int i=1;i<height;i++){
-        value=GETPIX(src, 0, i)+GETPIX(src, 0, i-1);
-        SETPIXF(dst, 0, i, value);
+        value=cvGetReal2D(src, i, 0)+cvGetReal2D(src, i-1, 0);
+        cvSetReal2D(dst, i, 0,value);
     }
-    value=GETPIX(src, 0, 0);
-    SETPIXF(dst, 0, 0, value);
+    value=cvGetReal2D(src, 0, 0);
+    cvSetReal2D(dst, 0, 0, value);
 
 }

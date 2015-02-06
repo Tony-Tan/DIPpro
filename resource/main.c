@@ -1,4 +1,4 @@
-#include "fr.h"
+
 #include "Image_FFT.h"
 #include "Contrast.h"
 #include "convolution.h"
@@ -26,7 +26,7 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/hist2.jpg", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/moon2.jpg", 0);
     IplImage *dst1 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     IplImage *dst2 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
 
@@ -61,13 +61,15 @@ int main(int argc, const char * argv[]) {
     //MeanFilter(src, dst,  5, 5);
     //Laplace(srcarry,dstarry,src->width,src->height,3);
     ////////////////////////////////////////////////////////
-    int hist[GRAY_LEVEL];
-    for(int i=1;i<GRAY_LEVEL;i++)
-        hist[i]=log((double)i);
-    HistogramEqualization(srcarry,dst1arry,src->width,src->height);
+    //int hist[GRAY_LEVEL];
+    //for(int i=1;i<GRAY_LEVEL;i++){
+    //    hist[i]=exp(-((double)(i)*(i))/(12800))*10000.0;
+    //    printf("%d ",hist[i]);
+    //}
+    //HistogramEqualization(srcarry,dst1arry,src->width,src->height);
     //HistogramSpecification(srcarry,dst2arry,hist,src->width,src->height);
     //SobelSharpen(srcarry, dst1arry, src->width, src->height, 1);
-    //Sobel(srcarry, dst2arry, src->width,src->height);
+    Sobel(srcarry, dst2arry, src->width,src->height);
     //RobertSharpen(srcarry, dst1arry, src->width, src->height, 1);
     //Robert(srcarry, dst2arry, src->width,src->height);
     for (int j=0;j<src->height; j++) {
@@ -78,15 +80,16 @@ int main(int argc, const char * argv[]) {
         for(int i=0;i<src->width;i++)
             cvSetReal2D(dst2, j, i,dst2arry[j*src->width+i]);
     }
-    cvSaveImage("/Users/Tony/DIPImage/hist_S_log.jpg",dst2, 0);
-    //cvSaveImage("/Users/Tony/DIPImage/sample_sobel_edge.jpg",dst2, 0);
-    //cvSub(dst2,dst1,dst2,NULL);
     cvNamedWindow("src", 1);
     cvShowImage("src", src);
     cvNamedWindow("dst1", 1);
     cvShowImage("dst1", dst1);
     cvNamedWindow("dst2", 1);
     cvShowImage("dst2", dst2);
+    //cvSaveImage("/Users/Tony/DIPImage/hist_S_gaussian_0.jpg",dst2, 0);
+    //cvSaveImage("/Users/Tony/DIPImage/sample_sobel_edge.jpg",dst2, 0);
+    //cvSub(dst2,dst1,dst2,NULL);
+
     //cvSub( dstcv,dst, dstcv, NULL);
     //HistogramEqualization(dstcv,dstcv);
     //cvNamedWindow("dstsub", 1);
