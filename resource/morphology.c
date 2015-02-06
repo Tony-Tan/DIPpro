@@ -144,7 +144,7 @@ void Not(IplImage *src,IplImage *dst){
     }
 }
 //将所有元素设为1
-void One(IplImage *src){
+void G_One(IplImage *src){
     for(int i=0;i<src->width;i++)
         for(int j=0;j<src->height;j++)
             cvSetReal2D(src, j, i, 255.0);
@@ -201,7 +201,7 @@ void Erode(IplImage *src,IplImage *dst,IplImage *se,Position *center){
     IplImage *temp=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
     IplImage *tempdst=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
     IplImage *realdst=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
-    One(realdst);
+    G_One(realdst);
     Zoom(src,temp);
     int width=se->width;
     int height=se->height;
@@ -273,7 +273,7 @@ void FillHole(IplImage *src,IplImage *dst,IplImage *se,Position *seed){
     cvReleaseImage(&nsrc);
 }
 //连通分量获取
-void GetConComponent(IplImage *src,IplImage *dst,IplImage *se,Position *seed){
+void GetConCompG_Onent(IplImage *src,IplImage *dst,IplImage *se,Position *seed){
     IplImage * temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     cvZero(temp);
     IplImage * lasttemp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);

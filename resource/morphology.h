@@ -26,7 +26,7 @@ void Or(IplImage *src0,IplImage *src1,IplImage *dst);
 //取反
 void Not(IplImage *src,IplImage *dst);
 //将所有元素设为1
-void One(IplImage *src);
+void G_One(IplImage *src);
 //膨胀
 void Dilate(IplImage *src,IplImage *dst,IplImage *se,Position *center);
 

@@ -11,6 +11,7 @@
 #include "smooth.h"
 #include "sharpen.h"
 #include "Histogram.h"
+#include "Segment.h"
 void showfilter(double *filter,int width,int height){
     IplImage *show=cvCreateImage(cvSize(width, height),8,1);
     for(int i=0;i<width;i++)
@@ -26,7 +27,7 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/moon2.jpg", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/edge3.jpg", 0);
     IplImage *dst1 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     IplImage *dst2 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
 
@@ -57,7 +58,7 @@ int main(int argc, const char * argv[]) {
     //SobelSharpen(srcarry,dstarry,src->width,src->height,1);
     //Sobel(srcarry, dstarry, src->width, src->height);
     //LaplaceSharpen(srcarry, dstarry, src->width, src->height,0,0.5);
-    //GaussianFilter(src,dst,3,3,2);
+    //GaussianFilter(srcarry,dst1arry,src->width, src->height,3,3,1);
     //MeanFilter(src, dst,  5, 5);
     //Laplace(srcarry,dstarry,src->width,src->height,3);
     ////////////////////////////////////////////////////////
@@ -69,9 +70,11 @@ int main(int argc, const char * argv[]) {
     //HistogramEqualization(srcarry,dst1arry,src->width,src->height);
     //HistogramSpecification(srcarry,dst2arry,hist,src->width,src->height);
     //SobelSharpen(srcarry, dst1arry, src->width, src->height, 1);
-    Sobel(srcarry, dst2arry, src->width,src->height);
+    //GaussianFilter(srcarry, srcarry, src->width, src->height, 3, 3, 0.5);
+    Sobel(srcarry, dst1arry, src->width,src->height);
     //RobertSharpen(srcarry, dst1arry, src->width, src->height, 1);
     //Robert(srcarry, dst2arry, src->width,src->height);
+    LoG(srcarry,dst2arry,src->width,src->height,3,3,1);
     for (int j=0;j<src->height; j++) {
         for(int i=0;i<src->width;i++)
             cvSetReal2D(dst1, j, i,dst1arry[j*src->width+i]);
@@ -86,7 +89,7 @@ int main(int argc, const char * argv[]) {
     cvShowImage("dst1", dst1);
     cvNamedWindow("dst2", 1);
     cvShowImage("dst2", dst2);
-    //cvSaveImage("/Users/Tony/DIPImage/hist_S_gaussian_0.jpg",dst2, 0);
+    //cvSaveImage("/Users/Tony/DIPImage/log_cross_0.225.jpg",dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/sample_sobel_edge.jpg",dst2, 0);
     //cvSub(dst2,dst1,dst2,NULL);
 

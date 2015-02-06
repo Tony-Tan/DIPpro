@@ -9,26 +9,12 @@
 
 
 
-void LaplaceSharpen(double *src,double *dst,int width,int height,int mask_type,double c){
+void LaplaceSharpen(double *src,double *dst,int width,int height,double c){
     
-    
-    Laplace(src,dst,width,height,mask_type);
+    Laplace(src,dst,width,height);
     matrixMultreal(dst,dst,c,width,height);
+    matrixAdd(src,dst,dst,width,height);
 
-    switch(mask_type){
-        case SHARPEN_LAP_0:
-        case SHARPEN_LAP_1:
-            matrixSub(src,dst,dst,width,height);
-            break;
-        case SHARPEN_LAP_2:
-        case SHARPEN_LAP_3:
-            matrixAdd(src,dst,dst,width,height);
-            break;
-        default:
-            printf("wrong mask type\n");
-            matrixCopy(src, dst, width, height);
-            break;
-    }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////

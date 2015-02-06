@@ -91,3 +91,30 @@ void matrixMultreal(double *src,double *dst,double k,int width,int height){
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
+
+//找出两幅等大图像中同一位置中相对较大的像素值
+void MaxPix(double *src1 ,double *src2,double *dst,int width,int height){
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            double value1=src1[j*width+i];
+            double value2=src2[j*width+i];
+            dst[j*width+i]=value1>=value2?value1:value2;
+        }
+}
+//找出两幅等大图像中同一位置中相对较小的像素值
+void MinPix(double *src1 ,double *src2,double *dst,int width,int height){
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            double value1=src1[j*width+i];
+            double value2=src2[j*width+i];
+            dst[j*width+i]=value1<=value2?value1:value2;
+        }
+}
+void One(double *src,int width,int height){
+    for(int i=0;i<width*height;i++)
+        src[i]=1.0;
+}
+void Zero(double *src,int width,int height){
+    for(int i=0;i<width*height;i++)
+        src[i]=0.0;
+}
