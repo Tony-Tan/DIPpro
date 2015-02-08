@@ -28,10 +28,10 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/edge_b.jpg", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.jpg", 0);
     IplImage *dst1 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     IplImage *dst2 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-
+    int width=src->width, height=src->height;
     double* srcarry=(double *)malloc(sizeof(double)*src->width*src->height);
     double* dst1arry=(double *)malloc(sizeof(double)*src->width*src->height);
     double* dst2arry=(double *)malloc(sizeof(double)*src->width*src->height);
@@ -39,8 +39,8 @@ int main(int argc, const char * argv[]) {
         for(int i=0;i<src->width;i++)
             srcarry[j*src->width+i]=cvGetReal2D(src, j, i);
     }
-    Canny(srcarry, dst1arry, src->width, src->height, 1.3, 200,60);
-    cvCanny(src, dst2, 200, 60, 3);
+    //Canny(srcarry, dst1arry, src->width, src->height, 1.3, 200,60);
+    //cvCanny(src, dst2, 200, 60, 3);
     //Sobel(srcarry, dst2arry, NULL, src->width, src->height);
     //double power=FrequencyFiltering(src,dst,GHPF,20,0,0,0,0,1);
     //Complex a[512*512];
@@ -77,17 +77,22 @@ int main(int argc, const char * argv[]) {
     //Sobel(srcarry, dst1arry, src->width,src->height);
     //RobertSharpen(srcarry, dst1arry, src->width, src->height, 1);
     //Robert(srcarry, dst2arry, src->width,src->height);
-    //LoG(srcarry,dst2arry,src->width,src->height,3,3,1);
+    LoG(srcarry,dst1arry,width,height,3,3,1);
+    //Canny(srcarry, dst1arry,width,height,7,100,60);
+    //Sobel(srcarry, dst1arry, NULL,width,height , 3);
+    Canny(srcarry, dst2arry, width, height,7, 200, 60);
     for (int j=0;j<src->height; j++) {
         for(int i=0;i<src->width;i++)
             cvSetReal2D(dst1, j, i,dst1arry[j*src->width+i]);
     }
-    //for (int j=0;j<src->height; j++) {
-    //    for(int i=0;i<src->width;i++)
-    //        cvSetReal2D(dst2, j, i,dst2arry[j*src->width+i]);
-    //}
+    for (int j=0;j<src->height; j++) {
+        for(int i=0;i<src->width;i++)
+            cvSetReal2D(dst2, j, i,dst2arry[j*src->width+i]);
+    }
     //cvSaveImage("/Users/Tony/DIPImage/canny_min.jpg", dst1, 0);
-    Thinning(dst1, dst1);
+    
+    //cvCanny(src, dst1, 200, 60, 7);
+    //Thinning(dst2, dst2);
     cvNamedWindow("src", 1);
     cvShowImage("src", src);
     cvNamedWindow("dst1", 1);

@@ -24,12 +24,12 @@
 #define EDGE_DETECTOR_CANNY 8
 #define MORETHAN 1
 #define LESSTHAN 0
-double Sobel(double *src,double *dst,double *edgedriction,int width,int height);
+double Sobel(double *src,double *dst,double *edgedriction,int width,int height,int sobel_size);
 double Laplace(double *src,double *dst,int width,int height);
 double Robert(double *src,double *dst,int width,int height);
 double Prewitt(double *src,double *dst,int width,int height);
 double Kirsch(double *src,double *dst,int width,int height);
-void Canny(double *src,double *dst,int width,int height,double deta,double threshold1,double threshold2);
+void Canny(double *src,double *dst,int width,int height,int sobel_size,double threshold1,double threshold2);
 double LoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta);
 double DoG();
 void Threshold(double *src,double *dst,int width,int height,double threshold,int type);
