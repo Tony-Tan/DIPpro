@@ -3,14 +3,9 @@
 #include <cv.h>
 #include <highgui.h>
 #include <stdio.h>
+#include "mathematic.h"
 #define isSIZEEQU(x,y) (((x)->width)==((y)->width)&&((x)->height)==((y)->height))
-typedef int DataType;
-struct Position_{
-    int x;
-    int y;
-};
-typedef struct Position_ Position;
-typedef struct Position_ MoveDirection;
+
 //位移操作，将图像整体移动，如果超出边界舍去
 int isEqual(IplImage *src1,IplImage *src2);
 //检测图像是否为空

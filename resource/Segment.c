@@ -5,6 +5,56 @@
 //  Copyright (c) 2014年 谭升. All rights reserved.
 //
 #include "Segment.h"
+#define TAN67_5 2.414213562373094
+#define TAN22_5 0.414213562373095
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ *   四个角度对应编号
+ *   1 2 3
+ *   4 * 6
+ *   7 8 9
+ *
+ */
+void getEdgeDirection(double *src_x,double *src_y,double *edgedriction,int width,int height){
+
+    
+    double tanvalue=0.0;
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            double x=src_x[j*width+i];
+            double y=src_y[j*width+i];
+            if(x>0.0&&y>0.0){//第一象限
+                tanvalue=y/x;
+                edgedriction[j*width+i]=(tanvalue<TAN22_5)?6.0:
+                (tanvalue<TAN67_5)?3.0:2.0;
+                
+            }else if(x>0.0&&y<0.0){//第四象限
+                tanvalue=y/x;
+                edgedriction[j*width+i]=tanvalue>-TAN22_5?6.0:
+                tanvalue>-TAN67_5?9.0:8.0;
+            }
+            else if(x<0.0&&y<0.0){//第三象限
+                tanvalue=y/x;
+                edgedriction[j*width+i]=tanvalue<TAN22_5?4.0:
+                tanvalue<TAN67_5?7.0:8.0;
+                
+            }
+            else if(x<0.0&&y<0.0){//第二象限
+                tanvalue=y/x;
+                edgedriction[j*width+i]=tanvalue>-TAN22_5?4.0:
+                tanvalue>-TAN67_5?9.0:2.0;
+                
+            }
+            else if(x==0){
+                edgedriction[j*width+i]=(y==0.0)?0.0:(y>0.0)?2.0:8.0;
+            }
+            
+        }
+
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 double findMatrixMax(double *src,int width,int height){
     double max=-1.0;
     for(int i=0;i<width*height;i++)
@@ -34,9 +84,9 @@ double Robert(double *src,double *dst,int width,int height){
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-double Sobel(double *src,double *dst,int width,int height){
+double Sobel(double *src,double *dst,double *edgedriction,int width,int height){
     //double SobelMask_x[3]={-1,-2,-1,0,0,0,1,2,1};
-    double SobelMask1[3]={3,10,3};
+    double SobelMask1[3]={1,2,1};
     double SobelMask2[3]={-1,0,1};
     double *dst_x=(double *)malloc(sizeof(double)*width*height);
     double *dst_y=(double *)malloc(sizeof(double)*width*height);
@@ -47,6 +97,35 @@ double Sobel(double *src,double *dst,int width,int height){
     
     RealConvolution(src, dst_y, SobelMask2, width, height, 1, 3);
     RealConvolution(dst_y, dst_y, SobelMask1, width, height, 3, 1);
+    if(edgedriction!=NULL)
+        getEdgeDirection(dst_x, dst_y, edgedriction, width, height);
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            dst[j*width+i]=abs(dst_x[j*width+i])+abs(dst_y[j*width+i]);
+        }
+    free(dst_x);
+    free(dst_y);
+    return findMatrixMax(dst,width,height);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+double Scharr(double *src,double *dst,double *edgedriction,int width,int height){
+    double ScharrMask1[3]={3,10,3};
+    double ScharrMask2[3]={-1,0,1};
+    double *dst_x=(double *)malloc(sizeof(double)*width*height);
+    double *dst_y=(double *)malloc(sizeof(double)*width*height);
+    RealConvolution(src, dst_x, ScharrMask1, width, height, 1, 3);
+    RealConvolution(dst_x, dst_x, ScharrMask2, width, height, 3, 1);
+    
+    RealConvolution(src, dst_y, ScharrMask2, width, height, 1, 3);
+    RealConvolution(dst_y, dst_y, ScharrMask1, width, height, 3, 1);
+    if(edgedriction!=NULL)
+        getEdgeDirection(dst_x, dst_y, edgedriction, width, height);
     for(int j=0;j<height;j++)
         for(int i=0;i<width;i++){
             dst[j*width+i]=abs(dst_x[j*width+i])+abs(dst_y[j*width+i]);
@@ -186,7 +265,7 @@ void EdgeDetection(double *src,double *dst,int width,int height,int detector,dou
         }
         case EDGE_DETECTOR_SOBEL:
         {
-            maxvalue=Sobel(src, dst, width, height);
+            maxvalue=Sobel(src, dst,NULL, width, height);
             Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
             break;
         }
@@ -211,7 +290,88 @@ void EdgeDetection(double *src,double *dst,int width,int height,int detector,dou
         default:
             break;
     }
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+void Non_MaxSuppression(double *src,double *dst,double *dirction,int width,int height){
+    double *temp=(double*)malloc(sizeof(double)*width*height);
+    int dir;
+    int y;
+    int x;
+    double value_c;
+    Zero(temp, width, height);
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            dir=(int)dirction[j*width+i]-1;
+            y=dir/3-1;
+            x=dir%3-1;
+            value_c=src[j*width+i];
+            if(value_c<src[(j+y)*width+i+x]||value_c<src[(j-y)*width+i-x])
+                temp[j*width+i]=0.0;
+            else
+                temp[j*width+i]=value_c;
+        }
+    matrixCopy(temp, dst, width, height);
+    free(temp);
 
-
+}
+void EdgeTrack(double *src,int width,int height,Position *seed){
+    int x=seed->x;
+    int y=seed->y;
+    if(x>=0&&x<width&&y>=0&&y<height&&src[y*width+x]==1.0){
+        src[y*width+x]=2;
+        for(int j=-1;j<2;j++)
+            for(int i=-1;i<2;i++){
+                
+                if(!(j==0&&i==0)){
+                    Position seed_next;
+                    seed_next.x=x+i;
+                    seed_next.y=y+j;
+                    EdgeTrack(src,width,height,&seed_next);
+                }
+            }
+        
+    }
+}
+void NonZeroSetOne(double *src,double *dst,int width,int height){
+    for(int i=0;i<width*height;i++)
+        dst[i]=src[i]!=0.0?1.0:0.0;
+}
+void Canny(double *src,double *dst,int width,int height,double deta,double threshold1,double threshold2){
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+    double *edge_a=(double *)malloc(sizeof(double)*width*height);//边缘幅度
+    double *edge_d=(double *)malloc(sizeof(double)*width*height);//边缘方向
+    double *threshold_max=(double *)malloc(sizeof(double)*width*height);
+    double *threshold_min=(double *)malloc(sizeof(double)*width*height);
+    int gaussianMaskSize=(int)(deta*6.0);
+    if(!gaussianMaskSize%2)
+        gaussianMaskSize++;
+    GaussianFilter(src, temp, width, height, gaussianMaskSize, gaussianMaskSize, deta);
+    Scharr(temp, edge_a, edge_d, width, height);
+    //Sobel(temp, edge_a, edge_d, width, height);
+    Non_MaxSuppression(edge_a, temp, edge_d, width, height);
+    Threshold(temp, threshold_max, width, height, threshold1, MORETHAN);
+    Threshold(temp, threshold_min, width, height, threshold2, MORETHAN);
+    NonZeroSetOne(threshold_max,threshold_max,width,height);
+    NonZeroSetOne(threshold_min,threshold_min,width,height);
+    for(int j=0;j<height;j++){
+        for(int i=0;i<width;i++){
+            if(threshold_max[j*width+i]==1.0&&threshold_min[j*width+i]!=2.0){
+                Position p;
+                p.x=i;
+                p.y=j;
+                EdgeTrack(threshold_min, width, height, &p);
+            }
+        
+        }
+    }
+    for(int i=0;i<width*height;i++)
+        if(threshold_min[i]==2.0)
+            dst[i]=255.0;
+    free(temp);
+    free(threshold_max);
+    free(threshold_min);
+    free(edge_d);
+    free(edge_a);
 
 }

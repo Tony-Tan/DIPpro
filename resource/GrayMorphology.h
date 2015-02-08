@@ -6,11 +6,7 @@
 #include "mathematic.h"
 #define TOFINDMAX 0
 #define TOFINDMIN 1
-struct position{
-    int x;
-    int y;
-};
-typedef struct position Position;
+
 //判断结构元是否平滑
 int isSmooth(double *src,int width,int height);
 //判断两幅图像是否相等

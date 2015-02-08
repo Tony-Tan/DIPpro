@@ -5,7 +5,13 @@
 #endif
 #include <math.h>
 
-
+typedef int DataType;
+struct Position_{
+    int x;
+    int y;
+};
+typedef struct Position_ Position;
+typedef struct Position_ MoveDirection;
 
 ////////////////////////////////////////////////////////////////////
 //复数数据结构

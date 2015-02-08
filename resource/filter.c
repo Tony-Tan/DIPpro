@@ -95,7 +95,6 @@ double FrequencyFiltering(IplImage *src,IplImage *dst,int filter_type,double par
         case HFEPF:
             HighFrequencyEmphasisFilter(filter, fft_width, fft_height, param4, param1, param2, param3,param5);
             break;
-            /*HighFrequencyEmphasisFilter(double *Filter,int width,int height,int filter_type,double cut_off_frequency,double k1,double k2,double param1)*/
 
     }
     //showfilter(filter,fft_width,fft_height);

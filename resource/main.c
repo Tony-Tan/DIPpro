@@ -7,6 +7,7 @@
 #define HIGH_FR 1
 #define LOW_FR 2
 #include "lowpassfilter.h"
+#include "morphology.h"
 #include "filter.h"
 #include "smooth.h"
 #include "sharpen.h"
@@ -27,7 +28,7 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/edge3.jpg", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/edge_b.jpg", 0);
     IplImage *dst1 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     IplImage *dst2 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
 
@@ -38,7 +39,9 @@ int main(int argc, const char * argv[]) {
         for(int i=0;i<src->width;i++)
             srcarry[j*src->width+i]=cvGetReal2D(src, j, i);
     }
-    
+    Canny(srcarry, dst1arry, src->width, src->height, 1.3, 200,60);
+    cvCanny(src, dst2, 200, 60, 3);
+    //Sobel(srcarry, dst2arry, NULL, src->width, src->height);
     //double power=FrequencyFiltering(src,dst,GHPF,20,0,0,0,0,1);
     //Complex a[512*512];
     //ImageFFT(src, a);
@@ -51,7 +54,7 @@ int main(int argc, const char * argv[]) {
     //MeanFilter(src, dst,  7, 7);
     //NoLinearMeanFilter(src, dst, 3, 3, NLMF_MASK_G, NLMF_FUN_G, 1.0);
     //RobustSmoothFilter(src,dst,3,3);
-    //cvSaveImage("/Users/Tony/DIPImage/gau_lena_7.jpg", dst, 0);
+    
     //cvSmooth(src, cvdst, CV_MEDIAN, 13, 13, 0, 0);
     //cvSmooth(src, cvdst, CV_BLUR,15,15,0,0);
     //UnsharpMasking(srcarry,dstarry,src->width,src->height,SMOOTH_GAUSSIAN,7,7,2.0,2.0);
@@ -71,18 +74,20 @@ int main(int argc, const char * argv[]) {
     //HistogramSpecification(srcarry,dst2arry,hist,src->width,src->height);
     //SobelSharpen(srcarry, dst1arry, src->width, src->height, 1);
     //GaussianFilter(srcarry, srcarry, src->width, src->height, 3, 3, 0.5);
-    Sobel(srcarry, dst1arry, src->width,src->height);
+    //Sobel(srcarry, dst1arry, src->width,src->height);
     //RobertSharpen(srcarry, dst1arry, src->width, src->height, 1);
     //Robert(srcarry, dst2arry, src->width,src->height);
-    LoG(srcarry,dst2arry,src->width,src->height,3,3,1);
+    //LoG(srcarry,dst2arry,src->width,src->height,3,3,1);
     for (int j=0;j<src->height; j++) {
         for(int i=0;i<src->width;i++)
             cvSetReal2D(dst1, j, i,dst1arry[j*src->width+i]);
     }
-    for (int j=0;j<src->height; j++) {
-        for(int i=0;i<src->width;i++)
-            cvSetReal2D(dst2, j, i,dst2arry[j*src->width+i]);
-    }
+    //for (int j=0;j<src->height; j++) {
+    //    for(int i=0;i<src->width;i++)
+    //        cvSetReal2D(dst2, j, i,dst2arry[j*src->width+i]);
+    //}
+    //cvSaveImage("/Users/Tony/DIPImage/canny_min.jpg", dst1, 0);
+    Thinning(dst1, dst1);
     cvNamedWindow("src", 1);
     cvShowImage("src", src);
     cvNamedWindow("dst1", 1);
