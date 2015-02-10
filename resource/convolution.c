@@ -10,7 +10,7 @@
 /*
  实数矩阵的180度旋转
  */
-void RotateRealMatrix(double *matrix,int width,int height){
+void RotateRealMatrix(double *matrix,double *dst,int width,int height){
     double *temp=(double*)malloc(sizeof(double)*width*height);
     if(temp==NULL){
         printf("malloc wrong!\n");
@@ -19,8 +19,9 @@ void RotateRealMatrix(double *matrix,int width,int height){
     for(int i=0;i<width*height;i++){
         temp[width*height-1-i]=matrix[i];
     }
-    for(int i=0;i<width*height;i++)
-        matrix[i]=temp[i];
+    for(int i=0;i<width*height;i++){
+        dst[i]=temp[i];
+    }
     free(temp);
 
 }
@@ -111,8 +112,9 @@ void ComplexRelevant(Complex* src,Complex *dst,Complex *mask,
 }
 void RealConvolution(double *src,double *dst,double *mask,
                      int width,int height,int m_width,int m_height){
-    RotateRealMatrix(mask,m_width,m_height);
-    RealRelevant(src, dst, mask, width, height, m_width, m_height);
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+    RotateRealMatrix(mask,temp,m_width,m_height);
+    RealRelevant(src, dst, temp, width, height, m_width, m_height);
 
 
 }

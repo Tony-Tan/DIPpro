@@ -9,53 +9,24 @@
 #define TAN22_5 0.414213562373095
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-/*
- *   四个角度对应编号
- *   1 2 3
- *   4 * 6
- *   7 8 9
- *
- */
-void getEdgeDirection(double *src_x,double *src_y,double *edgedriction,int width,int height){
-
+//
+void getEdgeAngle(double *src_x,double *src_y,double *edgeAngle,int width,int height){
+    double x;
+    double y;
+    for(int i=0;i<width*height;i++){
+        x=src_x[i];
+        y=src_y[i];
+        if(!(x==0.0&&y==0.0)){
+            double v=atan2(y, x)*180.0/M_PI;
+            if(v<0.0)
+                v+=360.0;
+            edgeAngle[i]=v;
+        }else
+            edgeAngle[i]=-1.0;
+        
+    }
     
-    double tanvalue=0.0;
-    for(int j=0;j<height;j++)
-        for(int i=0;i<width;i++){
-            double x=src_x[j*width+i];
-            double y=src_y[j*width+i];
-            if(x>0.0&&y>=0.0){//第一象限
-                tanvalue=y/x;
-                edgedriction[j*width+i]=(tanvalue<TAN22_5)?6.0:
-                (tanvalue<TAN67_5)?3.0:2.0;
-                
-            }else if(x>0.0&&y<=0.0){//第四象限
-                tanvalue=y/x;
-                edgedriction[j*width+i]=tanvalue>-TAN22_5?6.0:
-                tanvalue>-TAN67_5?9.0:8.0;
-            }
-            else if(x<0.0&&y<=0.0){//第三象限
-                tanvalue=y/x;
-                edgedriction[j*width+i]=tanvalue<TAN22_5?4.0:
-                tanvalue<TAN67_5?7.0:8.0;
-                
-            }
-            else if(x<0.0&&y>=0.0){//第二象限
-                tanvalue=y/x;
-                edgedriction[j*width+i]=tanvalue>-TAN22_5?4.0:
-                tanvalue>-TAN67_5?1.0:2.0;
-                
-            }
-            else if(x==0){
-                edgedriction[j*width+i]=(y==0.0)?0.0:(y>0.0)?2.0:8.0;
-            }
-            if(edgedriction[j*width+i]>9||edgedriction[j*width+i]<0)
-                printf("hello bug\n");
-            
-        }
-
 }
-/////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 double findMatrixMax(double *src,int width,int height){
     double max=-1.0;
@@ -66,13 +37,16 @@ double findMatrixMax(double *src,int width,int height){
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-double Robert(double *src,double *dst,int width,int height){
+double Robert(double *src,double *dst,double *edgedriction,int width,int height){
     double RobertMask_x[9]={0,0,0,0,-1,0,0,0,1};
     double RobertMask_y[9]={0,0,0,0,0,-1,0,1,0};
+    
     double *dst_x=(double *)malloc(sizeof(double)*width*height);
     double *dst_y=(double *)malloc(sizeof(double)*width*height);
     RealConvolution(src, dst_x, RobertMask_x, width, height, ROBERT_MASK_SIZE,ROBERT_MASK_SIZE);
     RealConvolution(src, dst_y, RobertMask_y, width, height, ROBERT_MASK_SIZE,ROBERT_MASK_SIZE);
+    if(edgedriction!=NULL)
+        getEdgeAngle(dst_x, dst_y, edgedriction, width, height);
     for(int j=0;j<height;j++)
         for(int i=0;i<width;i++){
             dst[j*width+i]=abs(dst_x[j*width+i])+abs(dst_y[j*width+i]);
@@ -90,17 +64,20 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
     //double SobelMask_x[3]={-1,-2,-1,0,0,0,1,2,1};
     double *dst_x=(double *)malloc(sizeof(double)*width*height);
     double *dst_y=(double *)malloc(sizeof(double)*width*height);
+    
     if(sobel_size==3){
         double SobelMask1[3]={0.25,0.5,0.25};
-        double SobelMask2[3]={-1,0,1};
+        double SobelMask2[3]={1,0,-1};
+        RealConvolution(src, dst_y, SobelMask2, width, height, 1, 3 );
+        RealConvolution(dst_y, dst_y,SobelMask1, width, height, 3, 1);
+        
         RealConvolution(src, dst_x, SobelMask1, width, height, 1, 3);
         RealConvolution(dst_x, dst_x, SobelMask2, width, height, 3, 1);
     
-        RealConvolution(src, dst_y, SobelMask2, width, height, 1, 3);
-        RealConvolution(dst_y, dst_y, SobelMask1, width, height, 3, 1);
+       
     }else if(sobel_size==5){
         double SobelMask1[5]={0.0625,0.25,0.375,0.25,0.0625};
-        double SobelMask2[5]={1,2,0,-2,-1};
+        double SobelMask2[5]={1/3.0,2/3.0,0,-2/3.0,-1/3.0};
         RealConvolution(src, dst_x, SobelMask1, width, height, 1, 5);
         RealConvolution(dst_x, dst_x, SobelMask2, width, height, 5, 1);
         
@@ -109,7 +86,7 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
     
     }else if(sobel_size==7){
         double SobelMask1[7]={0.015625,0.09375,0.234375,0.3125,0.234375,0.09375,0.015625};
-        double SobelMask2[7]={1,4,5,0,-5,-4,-1};
+        double SobelMask2[7]={0.1,0.4,0.5,0,-0.5,-0.4,-0.1};
         RealConvolution(src, dst_x, SobelMask1, width, height, 1, 7);
         RealConvolution(dst_x, dst_x, SobelMask2, width, height, 7, 1);
         
@@ -117,8 +94,12 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
         RealConvolution(dst_y, dst_y, SobelMask1, width, height, 7, 1);
         
     }
+    
+    for(int i=0;i<width*height;i++)
+        dst_y[i]=-dst_y[i];
     if(edgedriction!=NULL)
-        getEdgeDirection(dst_x, dst_y, edgedriction, width, height);
+        //getEdgeDirection(dst_x, dst_y, edgedriction, width, height);
+        getEdgeAngle(dst_x, dst_y, edgedriction, width, height);
     for(int j=0;j<height;j++)
         for(int i=0;i<width;i++){
             dst[j*width+i]=abs(dst_x[j*width+i])+abs(dst_y[j*width+i]);
@@ -131,12 +112,13 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 double Scharr(double *src,double *dst,double *edgedriction,int width,int height){
-    double ScharrMask1[3]={3,10,3};
-    double ScharrMask2[3]={-1,0,1};
+    double ScharrMask1[3]={0.1875,0.625,0.1875};
+    double ScharrMask2[3]={1,0,-1};
     double *dst_x=(double *)malloc(sizeof(double)*width*height);
     double *dst_y=(double *)malloc(sizeof(double)*width*height);
     RealConvolution(src, dst_x, ScharrMask1, width, height, 1, 3);
@@ -144,8 +126,10 @@ double Scharr(double *src,double *dst,double *edgedriction,int width,int height)
     
     RealConvolution(src, dst_y, ScharrMask2, width, height, 1, 3);
     RealConvolution(dst_y, dst_y, ScharrMask1, width, height, 3, 1);
+    for(int i=0;i<width*height;i++)
+        dst_y[i]=-dst_y[i];
     if(edgedriction!=NULL)
-        getEdgeDirection(dst_x, dst_y, edgedriction, width, height);
+        getEdgeAngle(dst_x, dst_y, edgedriction, width, height);
     for(int j=0;j<height;j++)
         for(int i=0;i<width;i++){
             dst[j*width+i]=abs(dst_x[j*width+i])+abs(dst_y[j*width+i]);
@@ -168,7 +152,7 @@ double Laplace(double *src,double *dst,int width,int height){
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 double Prewitt(double *src,double *dst,int width,int height){
-    double PrewittMask1[3]={1.0,1.0,1.0};
+    double PrewittMask1[3]={1.0/3.0,1.0/3.0,1.0/3.0};
     double PrewittMask2[3]={-1.0,0.0,1.0};
     double *dst_x=(double *)malloc(sizeof(double)*width*height);
     double *dst_y=(double *)malloc(sizeof(double)*width*height);
@@ -261,6 +245,23 @@ double LoG(double *src,double *dst,int width,int height,int m_width,int m_height
     return findMatrixMax(dst,width,height);
     
 }
+double DoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta1,double deta2){
+    double *dsttemp=(double *)malloc(sizeof(double)*width*height);
+    double *mask1=(double *)malloc(sizeof(double)*width*height);
+    double *mask2=(double *)malloc(sizeof(double)*width*height);
+    GaussianMask(mask1, m_width, m_height, deta1);
+    GaussianMask(mask2, m_width, m_height, deta2);
+    if(deta1>deta2)
+        matrixSub(mask2, mask1, mask1, m_width, m_height);
+    else
+        matrixSub(mask1, mask2, mask1, m_width, m_height);
+    RealConvolution(src, dsttemp, mask1, width, height, m_width, m_height);
+    findCross(dsttemp, dsttemp, width, height);
+    matrixCopy(dsttemp, dst, width, height);
+    free(dsttemp);
+    return findMatrixMax(dst,width,height);
+    
+}
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +285,7 @@ void EdgeDetection(double *src,double *dst,int width,int height,int detector,dou
     switch (detector) {
         case EDGE_DETECTOR_ROBERT:
         {
-            maxvalue=Robert(src, dst, width, height);
+            maxvalue=Robert(src, dst,NULL, width, height);
             Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
             break;
         }
@@ -296,7 +297,7 @@ void EdgeDetection(double *src,double *dst,int width,int height,int detector,dou
         }
         case EDGE_DETECTOR_SOBEL:
         {
-            maxvalue=Sobel(src, dst,NULL, width, height,3);
+            maxvalue=Sobel(src, dst,NULL, width, height,(int)deta);
             Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
             break;
         }
@@ -324,11 +325,47 @@ void EdgeDetection(double *src,double *dst,int width,int height,int detector,dou
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 /*
  *   四个角度对应编号
- *   1 2 3
- *   4 * 6
- *   7 8 9
+ *   0 1 2
+ *   3 * 5
+ *   6 7 8
+ *   edgedirction
+ */
+void getEdgeDirection(double *edgedirection,double *sample_direction,int width,int height){
+    
+    
+    double angle=0.0;
+    for(int i=0;i<width*height;i++){
+        angle=edgedirection[i];
+        if(angle<22.5||angle>=337.5)
+            sample_direction[i]=5.0;
+        else if(angle<67.5&&angle>=22.5)
+            sample_direction[i]=2.0;
+        else if(angle<112.5&&angle>=67.5)
+            sample_direction[i]=1.0;
+        else if(angle<157.5&&angle>=112.5)
+            sample_direction[i]=0.0;
+        else if(angle<202.5&&angle>=157.5)
+            sample_direction[i]=3.0;
+        else if(angle<247.5&&angle>=202.5)
+            sample_direction[i]=6.0;
+        else if(angle<292.5&&angle>=247.5)
+            sample_direction[i]=7.0;
+        else if(angle<337.5&&angle>=292.5)
+            sample_direction[i]=8.0;
+        else if(angle==-1.0)
+            sample_direction[i]=-1.0;
+        }
+    
+}
+
+/*
+ *   四个角度对应编号
+ *   0 1 2
+ *   3 * 5
+ *   6 7 8
  *
  */
 void Non_MaxSuppression(double *src,double *dst,double *dirction,int width,int height){
@@ -340,8 +377,8 @@ void Non_MaxSuppression(double *src,double *dst,double *dirction,int width,int h
     Zero(temp, width, height);
     for(int j=1;j<height-1;j++)
         for(int i=1;i<width-1;i++){
-            if(dirction[j*width+i]){
-                dir=(int)dirction[j*width+i]-1;
+            if(dirction[j*width+i]!=-1.0){
+                dir=(int)dirction[j*width+i];
                 y=dir/3-1;
                 x=dir%3-1;
                 value_c=src[j*width+i];
@@ -362,7 +399,6 @@ void EdgeTrack(double *src,int width,int height,Position *seed){
         src[y*width+x]=2;
         for(int j=-1;j<2;j++)
             for(int i=-1;i<2;i++){
-                
                 if(!(j==0&&i==0)){
                     Position seed_next;
                     seed_next.x=x+i;
@@ -387,6 +423,7 @@ void Canny(double *src,double *dst,int width,int height,int sobel_size,double th
         Scharr(src, edge_a, edge_d, width, height);
     else if(sobel_size==5||sobel_size==7)
         Sobel(src, edge_a, edge_d, width, height,sobel_size);
+    getEdgeDirection(edge_d, edge_d, width, height);
     Non_MaxSuppression(edge_a, temp, edge_d, width, height);
     Threshold(temp, threshold_max, width, height, threshold1, MORETHAN);
     Threshold(temp, threshold_min, width, height, threshold2, MORETHAN);
@@ -413,3 +450,49 @@ void Canny(double *src,double *dst,int width,int height,int sobel_size,double th
     free(edge_a);
 
 }
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+void BoundaryDetection(double *src,double *dst,double *angle,int width,int height,double v_threshold,double a_threshold,int isVertical){
+    double angle_value=0.0;
+    double pix_value=0.0;
+    for(int i=0;i<width*height;i++){
+        pix_value=src[i];
+        angle_value=angle[i];
+        if(pix_value>=v_threshold){
+            if(!isVertical){
+                if((angle_value>90.0- a_threshold && angle_value<90+a_threshold)||
+                   (angle_value>270.0-a_threshold && angle_value<270+a_threshold))
+                dst[i]=255.0;
+            }else{
+                if((angle_value>360.0 - a_threshold || angle_value<a_threshold)||
+                   (angle_value>180.0-a_threshold && angle_value<180.0+a_threshold))
+                dst[i]=255.0;
+            }
+        }
+    }
+}
+void getV_HBoundary(double *src,double *dst,int width,int height,double v_threshold,double a_threshold,int isVertical){
+    double *dst_v=(double *)malloc(sizeof(double)*width*height);
+    double *dst_a=(double *)malloc(sizeof(double)*width*height);
+    double *dst_d=(double *)malloc(sizeof(double)*width*height);
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+    Scharr(src, dst_v, dst_a, width, height);
+    getEdgeDirection(dst_a, dst_d, width, height);
+    Non_MaxSuppression(dst_v, temp, dst_d, width, height);
+    BoundaryDetection(temp, dst, dst_a, width, height, v_threshold, a_threshold,isVertical);
+    
+    free(dst_a);
+    free(dst_v);
+    free(dst_d);
+    free(temp);
+
+}
+
+
+
+
+
+
+
+
+

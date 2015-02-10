@@ -25,13 +25,18 @@
 #define MORETHAN 1
 #define LESSTHAN 0
 double Sobel(double *src,double *dst,double *edgedriction,int width,int height,int sobel_size);
+double Scharr(double *src,double *dst,double *edgedriction,int width,int height);
 double Laplace(double *src,double *dst,int width,int height);
-double Robert(double *src,double *dst,int width,int height);
+double Robert(double *src,double *dst,double *edgedriction,int width,int height);
 double Prewitt(double *src,double *dst,int width,int height);
 double Kirsch(double *src,double *dst,int width,int height);
 void Canny(double *src,double *dst,int width,int height,int sobel_size,double threshold1,double threshold2);
 double LoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta);
-double DoG();
+double DoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta1,double deta2);
 void Threshold(double *src,double *dst,int width,int height,double threshold,int type);
 void EdgeDetection(double *src,double *dst,int width,int height,int detector,double threshold,int m_width,int m_height,double deta);
+void getEdgeAngle(double *src_x,double *src_y,double *edgeAngle,int width,int height);
+//////////////////////////test///////////////////////////
+/////////////////////////////////////////////////////////
+void getV_HBoundary(double *src,double *dst,int width,int height,double v_threshold,double a_threshold,int isVertical);
 #endif

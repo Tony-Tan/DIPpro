@@ -4,6 +4,7 @@
 #include "convolution.h"
 #include "smooth.h"
 #include "mathematic.h"
+#include "Segment.h"
 #define SHARPEN_LAP_0 0
 #define SHARPEN_LAP_1 1
 #define SHARPEN_LAP_2 2

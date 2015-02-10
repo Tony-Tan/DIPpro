@@ -73,7 +73,7 @@ void SobelSharpen(double *src,double *dst,int width,int height,double c){
 
 
 void SobelSharpen(double *src,double *dst,int width,int height,double c){
-    Sobel(src,dst,width,height);
+    Sobel(src,dst,NULL,width,height,3);
     for(int j=0;j<height;j++)
         for(int i=0;i<width;i++){
             dst[j*width+i]=src[j*width+i]+c*dst[j*width+i];
