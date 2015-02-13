@@ -29,10 +29,9 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     
     IplImage *src =cvLoadImage("/Users/Tony/DIPImage/edge_b.jpg", 0);
-    IplImage *dst1 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    IplImage *dst2 =cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    
     int width=src->width, height=src->height;
-    printf("%d,%d",width,height);
+    //printf("%d,%d",width,height);
     double* srcarry=(double *)malloc(sizeof(double)*src->width*src->height);
     double* dst1arry=(double *)malloc(sizeof(double)*src->width*src->height);
     double* dst2arry=(double *)malloc(sizeof(double)*src->width*src->height);
@@ -80,27 +79,31 @@ int main(int argc, const char * argv[]) {
     //Sobel(srcarry, dst1arry, src->width,src->height);
     //RobertSharpen(srcarry, dst1arry, src->width, src->height, 1);
     //Robert(srcarry, dst1arry, width,height);
-    //EdgeDetection(srcarry ,dst2arry,width,height,EDGE_DETECTOR_SOBEL,0.1,0,0,5);
+    //EdgeDetection(srcarry ,dst1arry,width,height,EDGE_DETECTOR_SOBEL,0.490291,0,0,-1);
     
-    //LoG(srcarry,dst1arry,width,height,15,15,2);
+    LoG(srcarry,dst1arry,width,height,11,11,1.5,0);
     //Scharr(srcarry, dst1arry, NULL, width, height);
     //Canny(srcarry, dst2arry,width,height,3,30,10);
     //Sobel(srcarry, dst2arry, NULL,width,height , 3);
-    Canny(srcarry, dst1arry, width, height,5,40, 20);
-    //getV_HBoundary(srcarry,dst1arry,width,height,10,20,1);
-    //DoG(srcarry,dst2arry,width,height,5,5,0.8,0.6);
+    //Canny(srcarry, dst1arry, width, height,3,200, 150);
+    //Prewitt(srcarry, dst1arry, width, height);
+    //Scharr(srcarry, dst2arry, NULL, width, height);
+    //getV_HBoundary(srcarry,dst2arry,width,height,10,20,1);
+    //DoG(srcarry,dst2arry,width,height,5,5,0.7,10);
     //HistogramEqualization(dst2arry, dst2arry, width, height);
-    for (int j=0;j<src->height; j++) {
-        for(int i=0;i<src->width;i++)
+    IplImage *dst1 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
+    
+    for (int j=0;j<height; j++) {
+        for(int i=0;i<width;i++)
             cvSetReal2D(dst1, j, i,dst1arry[j*src->width+i]);
     }
-    for (int j=0;j<src->height; j++) {
-        for(int i=0;i<src->width;i++)
+    //cvSaveImage("/Users/Tony/DIPImage/scharr_t0_490291.jpg", dst1, 0);
+    IplImage *dst2 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
+    for (int j=0;j<height; j++) {
+        for(int i=0;i<width;i++)
             cvSetReal2D(dst2, j, i,dst2arry[j*src->width+i]);
     }
-    
-    //cvSaveImage("/Users/Tony/DIPImage/scharr_r.jpg", dst1, 0);
-    //cvSaveImage("/Users/Tony/DIPImage/sobel_r.jpg", dst2, 0);
+    cvSaveImage("/Users/Tony/DIPImage/log_1111150.jpg", dst1, 0);
     
     //cvCanny(src, dst2, 200, 150,3);
     //Thinning(dst2, dst2);

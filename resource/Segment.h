@@ -31,8 +31,8 @@ double Robert(double *src,double *dst,double *edgedriction,int width,int height)
 double Prewitt(double *src,double *dst,int width,int height);
 double Kirsch(double *src,double *dst,int width,int height);
 void Canny(double *src,double *dst,int width,int height,int sobel_size,double threshold1,double threshold2);
-double LoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta);
-double DoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta1,double deta2);
+double LoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta,double threshold);
+double DoG(double *src,double *dst,int width,int height,int m_width,int m_height,double delta,double threshold);
 void Threshold(double *src,double *dst,int width,int height,double threshold,int type);
 void EdgeDetection(double *src,double *dst,int width,int height,int detector,double threshold,int m_width,int m_height,double deta);
 void getEdgeAngle(double *src_x,double *src_y,double *edgeAngle,int width,int height);

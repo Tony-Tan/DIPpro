@@ -64,9 +64,11 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
     //double SobelMask_x[3]={-1,-2,-1,0,0,0,1,2,1};
     double *dst_x=(double *)malloc(sizeof(double)*width*height);
     double *dst_y=(double *)malloc(sizeof(double)*width*height);
-    
-    if(sobel_size==3){
-        double SobelMask1[3]={0.25,0.5,0.25};
+    if(sobel_size==-1){
+        return Scharr(src, dst, edgedriction, width, height);
+    }
+    else if(sobel_size==3){
+        double SobelMask1[3]={1,2,1};
         double SobelMask2[3]={1,0,-1};
         RealConvolution(src, dst_y, SobelMask2, width, height, 1, 3 );
         RealConvolution(dst_y, dst_y,SobelMask1, width, height, 3, 1);
@@ -76,8 +78,8 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
     
        
     }else if(sobel_size==5){
-        double SobelMask1[5]={0.0625,0.25,0.375,0.25,0.0625};
-        double SobelMask2[5]={1/3.0,2/3.0,0,-2/3.0,-1/3.0};
+        double SobelMask1[5]={1,4,6,4,1};
+        double SobelMask2[5]={1,2,0,-2,-1};
         RealConvolution(src, dst_x, SobelMask1, width, height, 1, 5);
         RealConvolution(dst_x, dst_x, SobelMask2, width, height, 5, 1);
         
@@ -85,8 +87,8 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
         RealConvolution(dst_y, dst_y, SobelMask1, width, height, 5, 1);
     
     }else if(sobel_size==7){
-        double SobelMask1[7]={0.015625,0.09375,0.234375,0.3125,0.234375,0.09375,0.015625};
-        double SobelMask2[7]={0.1,0.4,0.5,0,-0.5,-0.4,-0.1};
+        double SobelMask1[7]={1,6,15,20,15,6,1};
+        double SobelMask2[7]={1,0.4,5,0,-5,-4,-1};
         RealConvolution(src, dst_x, SobelMask1, width, height, 1, 7);
         RealConvolution(dst_x, dst_x, SobelMask2, width, height, 7, 1);
         
@@ -117,7 +119,7 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 double Scharr(double *src,double *dst,double *edgedriction,int width,int height){
-    double ScharrMask1[3]={0.1875,0.625,0.1875};
+    double ScharrMask1[3]={3,10,3};
     double ScharrMask2[3]={1,0,-1};
     double *dst_x=(double *)malloc(sizeof(double)*width*height);
     double *dst_y=(double *)malloc(sizeof(double)*width*height);
@@ -143,7 +145,7 @@ double Scharr(double *src,double *dst,double *edgedriction,int width,int height)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-
+//拉普拉斯算子
 double Laplace(double *src,double *dst,int width,int height){
     double LaplaceMask[9]={-1,-1,-1,-1,8,-1,-1,-1,-1};
     RealRelevant(src, dst, LaplaceMask, width, height, LAPLACE_MASK_SIZE, LAPLACE_MASK_SIZE);
@@ -151,8 +153,9 @@ double Laplace(double *src,double *dst,int width,int height){
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
+//Prewitt算子
 double Prewitt(double *src,double *dst,int width,int height){
-    double PrewittMask1[3]={1.0/3.0,1.0/3.0,1.0/3.0};
+    double PrewittMask1[3]={1.0,1.0,1.0};
     double PrewittMask2[3]={-1.0,0.0,1.0};
     double *dst_x=(double *)malloc(sizeof(double)*width*height);
     double *dst_y=(double *)malloc(sizeof(double)*width*height);
@@ -172,6 +175,7 @@ double Prewitt(double *src,double *dst,int width,int height){
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
+//Kirsch算子
 double Kirsch(double *src,double *dst,int width,int height){
     double KirschMask[8][9]={{-3,-3,-3,
                           -3, 0, 5,
@@ -212,53 +216,115 @@ double Kirsch(double *src,double *dst,int width,int height){
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-void findCross(double *src,double *dst,int width,int height){
+//3x3的邻域内，如果中心像素大于阈值，切周围存在负像素值，则此点为0交叉点
+void findCross(double *src,double *dst,int width,int height,double threshold){
     double *dsttemp=(double *)malloc(sizeof(double)*width*height);
     Zero(dst, width, height);
     double c_value=0.0;
     int flag=1;
+    Zero(dsttemp, width, height);
     for(int j=1;j<height-1;j++){
         for(int i=1;i<width-1;i++){
             c_value=src[j*width+i];
             flag=1;
             for(int m=-1;m<=1&&flag;m++)
                 for(int n=-1;n<=1;n++){
-                    if(c_value>0&&src[(j+m)*width+i+n]<0.0){
+                    if(c_value>threshold&&src[(j+m)*width+i+n]<-0.1){
                         flag=0;
-                        dsttemp[j*width+i]=c_value;
+                        dsttemp[j*width+i]=255.0;
                         break;
                     }
+                    
                 }
         }
     }
     matrixCopy(dsttemp, dst,width, height);
+    free(dsttemp);
 
 
 }
-double LoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta){
+//得到LoG模板，根据公式得出double型模板，然后调整整体位置，使模板内系数和为0
+void getLoGMask(double *mask,int width,int height,double delta){
+    int center_x=width/2;
+    int center_y=height/2;
+    double x,y;
+    for(int j=0;j<height;j++){
+        for(int i=0;i<width;i++){
+            x=i-center_x;
+            y=j-center_y;
+            mask[j*width+i]=-((x*x+y*y-2*delta*delta)/pow(delta,4))*(exp(-(x*x+y*y)/(2*delta*delta)));
+            
+        }
+    
+    }
+
+    double sum=0.0;
+    for(int i=0;i<width*height;i++){
+        sum+=mask[i];
+    }
+    double di=sum/(double)(width*height);
+    for(int i=0;i<width*height;i++){
+        mask[i]-=di;
+    }
+
+}
+
+//LoG边缘检测完整过程，
+//生成模板
+//与图像卷积
+//寻找0交叉
+double LoG(double *src,double *dst,int width,int height,int m_width,int m_height,double delta,double threshold){
     double *dsttemp=(double *)malloc(sizeof(double)*width*height);
-    GaussianFilter(src,dsttemp,width,height, m_width, m_height, deta);
-    Laplace(dsttemp,dsttemp, width, height);
-    matrixCopy(dsttemp, dst, width, height);
-    findCross(dst, dst, width, height);
+    double * mask=(double *)malloc(sizeof(double)*m_width*m_height);
+    getLoGMask(mask, m_width,m_height,delta);
+    RealConvolution(src, dsttemp, mask, width, height, m_width, m_height);
+    findCross(dsttemp,dst,width,height,threshold);
     free(dsttemp);
+    free(mask);
     return findMatrixMax(dst,width,height);
     
 }
-double DoG(double *src,double *dst,int width,int height,int m_width,int m_height,double deta1,double deta2){
-    double *dsttemp=(double *)malloc(sizeof(double)*width*height);
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+//生成DoG模板
+//使用两个高斯模板做差
+void getDoGMask(double *mask,int width,int height,double delta){
     double *mask1=(double *)malloc(sizeof(double)*width*height);
     double *mask2=(double *)malloc(sizeof(double)*width*height);
-    GaussianMask(mask1, m_width, m_height, deta1);
-    GaussianMask(mask2, m_width, m_height, deta2);
-    if(deta1>deta2)
-        matrixSub(mask2, mask1, mask1, m_width, m_height);
-    else
-        matrixSub(mask1, mask2, mask1, m_width, m_height);
-    RealConvolution(src, dsttemp, mask1, width, height, m_width, m_height);
-    findCross(dsttemp, dsttemp, width, height);
-    matrixCopy(dsttemp, dst, width, height);
+    GaussianMask(mask1, width, height, delta);
+    GaussianMask(mask2, width, height, delta*1.6);
+    matrixMultreal(mask1, mask1, delta*2*M_PI, width, height);
+    matrixMultreal(mask2, mask2, delta*3.2*M_PI, width, height);
+    matrixSub( mask2,mask1, mask1, width, height);
+    double sum=0.0;
+    for(int i=0;i<width*height;i++){
+        sum+=mask1[i];
+       
+    }
+    double di=sum/(double)(width*height);
+    for(int i=0;i<width*height;i++){
+        mask1[i]-=di;
+    }
+    matrixCopy(mask1, mask, width, height);
+    //matrixMultreal(mask, mask, 10, width, height);
+    free(mask1);
+    free(mask2);
+    
+}
+//DoG完整过程
+//生成DoG模板
+//卷积
+//寻找零交叉
+double DoG(double *src,double *dst,int width,int height,int m_width,int m_height,double delta,double threshold){
+    double *dsttemp=(double *)malloc(sizeof(double)*width*height);
+    double * mask=(double *)malloc(sizeof(double)*m_width*m_height);
+    getDoGMask(mask, m_width,m_height,delta);
+    RealConvolution(src, dsttemp, mask, width, height, m_width, m_height);
+    findCross(dsttemp, dst, width, height,threshold);
     free(dsttemp);
+    free(mask);
     return findMatrixMax(dst,width,height);
     
 }
@@ -309,7 +375,7 @@ void EdgeDetection(double *src,double *dst,int width,int height,int detector,dou
         }
         case EDGE_DETECTOR_LOG:
         {
-            maxvalue=LoG(src, dst, width, height,m_width,m_height,deta);
+            maxvalue=LoG(src, dst, width, height,m_width,m_height,deta,threshold);
             Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
             break;
         }
@@ -419,16 +485,36 @@ void Canny(double *src,double *dst,int width,int height,int sobel_size,double th
     double *edge_d=(double *)malloc(sizeof(double)*width*height);//边缘方向
     double *threshold_max=(double *)malloc(sizeof(double)*width*height);
     double *threshold_min=(double *)malloc(sizeof(double)*width*height);
+/*********************************************************************
+ *step1:gaussian smooth
+ *********************************************************************/
+    double gaussianmask[25]={ 2, 4, 5, 4, 2,
+                              4, 9,12, 9, 4,
+                              5,12,15,12, 5,
+                              4, 9,12, 9, 4,
+                              2, 4, 5, 4, 2};
+    RealConvolution(src, temp, gaussianmask, width, height, 5, 5);
+    matrixMultreal(temp, temp, 1.0/159.0, width, height);
+/*********************************************************************
+ *step2:sobel
+ *********************************************************************/
     if(sobel_size==3)
-        Scharr(src, edge_a, edge_d, width, height);
+        Scharr(temp, edge_a, edge_d, width, height);
     else if(sobel_size==5||sobel_size==7)
-        Sobel(src, edge_a, edge_d, width, height,sobel_size);
+        Sobel(temp, edge_a, edge_d, width, height,sobel_size);
+/*********************************************************************
+ *step3:Non_MaxSuppression
+ *********************************************************************/
     getEdgeDirection(edge_d, edge_d, width, height);
     Non_MaxSuppression(edge_a, temp, edge_d, width, height);
+ /*********************************************************************
+ *step4:double threshold
+ *********************************************************************/
     Threshold(temp, threshold_max, width, height, threshold1, MORETHAN);
     Threshold(temp, threshold_min, width, height, threshold2, MORETHAN);
     NonZeroSetOne(threshold_max,threshold_max,width,height);
     NonZeroSetOne(threshold_min,threshold_min,width,height);
+    
     for(int j=0;j<height;j++){
         for(int i=0;i<width;i++){
             if(threshold_max[j*width+i]==1.0&&threshold_min[j*width+i]!=2.0){
@@ -440,6 +526,10 @@ void Canny(double *src,double *dst,int width,int height,int sobel_size,double th
         
         }
     }
+/*********************************************************************
+ *step5:result
+*********************************************************************/
+    Zero(dst, width, height);
     for(int i=0;i<width*height;i++)
         if(threshold_min[i]==2.0)
             dst[i]=255.0;
@@ -452,6 +542,7 @@ void Canny(double *src,double *dst,int width,int height,int sobel_size,double th
 }
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
+//垂直边界或水平边界
 void BoundaryDetection(double *src,double *dst,double *angle,int width,int height,double v_threshold,double a_threshold,int isVertical){
     double angle_value=0.0;
     double pix_value=0.0;
@@ -485,7 +576,6 @@ void getV_HBoundary(double *src,double *dst,int width,int height,double v_thresh
     free(dst_v);
     free(dst_d);
     free(temp);
-
 }
 
 
