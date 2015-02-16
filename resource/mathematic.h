@@ -36,7 +36,7 @@ void matrixAdd(double *src1,double *src2,double *dst,int width,int height);
 void matrixSub(double *src1,double *src2,double *dst,int width,int height);
 void matrixCopy(double *src,double *dst,int width,int height);
 void matrixMultreal(double *src,double *dst,double k,int width,int height);
-
+double findMatrixMax(double *src,int width,int height);
 
 //找出两幅等大图像中同一位置中相对较大的像素值
 void MaxPix(double *src1 ,double *src2,double *dst,int width,int height);

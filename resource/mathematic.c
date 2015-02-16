@@ -89,6 +89,12 @@ void matrixMultreal(double *src,double *dst,double k,int width,int height){
     for(int i=0;i<width*height;i++)
         dst[i]=src[i]*k;
 }
+double findMatrixMax(double *src,int width,int height){
+    double max=-1.0;
+    for(int i=0;i<width*height;i++)
+        max=src[i]>max?src[i]:max;
+    return max;
+}
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
