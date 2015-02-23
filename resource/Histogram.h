@@ -6,4 +6,9 @@
 #define GRAY_LEVEL 256
 void HistogramEqualization(double *src,double *dst,int width,int height);
 void HistogramSpecification(double *src,double *dst,int* hist,int width,int height);
+void setHistogram(double *src,int *hist,int width,int height);
+void InitHistogram(int *hist);
+void setHistogram(double *src,int *hist,int width,int height);
+int findHistogramMax(int *hist);
+int findHistogramMin(int *hist);
 #endif

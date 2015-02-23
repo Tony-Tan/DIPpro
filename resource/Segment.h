@@ -4,6 +4,7 @@
 #include "convolution.h"
 #include "smooth.h"
 #include "mathematic.h"
+#include "Threshold.h"
 #define SHARPEN_LAP_0 0
 #define SHARPEN_LAP_1 1
 #define SHARPEN_LAP_2 2
@@ -22,8 +23,7 @@
 #define EDGE_DETECTOR_DOG 6
 #define EDGE_DETECTOR_LAPLACE 7
 #define EDGE_DETECTOR_CANNY 8
-#define MORETHAN 1
-#define LESSTHAN 0
+
 double Sobel(double *src,double *dst,double *edgedriction,int width,int height,int sobel_size);
 double Scharr(double *src,double *dst,double *edgedriction,int width,int height);
 double Laplace(double *src,double *dst,int width,int height);

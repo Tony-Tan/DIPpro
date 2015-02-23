@@ -327,16 +327,7 @@ double DoG(double *src,double *dst,int width,int height,int m_width,int m_height
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-void Threshold(double *src,double *dst,int width,int height,double threshold,int type){
-    if(type==MORETHAN){
-        for(int i=0;i<width*height;i++)
-            dst[i]=src[i]>threshold?src[i]:0.0;
-    }else if(type==LESSTHAN){
-        for(int i=0;i<width*height;i++)
-            dst[i]=src[i]<threshold?src[i]:0.0;
-    }
 
-}
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,37 +338,37 @@ void EdgeDetection(double *src,double *dst,int width,int height,int detector,dou
         case EDGE_DETECTOR_ROBERT:
         {
             maxvalue=Robert(src, dst,NULL, width, height);
-            Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
             break;
         }
         case EDGE_DETECTOR_PREWITT:
         {
             maxvalue=Prewitt(src, dst, width, height);
-            Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
             break;
         }
         case EDGE_DETECTOR_SOBEL:
         {
             maxvalue=Sobel(src, dst,NULL, width, height,(int)deta);
-            Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
             break;
         }
         case EDGE_DETECTOR_KIRSCH:
         {
             maxvalue=Kirsch(src, dst, width, height);
-            Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
             break;
         }
         case EDGE_DETECTOR_LOG:
         {
             maxvalue=LoG(src, dst, width, height,m_width,m_height,deta,threshold);
-            Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
             break;
         }
         case EDGE_DETECTOR_LAPLACE:
         {
             maxvalue=Laplace(src, dst, width, height);
-            Threshold(dst, dst, width, height, maxvalue*threshold, MORETHAN);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
             break;
         }
         default:
@@ -505,8 +496,8 @@ void Canny(double *src,double *dst,int width,int height,int sobel_size,double th
  /*********************************************************************
  *step4:double threshold
  *********************************************************************/
-    Threshold(temp, threshold_max, width, height, threshold1, MORETHAN);
-    Threshold(temp, threshold_min, width, height, threshold2, MORETHAN);
+    Threshold(temp, threshold_max, width, height, threshold1, THRESHOLD_TYPE1);
+    Threshold(temp, threshold_min, width, height, threshold2, THRESHOLD_TYPE1);
     NonZeroSetOne(threshold_max,threshold_max,width,height);
     NonZeroSetOne(threshold_min,threshold_min,width,height);
     
