@@ -30,7 +30,7 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.jpg", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/threshold.jpg", 0);
     
     int width=src->width, height=src->height;
     //printf("%d,%d",width,height);
@@ -47,11 +47,11 @@ int main(int argc, const char * argv[]) {
     
     
     //MeanThreshold(srcarry,dst1arry,width,height,THRESHOLD_TYPE1);
-    PtileThreshold(srcarry, dst2arry, 0.7, width, height, THRESHOLD_TYPE3);
-    IterativeThreshold(srcarry, dst1arry, 1, width, height, THRESHOLD_TYPE3);
-    
-    
-    
+    //PtileThreshold(srcarry, dst2arry, 0.7, width, height, THRESHOLD_TYPE3);
+    //IterativeThreshold(srcarry, dst1arry, 1, width, height, THRESHOLD_TYPE3);
+    ValleyBottomThreshold(srcarry,dst2arry,width,height,THRESHOLD_TYPE3);
+    MeanDoubleHumpThreshold(srcarry, dst1arry, width, height, THRESHOLD_TYPE3);
+    /////////////////////////////////////////////////////////////////
     IplImage *dst1 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     
     for (int j=0;j<height; j++) {

@@ -98,3 +98,151 @@ void IterativeThreshold(double *src,double *dst,double deta_t,int width,int heig
     }
     Threshold(src,dst, width, height, threshold_value,type);
 }
+/*********************************************************************************/
+/*********************************************************************************/
+/*双峰型直方图，经过直方图平滑后呈现出双峰后找出谷底，以此值为阈值划分灰度值
+ *平滑直方图采用1/4[1 2 1]的模板
+ *判断是否是双峰采用1阶微分，判断正负性
+ *直方图非双峰不能使用该方法。
+ */
+
+//直方图从int转换为double
+void Hist_int2double(int *hist,double *hist_d){
+    for(int i=0;i<GRAY_LEVEL;i++)
+        hist_d[i]=(double)hist[i];
+}
+//平滑直方图，是指呈现双峰形状
+void SmoothHist(double *hist,double *dsthist){
+    double *histtemp=(double *)malloc(sizeof(double)*GRAY_LEVEL);
+    histtemp[0]=0.0;
+    histtemp[GRAY_LEVEL]=0.0;
+    for(int i=0;i<GRAY_LEVEL;i++)
+        histtemp[i]=hist[i];
+    for(int i=1;i<GRAY_LEVEL-1;i++){
+        histtemp[i]=0.25*histtemp[i-1]+0.5*histtemp[i]+0.25*histtemp[i+1];
+    }
+    for(int i=0;i<GRAY_LEVEL;i++)
+        dsthist[i]=histtemp[i];
+    free(histtemp);
+}
+//判断是否是双峰直方图，如果是返回谷底，否则返回0
+//#define DOUBLEHUMP_BOTTOM 1
+//#define DOUBLEHUMP_MEANHUMP 2
+int isDoubleHump(double *hist,int returnvalue){
+    double * diffHist=(double *)malloc(sizeof(double)*GRAY_LEVEL);
+    int * statusHist=(int *)malloc(sizeof(int)*GRAY_LEVEL);
+    for(int i=1;i<GRAY_LEVEL-1;i++){
+        diffHist[i]=hist[i+1]-hist[i];
+    }
+    for(int i=1;i<GRAY_LEVEL;i++){
+        if(diffHist[i]>0)
+            statusHist[i]=1;
+        else if(diffHist[i]<0)
+            statusHist[i]=-1;
+        else if(diffHist[i]==0&&statusHist[i-1]>0)
+            statusHist[i]=1;
+        else if(diffHist[i]==0&&statusHist[i-1]<0)
+            statusHist[i]=-1;
+    }
+/*1st order:
+ *______________                ________________
+ *              |              |
+ *              |              |
+ *              |______________|
+ *status:       1             -1
+ *hist:
+ *0 0 0 0 0 0 0 1 0 0 0 0 0 0 -1 0 0 0 0 0 0 0 0
+ */
+    for(int i=0;i<GRAY_LEVEL-1;i++)
+        if(statusHist[i]*statusHist[i+1]<0){
+            if(statusHist[i]>0)
+                statusHist[i]=1;
+            else if(statusHist[i]<0)
+                statusHist[i]=-1;
+        }else{
+            statusHist[i]=0;
+        }
+    statusHist[GRAY_LEVEL-1]=0;
+ /*double hump diff:
+  *______________                _______________
+  *              |              |               |
+  *              |              |               |
+  *              |______________|               |______________
+  *status:       1             -1               1
+  *             top           bottom           top
+  *0 0 0 0 0 0 0 1 0 0 0 0 0 0 -1 0 0 0 0 0 0 0 1 0 0 0 0
+  *the arry test store nonzero
+  */
+    int test[4]={0,0,0,0};
+    int test_num=0;
+    for(int i=0;i<GRAY_LEVEL;i++){
+        if(statusHist[i]!=0){
+            test[test_num]=statusHist[i];
+            if(test_num>=3){
+                free(diffHist);
+                free(statusHist);
+                return 0;
+            }
+            test_num++;
+        }
+    }
+    
+    if(test_num==3&&test[0]==1&&test[1]==-1&&test[2]==1){
+        if(returnvalue==DOUBLEHUMP_BOTTOM){
+            for(int i=0;i<GRAY_LEVEL;i++)
+                if(statusHist[i]==-1){
+                    free(diffHist);
+                    free(statusHist);
+                    return i;
+                }
+        }else if(returnvalue==DOUBLEHUMP_MEANHUMP){
+            int hump[2];
+            for(int i=0,k=0;i<GRAY_LEVEL;i++)
+                if(statusHist[i]==1){
+                    hump[k]=i;
+                    k++;
+                }
+            free(diffHist);
+            free(statusHist);
+            return (hump[0]+hump[1])/2;
+        }
+    }
+    free(diffHist);
+    free(statusHist);
+    return 0;
+}
+//谷底法阈值分割，适用于
+void ValleyBottomThreshold(double *src,double *dst,int width,int height,int type){
+    int *hist=(int *)malloc(sizeof(int)*GRAY_LEVEL);
+    double *hist_d=(double *)malloc(sizeof(double)*GRAY_LEVEL);
+    setHistogram(src, hist, width, height);
+    Hist_int2double(hist, hist_d);
+    double threshold=0.0;
+#define MAXLOOP 1000
+    for(int i=0;i<MAXLOOP;i++){
+        SmoothHist(hist_d, hist_d);
+        if(0.0!=(threshold = (double)isDoubleHump(hist_d,DOUBLEHUMP_BOTTOM))){
+            Threshold(src, dst, width, height, threshold, type);
+            break;
+        }
+    }
+
+}
+void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int type){
+    int *hist=(int *)malloc(sizeof(int)*GRAY_LEVEL);
+    double *hist_d=(double *)malloc(sizeof(double)*GRAY_LEVEL);
+    setHistogram(src, hist, width, height);
+    Hist_int2double(hist, hist_d);
+    double threshold=0.0;
+    for(int i=0;i<MAXLOOP;i++){
+        SmoothHist(hist_d, hist_d);
+        if(0.0!=(threshold = (double)isDoubleHump(hist_d,DOUBLEHUMP_MEANHUMP))){
+            Threshold(src, dst, width, height, threshold, type);
+            break;
+        }
+    }
+    
+}
+
+
+
