@@ -33,4 +33,5 @@ void Hist_int2double(int *hist,double *hist_d);
 void SmoothHist(double *hist,double *dsthist);
 int isDoubleHump(double *hist,int returnvalue);
 void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int type);
+void OTSUThreshold(double *src,double *dst,int width,int height,int type);
 #endif

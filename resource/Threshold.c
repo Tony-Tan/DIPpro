@@ -211,7 +211,7 @@ int isDoubleHump(double *hist,int returnvalue){
     free(statusHist);
     return 0;
 }
-//谷底法阈值分割，适用于
+//谷底法阈值分割，适用于直方图是双峰的。
 void ValleyBottomThreshold(double *src,double *dst,int width,int height,int type){
     int *hist=(int *)malloc(sizeof(int)*GRAY_LEVEL);
     double *hist_d=(double *)malloc(sizeof(double)*GRAY_LEVEL);
@@ -244,5 +244,51 @@ void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int ty
     
 }
 
+////OTSU 算法
+void setHist2One(double *hist_d,double *dst_hist_d){
+    double sum=0.0;
+    for(int i=0;i<GRAY_LEVEL;i++)
+        sum+=hist_d[i];
+    if(sum!=0)
+        for(int i=0;i<GRAY_LEVEL;i++)
+            dst_hist_d[i]=hist_d[i]/sum;
+    
+}
+double findMaxDeta(double *hist_d){
+    double max_deta=-1.0;
+    double max_deta_location=0.0;
+    double m_g=0.0;
+    
+    for(int i=0;i<GRAY_LEVEL;i++)
+        m_g+=i*hist_d[i];
+    
+    
+    for(int i=0;i<GRAY_LEVEL;i++){
+        double p1=0.0;
+        double m1=0.0;
+        double deta=0.0;
+        for(int j=0;j<i;j++){
+            p1+=hist_d[j];
+            m1+=j*hist_d[j];
+        }
+        deta=p1*(m1-m_g)*(m1-m_g)/(1-p1);
+        if(deta>max_deta){
+            max_deta_location=i;
+            max_deta=deta;
+        }
+    }
+    return max_deta_location;
+}
+void OTSUThreshold(double *src,double *dst,int width,int height,int type){
+    int hist[GRAY_LEVEL];
+    double hist_d[GRAY_LEVEL];
+    setHistogram(src, hist, width, height);
+    Hist_int2double(hist, hist_d);
+    setHist2One(hist_d, hist_d);
+    double threshold=findMaxDeta(hist_d);
+    
+    Threshold(src, dst, width, height, threshold, type);
 
+
+}
 
