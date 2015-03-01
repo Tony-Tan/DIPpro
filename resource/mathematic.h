@@ -47,5 +47,5 @@ void MinPix(double *src1 ,double *src2,double *dst,int width,int height);
 //将图像全部设置为1
 void One(double *src,int width,int height);
 void Zero(double *src,int width,int height);
-
+void Mask(double *src,double *dst,double *mask,int width,int height);
 #endif

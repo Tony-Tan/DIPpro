@@ -6,7 +6,7 @@
 //
 
 #include "mathematic.h"
-
+#include <stdio.h>
 int isBase2(int size_n){
     int k=size_n;
     int z=0;
@@ -124,3 +124,12 @@ void Zero(double *src,int width,int height){
     for(int i=0;i<width*height;i++)
         src[i]=0.0;
 }
+void Mask(double *src,double *dst,double *mask,int width,int height){
+    Zero(dst, width, height);
+    for(int i=0;i<height*width;i++){
+        if(mask[i]==255.0){
+            dst[i]=src[i];
+        }
+    }
+}
+

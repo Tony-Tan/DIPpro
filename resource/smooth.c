@@ -254,7 +254,6 @@ void BilateralFilter(double *src,double *dst,int width,int height,int m_width,in
                     window[(m+m_height/2)*m_width+n+m_width/2]=src[(j+m)*width+i+n];
             }
             double value=BilateralWindow(window,m_width,m_height,deta_d,deta_r);
-            //cvSetReal2D(dst, j, i, value);
             dst[j*width+i]=value;
         }
     }

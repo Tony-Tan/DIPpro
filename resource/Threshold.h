@@ -23,6 +23,7 @@
 #define DOUBLEHUMP_MEANHUMP 2
 #include "Histogram.h"
 #include "mathematic.h"
+#include "Segment.h"
 #include <stdlib.h>
 void Threshold(double *src,double *dst,int width,int height,double threshold,int type);
 void MeanThreshold(double *src,double *dst,int width,int height,int type);
@@ -34,4 +35,6 @@ void SmoothHist(double *hist,double *dsthist);
 int isDoubleHump(double *hist,int returnvalue);
 void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int type);
 void OTSUThreshold(double *src,double *dst,int width,int height,int type);
+//void CannyThreshold(double *src,double *dst,int width,int height,double threshold1,double threshold2,int type);
+void LoGThreshold(double *src,double *dst,int width,int height,double threshold,int type);
 #endif

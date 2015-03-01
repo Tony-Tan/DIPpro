@@ -63,7 +63,7 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
         return Scharr(src, dst, edgedriction, width, height);
     }
     else if(sobel_size==3){
-        double SobelMask1[3]={1,2,1};
+        double SobelMask1[3]={0.25,0.5,0.25};
         double SobelMask2[3]={1,0,-1};
         RealConvolution(src, dst_y, SobelMask2, width, height, 1, 3 );
         RealConvolution(dst_y, dst_y,SobelMask1, width, height, 3, 1);
@@ -73,8 +73,8 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
     
        
     }else if(sobel_size==5){
-        double SobelMask1[5]={1,4,6,4,1};
-        double SobelMask2[5]={1,2,0,-2,-1};
+        double SobelMask1[5]={1/16.,4/16.,6/16.,4/16.,1/16.};
+        double SobelMask2[5]={1/3.,2/3.,0,-2/3.,-1/3.};
         RealConvolution(src, dst_x, SobelMask1, width, height, 1, 5);
         RealConvolution(dst_x, dst_x, SobelMask2, width, height, 5, 1);
         
@@ -82,8 +82,8 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
         RealConvolution(dst_y, dst_y, SobelMask1, width, height, 5, 1);
     
     }else if(sobel_size==7){
-        double SobelMask1[7]={1,6,15,20,15,6,1};
-        double SobelMask2[7]={1,0.4,5,0,-5,-4,-1};
+        double SobelMask1[7]={1/64.,6/64.,15/64.,20/64.,15/64.,6/64.,1/64.};
+        double SobelMask2[7]={0.1,0.4,0.5,0,-0.5,-0.4,-0.1};
         RealConvolution(src, dst_x, SobelMask1, width, height, 1, 7);
         RealConvolution(dst_x, dst_x, SobelMask2, width, height, 7, 1);
         
@@ -338,37 +338,37 @@ void EdgeDetection(double *src,double *dst,int width,int height,int detector,dou
         case EDGE_DETECTOR_ROBERT:
         {
             maxvalue=Robert(src, dst,NULL, width, height);
-            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE3);
             break;
         }
         case EDGE_DETECTOR_PREWITT:
         {
             maxvalue=Prewitt(src, dst, width, height);
-            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE3);
             break;
         }
         case EDGE_DETECTOR_SOBEL:
         {
             maxvalue=Sobel(src, dst,NULL, width, height,(int)deta);
-            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE3);
             break;
         }
         case EDGE_DETECTOR_KIRSCH:
         {
             maxvalue=Kirsch(src, dst, width, height);
-            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE3);
             break;
         }
         case EDGE_DETECTOR_LOG:
         {
             maxvalue=LoG(src, dst, width, height,m_width,m_height,deta,threshold);
-            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE3);
             break;
         }
         case EDGE_DETECTOR_LAPLACE:
         {
             maxvalue=Laplace(src, dst, width, height);
-            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE1);
+            Threshold(dst, dst, width, height, maxvalue*threshold, THRESHOLD_TYPE3);
             break;
         }
         default:

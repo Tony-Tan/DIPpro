@@ -131,6 +131,7 @@ void SmoothHist(double *hist,double *dsthist){
 int isDoubleHump(double *hist,int returnvalue){
     double * diffHist=(double *)malloc(sizeof(double)*GRAY_LEVEL);
     int * statusHist=(int *)malloc(sizeof(int)*GRAY_LEVEL);
+    diffHist[0]=0.0;
     for(int i=1;i<GRAY_LEVEL-1;i++){
         diffHist[i]=hist[i+1]-hist[i];
     }
@@ -139,7 +140,7 @@ int isDoubleHump(double *hist,int returnvalue){
             statusHist[i]=1;
         else if(diffHist[i]<0)
             statusHist[i]=-1;
-        else if(diffHist[i]==0&&statusHist[i-1]>0)
+        else if(diffHist[i]==0&&statusHist[i-1]>=0)
             statusHist[i]=1;
         else if(diffHist[i]==0&&statusHist[i-1]<0)
             statusHist[i]=-1;
@@ -153,7 +154,7 @@ int isDoubleHump(double *hist,int returnvalue){
  *hist:
  *0 0 0 0 0 0 0 1 0 0 0 0 0 0 -1 0 0 0 0 0 0 0 0
  */
-    for(int i=0;i<GRAY_LEVEL-1;i++)
+    for(int i=1;i<GRAY_LEVEL-1;i++)
         if(statusHist[i]*statusHist[i+1]<0){
             if(statusHist[i]>0)
                 statusHist[i]=1;
@@ -175,7 +176,7 @@ int isDoubleHump(double *hist,int returnvalue){
   */
     int test[4]={0,0,0,0};
     int test_num=0;
-    for(int i=0;i<GRAY_LEVEL;i++){
+    for(int i=1;i<GRAY_LEVEL;i++){
         if(statusHist[i]!=0){
             test[test_num]=statusHist[i];
             if(test_num>=3){
@@ -228,6 +229,7 @@ void ValleyBottomThreshold(double *src,double *dst,int width,int height,int type
     }
 
 }
+//与谷底法类似，不是使用最小谷底值，而是使用峰值位置平均值
 void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int type){
     int *hist=(int *)malloc(sizeof(int)*GRAY_LEVEL);
     double *hist_d=(double *)malloc(sizeof(double)*GRAY_LEVEL);
@@ -243,8 +245,13 @@ void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int ty
     }
     
 }
-
-////OTSU 算法
+/*
+ *OTSU 算法
+ *otsu 算法使用贝叶斯分类原理得到最好聚类
+ *
+ *
+ */
+////
 void setHist2One(double *hist_d,double *dst_hist_d){
     double sum=0.0;
     for(int i=0;i<GRAY_LEVEL;i++)
@@ -288,7 +295,29 @@ void OTSUThreshold(double *src,double *dst,int width,int height,int type){
     double threshold=findMaxDeta(hist_d);
     
     Threshold(src, dst, width, height, threshold, type);
-
+}
+/*
+ *
+ *
+ *
+ *
+ */
+void LoGThreshold(double *src,double *dst,int width,int height,double threshold,int type){
+    double *mask=(double *)malloc(sizeof(double)*width*height);
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+    GaussianFilter(src, temp, width, height, 10, 10, 1.6);
+    double max=LoG(temp, mask, width, height, 3, 3, 0.5, threshold);
+    Threshold(mask, mask, width, height, max*0.7, THRESHOLD_TYPE3);
+    Mask(src, temp, mask, width, height);
+    ///////////////////////////////////////////////////////////////////////////
+    int hist[GRAY_LEVEL];
+    double hist_d[GRAY_LEVEL];
+    setHistogram(temp, hist, width, height);
+    Hist_int2double(hist, hist_d);
+    setHist2One(hist_d, hist_d);
+    double threshold_=findMaxDeta(hist_d);
+    Threshold(src, dst, width, height, threshold_, type);
+    free(mask);
+    free(temp);
 
 }
-
