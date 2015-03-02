@@ -1,3 +1,20 @@
+/*
+ * 中文说明
+ * 如果你下载或使用本代码说明你已阅读并同意本声明
+ * 此代码由谭升（Tony）开发，并允许任何人，或团体下载，使用此代码用于任何商业或非商业用途
+ * 使用本代码时必须复制此声明
+ * 本函数库版权归谭升所有.
+ * 如有第三方，例如部分使用OpenCV函数，OpenCV函数库版权属于Intel公司，将在后续版本中去除这些函数，特此声明
+ 
+ * English
+ * If you download or use the code that you have read and agree to this statement,
+ * This code by Tan Sheng (Tony) development, and allow any person, or group to download,
+ * use for any commercial or non-commercial use
+ * Use the code must be copied to this statement
+ * Copyright (C) 2015,Tony, all rights reserved.
+ * Part of the use of the OpenCV function, OpenCV function library copyright belongs
+ * to Intel company, will remove these functions in subsequent versions, hereby declare
+ */
 //
 //  Threshold
 //  tony.sheng.tan@gmail.com
@@ -12,7 +29,8 @@
  *THRESHOLD_TYPE4       |       dst(x,y)=src(x,y)>T?Minvalue:Maxvalue;          *
  ********************************************************************************/
 #include "Threshold.h"
-
+#include <cv.h>
+#include <highgui.h>
 void Threshold(double *src,double *dst,int width,int height,double threshold,int type){
     if(type==THRESHOLD_TYPE1){
         for(int i=0;i<width*height;i++)
@@ -274,7 +292,7 @@ double findMaxDeta(double *hist_d){
         double p1=0.0;
         double m1=0.0;
         double deta=0.0;
-        for(int j=0;j<i;j++){
+        for(int j=0;j<=i;j++){
             p1+=hist_d[j];
             m1+=j*hist_d[j];
         }
@@ -302,22 +320,70 @@ void OTSUThreshold(double *src,double *dst,int width,int height,int type){
  *
  *
  */
-void LoGThreshold(double *src,double *dst,int width,int height,double threshold,int type){
+void SobelThreshold(double *src,double *dst,int width,int height,double sobel_threshold,int type){
     double *mask=(double *)malloc(sizeof(double)*width*height);
     double *temp=(double *)malloc(sizeof(double)*width*height);
-    GaussianFilter(src, temp, width, height, 10, 10, 1.6);
-    double max=LoG(temp, mask, width, height, 3, 3, 0.5, threshold);
-    Threshold(mask, mask, width, height, max*0.7, THRESHOLD_TYPE3);
-    Mask(src, temp, mask, width, height);
+    //use 0.05*width and 0.05*height gaussian mask smooth src
+    GaussianFilter(src, temp, width, height, width/25,height/25, (double)width/150.);
+    double max=Sobel(temp, mask, NULL, width, height, 7);
+    Threshold(mask, mask, width, height, max*sobel_threshold, THRESHOLD_TYPE3);
     ///////////////////////////////////////////////////////////////////////////
     int hist[GRAY_LEVEL];
     double hist_d[GRAY_LEVEL];
-    setHistogram(temp, hist, width, height);
+    InitHistogram(hist);
+    for(int i=0;i<width*height;i++)
+        if(mask[i]!=0.0)
+            hist[(int)src[i]]++;
     Hist_int2double(hist, hist_d);
     setHist2One(hist_d, hist_d);
-    double threshold_=findMaxDeta(hist_d);
+    double threshold_=findMaxDeta(hist_d);//
     Threshold(src, dst, width, height, threshold_, type);
     free(mask);
     free(temp);
 
+}
+
+
+/*
+ *
+ *
+ *
+ *
+ */
+void LocalThreshold(double *src,double *dst,int width,int height,int w_size,double mean_param,double std_dev_param){
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+
+    Zero(temp, width,height);
+    double mean_g=matrixMean(src, width, height);
+    for(int j=w_size/2;j<height-w_size/2;j++){
+        for(int i=w_size/2;i<width-w_size/2;i++){
+            double deta=0.0;
+            double mean=0.0;
+            double pix_value=src[j*width+i];
+            //local mean
+            for(int m=-w_size/2;m<w_size/2+1;m++){
+                for(int n=-w_size/2;n<w_size/2+1;n++){
+                    mean+=src[(j+m)*width+i+n];
+                }
+            }
+            mean/=(double)(w_size*w_size);
+            //local deta
+            for(int m=-w_size/2;m<w_size/2+1;m++){
+                for(int n=-w_size/2;n<w_size/2+1;n++){
+                    deta+=(src[(j+m)*width+i+n]-mean)*(src[(j+m)*width+i+n]-mean);
+                }
+            }
+            
+            deta/=(double)(w_size*w_size);
+            deta=sqrt(deta);
+            if(pix_value>mean_param*mean_g&&pix_value>std_dev_param*deta){
+                temp[j*width+i]=255.0;
+            }
+        }
+    }
+    //for debug
+    
+    
+    matrixCopy(temp, dst, width, height);
+    free(temp);
 }

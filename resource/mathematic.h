@@ -4,6 +4,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 #include <math.h>
+#include <stdlib.h> 
 
 typedef int DataType;
 struct Position_{
@@ -36,6 +37,7 @@ void matrixAdd(double *src1,double *src2,double *dst,int width,int height);
 void matrixSub(double *src1,double *src2,double *dst,int width,int height);
 void matrixCopy(double *src,double *dst,int width,int height);
 void matrixMultreal(double *src,double *dst,double k,int width,int height);
+double matrixMean(double *mat,int width,int height);
 double findMatrixMax(double *src,int width,int height);
 
 //找出两幅等大图像中同一位置中相对较大的像素值

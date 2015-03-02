@@ -1,3 +1,20 @@
+/*
+ * 中文说明
+ * 如果你下载或使用本代码说明你已阅读并同意本声明
+ * 此代码由谭升（Tony）开发，并允许任何人，或团体下载，使用此代码用于任何商业或非商业用途
+ * 使用本代码时必须复制此声明
+ * 本函数库版权归谭升所有.
+ * 如有第三方，例如部分使用OpenCV函数，OpenCV函数库版权属于Intel公司，将在后续版本中去除这些函数，特此声明
+ 
+ * English
+ * If you download or use the code that you have read and agree to this statement,
+ * This code by Tan Sheng (Tony) development, and allow any person, or group to download,
+ * use for any commercial or non-commercial use
+ * Use the code must be copied to this statement
+ * Copyright (C) 2015,Tony, all rights reserved.
+ * Part of the use of the OpenCV function, OpenCV function library copyright belongs
+ * to Intel company, will remove these functions in subsequent versions, hereby declare
+ */
 //
 //  Segment
 //  tony.sheng.tan@gmail.com
@@ -211,7 +228,7 @@ double Kirsch(double *src,double *dst,int width,int height){
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-//3x3的邻域内，如果中心像素大于阈值，切周围存在负像素值，则此点为0交叉点
+//3x3的邻域内，如果中心像素大于阈值，且周围存在负像素值，则此点为0交叉点
 void findCross(double *src,double *dst,int width,int height,double threshold){
     double *dsttemp=(double *)malloc(sizeof(double)*width*height);
     Zero(dst, width, height);
@@ -224,7 +241,7 @@ void findCross(double *src,double *dst,int width,int height,double threshold){
             flag=1;
             for(int m=-1;m<=1&&flag;m++)
                 for(int n=-1;n<=1;n++){
-                    if(c_value>threshold&&src[(j+m)*width+i+n]<-0.1){
+                    if(c_value>=threshold&&src[(j+m)*width+i+n]<-0.000001){
                         flag=0;
                         dsttemp[j*width+i]=255.0;
                         break;
@@ -272,6 +289,7 @@ double LoG(double *src,double *dst,int width,int height,int m_width,int m_height
     double *dsttemp=(double *)malloc(sizeof(double)*width*height);
     double * mask=(double *)malloc(sizeof(double)*m_width*m_height);
     getLoGMask(mask, m_width,m_height,delta);
+    
     RealConvolution(src, dsttemp, mask, width, height, m_width, m_height);
     findCross(dsttemp,dst,width,height,threshold);
     free(dsttemp);

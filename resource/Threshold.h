@@ -35,6 +35,6 @@ void SmoothHist(double *hist,double *dsthist);
 int isDoubleHump(double *hist,int returnvalue);
 void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int type);
 void OTSUThreshold(double *src,double *dst,int width,int height,int type);
-//void CannyThreshold(double *src,double *dst,int width,int height,double threshold1,double threshold2,int type);
-void LoGThreshold(double *src,double *dst,int width,int height,double threshold,int type);
+void SobelThreshold(double *src,double *dst,int width,int height,double threshold,int type);
+void LocalThreshold(double *src,double *dst,int width,int height,int w_size,double mean_param,double std_dev_param);
 #endif

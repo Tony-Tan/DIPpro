@@ -30,8 +30,8 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/threshold_l3.jpg", 0);
-    
+    //IplImage *src =cvLoadImage("/Users/Tony/DIPImage/threshold_l3.jpg", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/threshold_changed.png", 0);
     int width=src->width, height=src->height;
     //printf("%d,%d",width,height);
     double* srcarry=(double *)malloc(sizeof(double)*src->width*src->height);
@@ -41,8 +41,8 @@ int main(int argc, const char * argv[]) {
         for(int i=0;i<width;i++)
             srcarry[j*width+i]=cvGetReal2D(src, j, i);
     }
-    
-    
+   
+
     
     
     
@@ -52,20 +52,27 @@ int main(int argc, const char * argv[]) {
     //ValleyBottomThreshold(srcarry,dst2arry,width,height,THRESHOLD_TYPE3);
     //MeanDoubleHumpThreshold(srcarry, dst1arry, width, height, THRESHOLD_TYPE3);
     //Canny(srcarry, dst1arry, width, height, 5, 30, 10);
-    LoGThreshold(srcarry, dst1arry, width, height, 0, THRESHOLD_TYPE3);
+    //LoGThreshold(srcarry, dst1arry, width, height, 0, THRESHOLD_TYPE3);
+    //EdgeDetection(srcarry, dst2arry, width, height, EDGE_DETECTOR_SOBEL, 0.3, 3, 3, 0);
+    LocalThreshold(srcarry, dst1arry, width, height, 3, 1.1 ,30);
+    //SobelThreshold(srcarry, dst1arry, width, height, 0.25, THRESHOLD_TYPE3);
+    //GaussianFilter(srcarry, dst1arry, width, height, 10, 10, 1.6);
+    //double max=Sobel(dst1arry, dst1arry, NULL, width, height, 5);
+    //Threshold(dst1arry, dst1arry, width, height, max*0.7, THRESHOLD_TYPE3);
+    //LoG(srcarry, dst2arry, width, height, 9, 9, 1.5, 10);
     OTSUThreshold(srcarry, dst2arry, width, height, THRESHOLD_TYPE3);
     /////////////////////////////////////////////////////////////////
     IplImage *dst1 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++)
-            cvSetReal2D(dst1, j, i,dst1arry[j*src->width+i]);
+            cvSetReal2D(dst1, j, i,dst1arry[j*width+i]);
     }
     //cvSaveImage("/Users/Tony/DIPImage/scharr_t0_490291.jpg", dst1, 0);
     IplImage *dst2 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++)
-            cvSetReal2D(dst2, j, i,dst2arry[j*src->width+i]);
+            cvSetReal2D(dst2, j, i,dst2arry[j*width+i]);
     }
     //cvSaveImage("/Users/Tony/DIPImage/hough_canny_edge3.jpg", dst1, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
