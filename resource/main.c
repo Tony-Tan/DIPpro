@@ -11,6 +11,7 @@
 #include "Hough.h"
 #include "adaboost.h"
 #include "Threshold.h"
+#include "watershed.h"
 #define HIGH_FR 1
 #define LOW_FR 2
 #define SIZE_WH 256
@@ -31,12 +32,12 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     
     //IplImage *src =cvLoadImage("/Users/Tony/DIPImage/threshold_l3.jpg", 0);
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/threshold_changed.png", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/watershed.png", 0);
     int width=src->width, height=src->height;
     //printf("%d,%d",width,height);
-    double* srcarry=(double *)malloc(sizeof(double)*src->width*src->height);
-    double* dst1arry=(double *)malloc(sizeof(double)*src->width*src->height);
-    double* dst2arry=(double *)malloc(sizeof(double)*src->width*src->height);
+    double* srcarry=(double *)malloc(sizeof(double)*width*height);
+    double* dst1arry=(double *)malloc(sizeof(double)*width*height);
+    double* dst2arry=(double *)malloc(sizeof(double)*width*height);
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++)
             srcarry[j*width+i]=cvGetReal2D(src, j, i);
@@ -44,7 +45,7 @@ int main(int argc, const char * argv[]) {
    
 
     
-    
+    findMinimal(srcarry, dst1arry, width, height);
     
     //MeanThreshold(srcarry,dst1arry,width,height,THRESHOLD_TYPE1);
     //PtileThreshold(srcarry, dst2arry, 0.7, width, height, THRESHOLD_TYPE3);
@@ -54,13 +55,13 @@ int main(int argc, const char * argv[]) {
     //Canny(srcarry, dst1arry, width, height, 5, 30, 10);
     //LoGThreshold(srcarry, dst1arry, width, height, 0, THRESHOLD_TYPE3);
     //EdgeDetection(srcarry, dst2arry, width, height, EDGE_DETECTOR_SOBEL, 0.3, 3, 3, 0);
-    LocalThreshold(srcarry, dst1arry, width, height, 3, 1.1 ,30);
+    //LocalThreshold(srcarry, dst1arry, width, height, 3, 1.1 ,30);
     //SobelThreshold(srcarry, dst1arry, width, height, 0.25, THRESHOLD_TYPE3);
     //GaussianFilter(srcarry, dst1arry, width, height, 10, 10, 1.6);
     //double max=Sobel(dst1arry, dst1arry, NULL, width, height, 5);
     //Threshold(dst1arry, dst1arry, width, height, max*0.7, THRESHOLD_TYPE3);
     //LoG(srcarry, dst2arry, width, height, 9, 9, 1.5, 10);
-    OTSUThreshold(srcarry, dst2arry, width, height, THRESHOLD_TYPE3);
+    //OTSUThreshold(srcarry, dst2arry, width, height, THRESHOLD_TYPE3);
     /////////////////////////////////////////////////////////////////
     IplImage *dst1 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     
