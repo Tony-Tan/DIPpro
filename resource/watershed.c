@@ -21,60 +21,321 @@
 //  Created by 谭升 on 15/03/03.
 //  Copyright (c) 2015年 谭升. All rights reserved.
 //
-
+/*
+ typedef struct PriQueueNode_ PriQueueHead;
+ typedef struct NLevelPriQueueNode_ * NLevelPriQueue;
+ typedef struct NLevelPriQueueNode_ NLevelPriNode;
+ typedef struct ExPix_ Pix_Label;
+ 
+ *          ___    ____________________
+ *         | P |->|   NLevelPriQueue   |
+ *         |---|  |--------------------|
+ *         | r |->|   NLevelPriQueue   |
+ *         |---|  |--------------------|
+ *         | i |->|   NLevelPriQueue   |
+ *         |---|  |--------------------|
+ *         | Q |->|   NLevelPriQueue   |
+ *         |---|  |--------------------|
+ *         | u |->|   NLevelPriQueue   |
+ *         |---|  |--------------------|
+ *         | e |->|   NLevelPriQueue   |
+ *         |---|  |--------------------|
+ *         | u |->|   NLevelPriQueue   |
+ *         |---|  |--------------------|
+ *         | e |->|   NLevelPriQueue   |
+ *         |___|  |____________________|
+ 
+ struct NLevelPriNode_{
+ int x;
+ int y;
+ NLevelPriQueue  next;
+ };
+ struct PriQueueNode_{
+ int nodeNum;
+ NLevelPriQueue  head;
+ NLevelPriQueue  tail;
+ };
+ struct ExPix_{
+ int grayvalue;
+ int label;
+ };
+ */
 #include "watershed.h"
+#include <stdio.h>
 
-Pix_Label * ExImageArray(double *src,int width,int height){
-    Pix_Label * dst=(Pix_Label *)malloc(sizeof(Pix_Label)*width*height);
-    for(int i=0;i<width*height;i++){
-        dst[i].grayvalue=(int)src[i];
-        dst[i].label=INIT;
+//将非极小值且与极小值相邻的元素入队
+void inQueue(PriQueueHead* priQueue,int gray_level,int x,int y){
+    priQueue[gray_level].nodeNum++;
+    ///malloc new node
+    NLevelPriNode* newNode=(NLevelPriNode *)malloc(sizeof(NLevelPriNode));
+    newNode->x=x;
+    newNode->y=y;
+    newNode->next=NULL;
+    if(priQueue[gray_level].head==NULL){
+        priQueue[gray_level].head=newNode;
+        priQueue[gray_level].tail=newNode;
+    }else{
+        priQueue[gray_level].tail->next=newNode;
+        priQueue[gray_level].tail=newNode;
     }
-    return dst;
-}
-void MakeNewNode(int x,int y){
-
 
 }
-void inQueue(int gray_level);
-NLevelPriNode outQueue(int gray_level);
-void releaseNode(NLevelPriNode node);
-void releasePix_Label(Pix_Label * src){
-
+//判断极小值是平底锅型还是台阶形状，使用图的深度优先搜索
+int isPan(int *src,int width,int height,double value,int x,int y){
+    src[y*width+x]=-value;
+    
+    for(int j=-1;j<2;j++)
+        for(int i=-1;i<2;i++)
+            if(j+y>=0&&i+x>=0&&j+y<height&&i+x<width&&(i!=0||j!=0)){
+                if(src[(j+y)*width+i+x]<value&&src[(j+y)*width+i+x]>0)
+                    return 0;
+                else if(src[(j+y)*width+i+x]==value){
+                    if(isPan(src,width, height, value, i+x, j+y))
+                        return 1;
+                    }
+                }
+    return 1;
 
 }
+//由于判断平底锅时使部分数据损坏，现进行恢复
+void repairPan(int *src ,int width,int height,double value,int x,int y){
+    src[y*width+x]=-value;
+    for(int j=-1;j<2;j++)
+        for(int i=-1;i<2;i++)
+            if(j+y>=0&&i+x>=0&&j+y<height&&i+x<width&&(i!=0||j!=0)){
+                if(src[(j+y)*width+i+x]==value){
+                    repairPan(src, width, height, value, x+i, y+j);
+                }
+            }
+}
+//平底锅形状，标记极小值为255
+void setMinimal(int *src,double *dst,int width,int height,int value,int x,int y){
+    dst[y*width+x]=255.0;
+    for(int j=-1;j<2;j++)
+        for(int i=-1;i<2;i++)
+            if(j+y>=0&&i+x>=0&&j+y<height&&i+x<width&&(i!=0||j!=0)){
+                if(src[(j+y)*width+x+i]==value&&dst[(j+y)*width+x+i]==0.0)
+                    setMinimal(src,dst,width, height, value, x+i,y+j);
+            }
+}
+//台阶形状，标记非极小值127
+void setUnMinimal(int *src,double *dst,int width,int height,int value,int x,int y){
+    dst[y*width+x]=127.0;
+    for(int j=-1;j<2;j++)
+        for(int i=-1;i<2;i++)
+            if(j+y>=0&&i+x>=0&&j+y<height&&i+x<width&&(i!=0||j!=0)){
+                if(src[(j+y)*width+x+i]==value&&dst[(j+y)*width+x+i]==0.0)
+                    setUnMinimal(src,dst,width, height, value, x+i,y+j);
+            }
+}
 
+//数据类型从double到int
+void Double2Int(double *src,int* dst,int width,int height){
+    for(int i=0;i<width*height;i++)
+            dst[i]=(int)src[i]+1;
+}
+//寻找极小值，包括单点极小值和平底锅
 void findMinimal(double *src,double *dst,int width,int height){
     Zero(dst, width, height);
+    int *temp=(int *)malloc(sizeof(int)*width*height);
+    Double2Int(src, temp, width, height);
     int lessthan=0;
     int equ=0;
+    double min=findMatrixMin(src, width, height);
+    for(int i=0;i<width*height;i++)
+        if(src[i]==min)
+            dst[i]=255.0;
     for(int j=0;j<height;j++){
         for(int i=0;i<width;i++){
             lessthan=0;
             equ=0;
-            double pix=src[j*width+i];
-            for(int m=-1;m<2;m++)
-                for(int n=-1;n<2;n++)
-                    if(j+m>=0&&i+n>=0&&j+m<height&&i+n<width){
-                        if(m!=0||n!=0){
-                            if(src[(j+m)*width+i+n]<pix)
-                                lessthan=1;
-                            if(src[(j+m)*width+i+n]==pix)
-                                equ=1;
+            int pix=temp[j*width+i];
+            if(dst[j*width+i]==0.0){
+                for(int m=-1;m<2;m++)
+                    for(int n=-1;n<2;n++)
+                        if(j+m>=0&&i+n>=0&&j+m<height&&i+n<width){
+                            if(m!=0||n!=0){
+                                if(temp[(j+m)*width+i+n]<pix)
+                                    lessthan=1;
+                                if(temp[(j+m)*width+i+n]==pix)
+                                    equ=1;
+                            }
                         }
+                
+                if(equ){
+                    if(isPan(temp, width, height,pix, i, j)){
+                        //repairPan(temp,width, height, -pix, i,j);
+                        setMinimal(temp,dst, width, height, -pix, i, j);
+                    }else {
+                        repairPan(temp,width, height, -pix, i,j);
+                        setUnMinimal(temp,dst, width, height, pix, i, j);
                     }
-            if(lessthan)
-                dst[j*width+i]=0;
-            else if(equ)
-                dst[j*width+i]=127.0;
-            if(0==lessthan&&0==equ)
-                dst[j*width+i]=255.0;
+                }else if(lessthan)
+                    dst[j*width+i]=127.0;
+                if(0==lessthan&&0==equ)
+                    dst[j*width+i]=255.0;
+            
+            }
         }
     }
+    free(temp);
 }
+//标记极小值的label，从-1开始向下增长 -2 -3 -4 -5 -6 -7.....
+void LabelMinimal(double * src,Pix_Label* dst,int width,int height,int x,int y,int label){
+    dst[y*width+x].label=label;
+    for(int i=-1;i<2;i++){
+        for(int j=-1;j<2;j++)
+            if(x+i>=0&&x+i<width&&y+j>=0&&y+j<height&&(i!=0||j!=0))
+                if(src[(y+j)*width+x+i]==255.0&&dst[(y+j)*width+x+i].label==0){
+                    LabelMinimal(src, dst, width, height, x+i, y+j, label);
+                }
+    }
+
+}
+//初始化label数组，此数组与图像数组多加了label
+void InitLabelMat(double *src,Pix_Label* dst,double *mask,int width,int height){
+    for(int i=0;i<width*height;i++){
+        dst[i].grayvalue=src[i];
+        dst[i].label=0;
+    }
+    int label_minimal=-1;
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            if(mask[j*width+i]==255.0&&dst[j*width+i].label==0){
+                LabelMinimal(mask, dst, width,height,i,j, label_minimal);
+                label_minimal--;
+            }
+    }
+}
+//初始化队列头数组
+void InitPriQueue(PriQueueHead* priQueue,Pix_Label *srclabel,int width,int height){
+    for(int i=0;i<GRAY_LEVEL;i++){
+        priQueue[i].head=NULL;
+        priQueue[i].nodeNum=0;
+        priQueue[i].tail=NULL;
+    }
+    int inqueue=0;
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            inqueue=0;
+            if(srclabel[j*width+i].label==0){
+                for(int m=-1;m<2;m++)
+                    for(int n=-1;n<2;n++){
+                        if(m+j>=0&&m+j<height&&n+i>=0&&n+i<width&&(m!=0||n!=0))
+                            if(srclabel[(m+j)*width+n+i].label<0)
+                                inqueue=1;
+                    }
+                if(inqueue){
+                    inQueue(priQueue,srclabel[j*width+i].grayvalue,i,j);
+                    srclabel[j*width+i].label=INQUEUE;
+                }
+            }
+        }
+    //for(int i=0;i<GRAY_LEVEL;i++)
+    //    printf("g:%d  NumofNode:%d\n",i,priQueue[i].nodeNum);
+
+}
+
+
+int PirQueueisEmpty(PriQueueHead* priqueue){
+    int sum=0;
+    for(int i=0;i<GRAY_LEVEL;i++)
+        sum+=priqueue[i].nodeNum;
+    return !sum;
+}
+
+
+NLevelPriNode* outQueue(PriQueueHead* priqueue){
+    NLevelPriNode* node=NULL;
+    if(!PirQueueisEmpty(priqueue))
+        for(int i=0;i<GRAY_LEVEL;i++)
+            if(priqueue[i].nodeNum!=0){
+                node=priqueue[i].head;
+                priqueue[i].head=node->next;
+                priqueue[i].nodeNum--;
+                break;
+            }
+    return node;
+}
+
+
+void findWaterShed(Pix_Label * srclabel,PriQueueHead* priqueue,int width,int height){
+    NLevelPriNode* node=outQueue(priqueue);
+    while(node!=NULL){
+        int y=node->y;
+        int x=node->x;
+        //printf("x:%d y:%d \n",x,y);
+        int label=0;
+        int isWatershed=0;
+        for(int j=-1;j<2;j++)
+            for(int i=-1;i<2;i++){
+                if(j+y>=0&&j+y<height&&i+x>=0&&i+x<width&&(j!=0||i!=0)){
+                    if(srclabel[(j+y)*width+x+i].label<0){
+                        if(label==0)
+                            label=srclabel[(j+y)*width+x+i].label;
+                        else if(label!=srclabel[(j+y)*width+x+i].label){
+                            isWatershed=1;
+                        }
+                    }
+                }
+            }
+        if(isWatershed)
+            srclabel[y*width+x].label=WATERSHED;
+        else if(label<0){
+            srclabel[y*width+x].label=label;
+            for(int j=-1;j<2;j++)
+                for(int i=-1;i<2;i++){
+                    if(j+y>=0&&j+y<height&&i+x>=0&&i+x<width&&(j!=0||i!=0)){
+                        if(srclabel[(j+y)*width+x+i].label==0){
+                            inQueue(priqueue, srclabel[(j+y)*width+i+x].grayvalue, i+x, j+y);
+                            srclabel[(j+y)*width+i+x].label=INQUEUE;
+                        }
+                    }
+                }
+            }
+        else if(label==0&&isWatershed==0){
+            srclabel[y*width+x].label=0;
+            
+        }
+        free(node);
+        node=outQueue(priqueue);
+                
+    }
+
+}
+//meyer分水岭方法
 void MeyerWatershed(double *src,double *dst,int width,int height){
-
+    double *dst_temp=(double *)malloc(sizeof(double)*width*height);
+    Zero(dst_temp, width, height);
+    Pix_Label * srclabel=(Pix_Label*)malloc(sizeof(Pix_Label)*width*height);
+    PriQueueHead priqueue[GRAY_LEVEL];
+    double *minimal=(double *)malloc(sizeof(double)*width*height);
+    Zero(minimal, width, height);
+    findMinimal(src, minimal, width, height);
+    InitLabelMat(src, srclabel, minimal, width, height);
+    //for(int j=0;j<height;j++){
+    //    for(int i=0;i<width;i++)
+    //        printf("  l:%3d|",srclabel[j*width+i].label);
+    //    printf("\n");
+    //}
+    InitPriQueue(priqueue, srclabel, width, height);
+    /*for(int i=0;i<GRAY_LEVEL;i++){
+        NLevelPriNode *node=priqueue[i].head;
+        printf("%d:",i);
+        while (node!=NULL) {
+            printf("x:%d,y:%d   ",node->x,node->y);
+            node=node->next;
+        }
+        printf("\n");
     
-
+    }*/
+    findWaterShed(srclabel, priqueue, width, height);
+    for(int i=0;i<width*height;i++)
+        if(srclabel[i].label==WATERSHED)
+            dst_temp[i]=255.0;
+    matrixCopy(dst_temp, dst, width, height);
+    free(dst_temp);
+    free(srclabel);
+    free(minimal);
 
 }

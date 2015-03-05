@@ -11,6 +11,7 @@
 #include "Hough.h"
 #include "adaboost.h"
 #include "Threshold.h"
+#include "regionSegment.h"
 #include "watershed.h"
 #define HIGH_FR 1
 #define LOW_FR 2
@@ -32,21 +33,31 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     
     //IplImage *src =cvLoadImage("/Users/Tony/DIPImage/threshold_l3.jpg", 0);
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/watershed.png", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/regionsplit.png", 0);
+    //IplImage *seed =cvLoadImage("/Users/Tony/DIPImage/seed.png", 0);
     int width=src->width, height=src->height;
     //printf("%d,%d",width,height);
     double* srcarry=(double *)malloc(sizeof(double)*width*height);
+    //double* seed_arry=(double *)malloc(sizeof(double)*width*height);
     double* dst1arry=(double *)malloc(sizeof(double)*width*height);
     double* dst2arry=(double *)malloc(sizeof(double)*width*height);
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++)
             srcarry[j*width+i]=cvGetReal2D(src, j, i);
     }
-   
-
-    
-    findMinimal(srcarry, dst1arry, width, height);
-    
+    //for (int j=0;j<height; j++) {
+    //    for(int i=0;i<width;i++)
+    //        seed_arry[j*width+i]=cvGetReal2D(seed, j, i);
+    //}
+    //GaussianFilter(srcarry, dst2arry, width, height, 15, 15, 2.4);
+    //MeanFilter(srcarry, dst2arry, width, height, 7, 7);
+    //Sobel(dst2arry, dst2arry, NULL, width, height,3);
+    //HistogramEqualization(dst2arry, dst2arry, width, height);
+    //MeyerWatershed(dst2arry, dst1arry, width, height);
+    //RegionGrow(srcarry, dst1arry, seed_arry, width, height, 50);
+    //matrixCopy(seed_arry, dst2arry, width, height);
+    //findMinimal(srcarry, dst1arry, width, height);
+    //HistogramEqualization(dst1arry, dst2arry, width, height);
     //MeanThreshold(srcarry,dst1arry,width,height,THRESHOLD_TYPE1);
     //PtileThreshold(srcarry, dst2arry, 0.7, width, height, THRESHOLD_TYPE3);
     //IterativeThreshold(srcarry, dst1arry, 1, width, height, THRESHOLD_TYPE3);
@@ -63,18 +74,20 @@ int main(int argc, const char * argv[]) {
     //LoG(srcarry, dst2arry, width, height, 9, 9, 1.5, 10);
     //OTSUThreshold(srcarry, dst2arry, width, height, THRESHOLD_TYPE3);
     /////////////////////////////////////////////////////////////////
+    RegionSplit(srcarry, dst1arry, width, height, 10, 50, 10, 25);
     IplImage *dst1 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++)
             cvSetReal2D(dst1, j, i,dst1arry[j*width+i]);
     }
-    //cvSaveImage("/Users/Tony/DIPImage/scharr_t0_490291.jpg", dst1, 0);
+    
     IplImage *dst2 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++)
             cvSetReal2D(dst2, j, i,dst2arry[j*width+i]);
     }
+
     //cvSaveImage("/Users/Tony/DIPImage/hough_canny_edge3.jpg", dst1, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);

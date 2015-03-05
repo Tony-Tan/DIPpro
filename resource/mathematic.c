@@ -23,6 +23,7 @@
 //
 
 #include "mathematic.h"
+#include <float.h>
 #include <stdio.h>
 int isBase2(int size_n){
     int k=size_n;
@@ -110,6 +111,12 @@ double findMatrixMax(double *src,int width,int height){
     double max=-1.0;
     for(int i=0;i<width*height;i++)
         max=src[i]>max?src[i]:max;
+    return max;
+}
+double findMatrixMin(double *src,int width,int height){
+    double max=DBL_MAX;
+    for(int i=0;i<width*height;i++)
+        max=src[i]<max?src[i]:max;
     return max;
 }
 double matrixMean(double *mat,int width,int height){

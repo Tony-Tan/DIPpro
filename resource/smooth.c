@@ -23,7 +23,7 @@
 //  Copyright (c) 2015年 谭升. All rights reserved.
 //
 #include "smooth.h"
-
+#define GRAY_LEVEL 256
 
 
 

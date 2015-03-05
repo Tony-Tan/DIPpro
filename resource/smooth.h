@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <cv.h>
 #include "convolution.h"
+
 #include "mathematic.h"
 
-#define GRAY_LEVEL 256
+
 #define SMOOTH_GAUSSIAN 0
 #define SMOOTH_MEDIAN 1
 #define SMOOTH_BILATERAL 2
