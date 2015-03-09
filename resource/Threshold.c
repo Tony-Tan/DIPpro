@@ -75,7 +75,7 @@ void MeanThreshold(double *src,double *dst,int width,int height,int type){
 /*********************************************************************************/
 //阈值法，p分位法
 //p分位为统计学方法
-//当p为5时为中位数
+//当p为0.5时为中位数
 void PtileThreshold(double *src,double *dst,double p_value,int width,int height,int type){/*0<p_value<1*/
     int total_pix_count=width*height;
     int pix_count=0;
@@ -90,6 +90,7 @@ void PtileThreshold(double *src,double *dst,double p_value,int width,int height,
             break;
         }
     }
+    
     Threshold(src,dst, width, height, threshold_value,type);
 }
 /*********************************************************************************/
@@ -98,6 +99,7 @@ void PtileThreshold(double *src,double *dst,double p_value,int width,int height,
 //将直方图分为两部分
 //求出两部分的均值
 //这两个均值的均值为新的阈值，迭代这些步骤
+//deta_t 精确度，当迭代n次以后阈值tn与第n-1次迭代结果tn-1相差小于deta_t时，迭代停止。
 void IterativeThreshold(double *src,double *dst,double deta_t,int width,int height,int type){
     
     int hist[GRAY_LEVEL];
@@ -114,6 +116,7 @@ void IterativeThreshold(double *src,double *dst,double deta_t,int width,int heig
         double mean2=getMeaninHist((int)threshold_value,hist_max+1, hist);
         threshold_value=(mean1+mean2)/2.0;
     }
+    printf("deta_t:%g  threshold:%g\n",deta_t,threshold_value);
     Threshold(src,dst, width, height, threshold_value,type);
 }
 /*********************************************************************************/
@@ -150,6 +153,7 @@ int isDoubleHump(double *hist,int returnvalue){
     double * diffHist=(double *)malloc(sizeof(double)*GRAY_LEVEL);
     int * statusHist=(int *)malloc(sizeof(int)*GRAY_LEVEL);
     diffHist[0]=0.0;
+    diffHist[GRAY_LEVEL-1]=0.0;
     for(int i=1;i<GRAY_LEVEL-1;i++){
         diffHist[i]=hist[i+1]-hist[i];
     }
@@ -194,7 +198,7 @@ int isDoubleHump(double *hist,int returnvalue){
   */
     int test[4]={0,0,0,0};
     int test_num=0;
-    for(int i=1;i<GRAY_LEVEL;i++){
+    for(int i=1;i<GRAY_LEVEL-1;i++){
         if(statusHist[i]!=0){
             test[test_num]=statusHist[i];
             if(test_num>=3){
@@ -208,7 +212,7 @@ int isDoubleHump(double *hist,int returnvalue){
     
     if(test_num==3&&test[0]==1&&test[1]==-1&&test[2]==1){
         if(returnvalue==DOUBLEHUMP_BOTTOM){
-            for(int i=0;i<GRAY_LEVEL;i++)
+            for(int i=1;i<GRAY_LEVEL;i++)
                 if(statusHist[i]==-1){
                     free(diffHist);
                     free(statusHist);
@@ -242,9 +246,12 @@ void ValleyBottomThreshold(double *src,double *dst,int width,int height,int type
         SmoothHist(hist_d, hist_d);
         if(0.0!=(threshold = (double)isDoubleHump(hist_d,DOUBLEHUMP_BOTTOM))){
             Threshold(src, dst, width, height, threshold, type);
+            
             break;
         }
     }
+    free(hist);
+    free(hist_d);
 
 }
 //与谷底法类似，不是使用最小谷底值，而是使用峰值位置平均值
@@ -261,6 +268,8 @@ void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int ty
             break;
         }
     }
+    free(hist);
+    free(hist_d);
     
 }
 /*
@@ -269,7 +278,8 @@ void MeanDoubleHumpThreshold(double *src,double *dst,int width,int height,int ty
  *
  *
  */
-////
+//归一化直方图
+
 void setHist2One(double *hist_d,double *dst_hist_d){
     double sum=0.0;
     for(int i=0;i<GRAY_LEVEL;i++)
@@ -279,6 +289,7 @@ void setHist2One(double *hist_d,double *dst_hist_d){
             dst_hist_d[i]=hist_d[i]/sum;
     
 }
+//计算公式中最大的deta，并返回直方图灰度
 double findMaxDeta(double *hist_d){
     double max_deta=-1.0;
     double max_deta_location=0.0;
@@ -311,21 +322,21 @@ void OTSUThreshold(double *src,double *dst,int width,int height,int type){
     Hist_int2double(hist, hist_d);
     setHist2One(hist_d, hist_d);
     double threshold=findMaxDeta(hist_d);
-    
+    printf("threshold:%g\n",threshold);
     Threshold(src, dst, width, height, threshold, type);
 }
-/*
- *
- *
- *
- *
+/*对于小目标物体
+ *使用边缘检测结果作为MASK
+ *得到MASK为1处的原图灰度集合
+ *对这个集合做阈值分割
+ *的到最终的结果
  */
 void SobelThreshold(double *src,double *dst,int width,int height,double sobel_threshold,int type){
     double *mask=(double *)malloc(sizeof(double)*width*height);
     double *temp=(double *)malloc(sizeof(double)*width*height);
     //use 0.05*width and 0.05*height gaussian mask smooth src
     GaussianFilter(src, temp, width, height, width/25,height/25, (double)width/150.);
-    double max=Sobel(temp, mask, NULL, width, height, 7);
+    double max=Sobel(temp, mask, NULL, width, height, 5);
     Threshold(mask, mask, width, height, max*sobel_threshold, THRESHOLD_TYPE3);
     ///////////////////////////////////////////////////////////////////////////
     int hist[GRAY_LEVEL];
@@ -336,17 +347,18 @@ void SobelThreshold(double *src,double *dst,int width,int height,double sobel_th
             hist[(int)src[i]]++;
     Hist_int2double(hist, hist_d);
     setHist2One(hist_d, hist_d);
-    double threshold_=findMaxDeta(hist_d);//
-    Threshold(src, dst, width, height, threshold_, type);
+    double threshold=findMaxDeta(hist_d);//
+    printf("Threshold:%g \n",threshold);
+    Threshold(src, dst, width, height, threshold, type);
     free(mask);
     free(temp);
 
 }
 
 
-/*
- *
- *
+/*局部阈值
+ *使用均值和标准差作为判定依据
+ *输入参数包括邻域大小，均值系数，以及标准差系数
  *
  *
  */
@@ -381,9 +393,6 @@ void LocalThreshold(double *src,double *dst,int width,int height,int w_size,doub
             }
         }
     }
-    //for debug
-    
-    
     matrixCopy(temp, dst, width, height);
     free(temp);
 }

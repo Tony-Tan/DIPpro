@@ -89,11 +89,15 @@ int isPan(int *src,int width,int height,double value,int x,int y){
             if(j+y>=0&&i+x>=0&&j+y<height&&i+x<width&&(i!=0||j!=0)){
                 if(src[(j+y)*width+i+x]<value&&src[(j+y)*width+i+x]>0)
                     return 0;
-                else if(src[(j+y)*width+i+x]==value){
-                    if(isPan(src,width, height, value, i+x, j+y))
-                        return 1;
-                    }
                 }
+    for(int j=-1;j<2;j++)
+        for(int i=-1;i<2;i++)
+            if(j+y>=0&&i+x>=0&&j+y<height&&i+x<width&&(i!=0||j!=0)){
+                if(src[(j+y)*width+i+x]==value){
+                    return(isPan(src,width, height, value, i+x, j+y));
+                    
+                }
+            }
     return 1;
 
 }
@@ -136,21 +140,23 @@ void Double2Int(double *src,int* dst,int width,int height){
 }
 //寻找极小值，包括单点极小值和平底锅
 void findMinimal(double *src,double *dst,int width,int height){
-    Zero(dst, width, height);
+    
     int *temp=(int *)malloc(sizeof(int)*width*height);
+    double *dsttemp=(double *)malloc(sizeof(double)*width*height);
+    Zero(dsttemp, width, height);
     Double2Int(src, temp, width, height);
     int lessthan=0;
     int equ=0;
     double min=findMatrixMin(src, width, height);
     for(int i=0;i<width*height;i++)
         if(src[i]==min)
-            dst[i]=255.0;
+            dsttemp[i]=255.0;
     for(int j=0;j<height;j++){
         for(int i=0;i<width;i++){
             lessthan=0;
             equ=0;
             int pix=temp[j*width+i];
-            if(dst[j*width+i]==0.0){
+            if(dsttemp[j*width+i]==0.0){
                 for(int m=-1;m<2;m++)
                     for(int n=-1;n<2;n++)
                         if(j+m>=0&&i+n>=0&&j+m<height&&i+n<width){
@@ -162,22 +168,25 @@ void findMinimal(double *src,double *dst,int width,int height){
                             }
                         }
                 
-                if(equ){
+                if(equ==1&&lessthan==0){
                     if(isPan(temp, width, height,pix, i, j)){
                         //repairPan(temp,width, height, -pix, i,j);
-                        setMinimal(temp,dst, width, height, -pix, i, j);
+                        setMinimal(temp,dsttemp, width, height, -pix, i, j);
                     }else {
                         repairPan(temp,width, height, -pix, i,j);
-                        setUnMinimal(temp,dst, width, height, pix, i, j);
+                        setUnMinimal(temp,dsttemp, width, height, pix, i, j);
                     }
-                }else if(lessthan)
-                    dst[j*width+i]=127.0;
+                }
+                if(lessthan==1)
+                    dsttemp[j*width+i]=127.0;
                 if(0==lessthan&&0==equ)
-                    dst[j*width+i]=255.0;
+                    dsttemp[j*width+i]=255.0;
             
             }
         }
     }
+    matrixCopy(dsttemp, dst, width, height);
+    free(dsttemp);
     free(temp);
 }
 //标记极小值的label，从-1开始向下增长 -2 -3 -4 -5 -6 -7.....
