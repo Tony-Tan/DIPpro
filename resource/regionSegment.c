@@ -21,9 +21,15 @@
 //
 
 #include "regionSegment.h"
-void findGrowRegion(double *src,double *dst,int seed_x,int seed_y,int width,int height,
-                    int regionNum,double value,double param){
-    //printf("seed :(%d,%d)\n",seed_x,seed_y);
+
+/****************************************************************************/
+/****************************************************************************/
+/*区域生长，设置一个种子点x（灰度值为x_v），然后以种子点为中心
+ *向四周进行图搜索，如果点y（灰度值为y_v）,邻域满足param+x_v>y_v>x_v-param（条件1）
+ *则此点与种子点归为一个区域，以此递归，条件1可以根据不同的需要自行设置其他.
+ */
+//递归遍历邻域，并判断条件是否成立
+void findGrowRegion(double *src,double *dst,int seed_x,int seed_y,int width,int height,int regionNum,double value,double param){
     dst[seed_y*width+seed_x]=(double)regionNum;
     for(int j=-1;j<2;j++)
         for(int i=-1;i<2;i++){
@@ -35,24 +41,33 @@ void findGrowRegion(double *src,double *dst,int seed_x,int seed_y,int width,int 
             }
         }
 }
-void RegionGrow(double *src,double *dst,double *seed,int width,int height,double param){
+void RegionGrow(double *src,double *dst,Position * position,int p_size,int width,int height,double param){
     double * dsttemp=(double *)malloc(sizeof(double)*width*height);
     Zero(dsttemp, width, height);
-    int regionNum=10;
+    int regionNum=100;
     
-    for(int j=0;j<height;j++){
-        for(int i=0;i<width;i++){
-            if(seed[j*width+i]==255.0&&dsttemp[j*width+i]==0.0){
-                findGrowRegion(src, dsttemp, i, j, width, height, regionNum,src[j*width+i],param);
-                regionNum+=10;
-            }
-        }
+    for(int i=0;i<p_size;i++){
+        int x=position[i].x;
+        int y=position[i].y;
+        findGrowRegion(src, dsttemp, x,y, width, height, regionNum,src[y*width+x],param);
+        regionNum+=10;
     }
+    
     matrixCopy(dsttemp, dst, width, height);
     free(dsttemp);
 }
 
 
+/****************************************************************************/
+/****************************************************************************/
+/*
+ *
+ *
+ *
+ *
+ *
+ */
+//区域均值
 double RegionMean(double *src,int width,int height,int x,int y,int w_width,int w_height){
     double sum=0.0;
     double pix_num=0.0;
@@ -67,7 +82,8 @@ double RegionMean(double *src,int width,int height,int x,int y,int w_width,int w
         return 0.0;
     return sum/pix_num;
 }
-double RegionVariance(double *src,int width,int height,int x,int y,int w_width,int w_height){
+//区域标准差
+double RegionStdDeviation(double *src,int width,int height,int x,int y,int w_width,int w_height){
     double sum=0.0;
     double pix_num=0.0;
     for(int j=y;j<y+w_height;j++)
@@ -92,6 +108,7 @@ double RegionVariance(double *src,int width,int height,int x,int y,int w_width,i
 
 
 }
+//矩阵局部地区设置为1
 void RegionSetOne(double *src,int width,int height,int x,int y,int w_width,int w_height){
     for(int j=y;j<y+w_height;j++)
         for(int i=x;i<x+w_width;i++){
@@ -100,10 +117,22 @@ void RegionSetOne(double *src,int width,int height,int x,int y,int w_width,int w
             }
         }
 }
+
+/*******************************************************************************/
+/*
+ *区域分割算法，递归进行判断
+ *如果区域不符合条件，将区域
+ *分为四份，递归判断每个区域
+ *知道区域分为最小设定值
+ */
+
 void findSplitRegion(double *src,double *dst,int width,int height,int x,int y,int w_width,int w_height,double mean_param1,double mean_param2,double variance_param1,double variance_param2){
     double mean=RegionMean(src, width, height, x, y, w_width, w_height);
-    double variance=RegionVariance(src, width, height, x, y, w_width, w_height);
-    if(mean>mean_param1&&mean<mean_param2&&variance>variance_param1&&variance<variance_param2){
+    double variance=RegionStdDeviation(src, width, height, x, y, w_width, w_height);
+    if(mean>mean_param1&&
+       mean<=mean_param2&&
+       variance>variance_param1&&
+       variance<=variance_param2){
         RegionSetOne(dst, width, height, x, y, w_width, w_height);
     }else{
 #define MINIMAL_CELL 3
@@ -121,8 +150,5 @@ void RegionSplit(double *src,double *dst,int width,int height,double mean_param1
     findSplitRegion(src, dsttemp, width, height, 0,0, width, height, mean_param1, mean_param2, variance_param1,variance_param2);
     matrixCopy(dsttemp, dst, width, height);
     free(dsttemp);
-    
-    
-    
 
 }

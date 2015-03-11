@@ -13,6 +13,7 @@
 #include "Threshold.h"
 #include "regionSegment.h"
 #include "watershed.h"
+#include "color.h"
 #define HIGH_FR 1
 #define LOW_FR 2
 #define SIZE_WH 256
@@ -32,23 +33,25 @@ void showfilter(double *filter,int width,int height){
 
 int main(int argc, const char * argv[]) {
     
-    //IplImage *src =cvLoadImage("/Users/Tony/DIPImage/threshold_l3.jpg", 0);
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/localthreshold.png", 0);
-    //IplImage *seed =cvLoadImage("/Users/Tony/DIPImage/seed.png", 0);
+    
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/watershed_water.png", 0);
+   
     int width=src->width, height=src->height;
-    //printf("%d,%d",width,height);
+    
     double* srcarry=(double *)malloc(sizeof(double)*width*height);
-    //double* seed_arry=(double *)malloc(sizeof(double)*width*height);
+   
     double* dst1arry=(double *)malloc(sizeof(double)*width*height);
     double* dst2arry=(double *)malloc(sizeof(double)*width*height);
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++)
             srcarry[j*width+i]=cvGetReal2D(src, j, i);
     }
-    //for (int j=0;j<height; j++) {
-    //    for(int i=0;i<width;i++)
-    //        seed_arry[j*width+i]=cvGetReal2D(seed, j, i);
-    //}
+    //Position p;
+    //p.x=128;
+    //p.y=128;
+    //RegionGrow(srcarry, dst1arry, &p, 1, width, height, 30);
+    //Threshold(dst1arry, dst1arry, width, height, 9, THRESHOLD_TYPE3);
+    //Mask(srcarry, dst2arry, dst1arry, width, height);
     //GaussianFilter(srcarry, dst1arry, width, height, 15, 15, 2.4);
     //MedianFilter(srcarry, dst2arry, width, height, 3, 3);
     //MeanFilter(srcarry, dst2arry, width, height, 7, 7);
@@ -61,7 +64,9 @@ int main(int argc, const char * argv[]) {
     //OTSUThreshold(dst1arry, dst1arry, width, height, THRESHOLD_TYPE3);
     //GaussianFilter(srcarry, dst2arry, width, height, 15, 15, 2.4);
     //findMinimal(srcarry, dst2arry, width, height);
-    //MeyerWatershed(srcarry, dst2arry, width, height);
+    //Canny(srcarry, dst1arry, width,height, 50, 600,THRESHOLD_TYPE3);
+    GaussianFilter(srcarry, dst1arry, width, height, 15, 15, 2.4);
+    MeyerWatershed(dst1arry, dst2arry, width, height);
     //matrixAdd(srcarry, dst2arry, dst2arry, width, height);
     //RegionGrow(srcarry, dst1arry, seed_arry, width, height, 50);
     //matrixCopy(seed_arry, dst2arry, width, height);
@@ -75,8 +80,8 @@ int main(int argc, const char * argv[]) {
     //Canny(srcarry, dst1arry, width, height, 5, 30, 10);
     //LoGThreshold(srcarry, dst1arry, width, height, 0, THRESHOLD_TYPE3);
     //EdgeDetection(srcarry, dst2arry, width, height, EDGE_DETECTOR_SOBEL, 0.3, 3, 3, 0);
-    LocalThreshold(srcarry, dst1arry, width, height,3, 1,30);
-    OTSUThreshold(srcarry, dst2arry, width, height, THRESHOLD_TYPE3);
+    //LocalThreshold(srcarry, dst1arry, width, height,3, 1,30);
+    //OTSUThreshold(srcarry, dst2arry, width, height, THRESHOLD_TYPE3);
     //double max=Sobel(srcarry, dst2arry, NULL, width, height, 5);
     //Threshold(dst2arry, dst2arry, width, height, 0.267*max, THRESHOLD_TYPE3);
     //Mask(srcarry, dst2arry, dst2arry, width, height);
@@ -88,6 +93,7 @@ int main(int argc, const char * argv[]) {
     //OTSUThreshold(dst1arry, dst2arry, width, height, THRESHOLD_TYPE3);
     /////////////////////////////////////////////////////////////////
     //RegionSplit(srcarry, dst1arry, width, height, 10, 50, 10, 25);
+    //RegionSplit(srcarry, dst1arry, width, height, 10, 30, 0, 15);
     IplImage *dst1 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     
     for (int j=0;j<height; j++) {
@@ -100,8 +106,7 @@ int main(int argc, const char * argv[]) {
         for(int i=0;i<width;i++)
             cvSetReal2D(dst2, j, i,dst2arry[j*width+i]);
     }
-
-    //cvSaveImage("/Users/Tony/DIPImage/threshold_ldst_11.png", dst1, 0);
+    cvSaveImage("/Users/Tony/DIPImage/xingyun2_dst.png", dst1, 0);
     //cvSaveImage("/Users/Tony/DIPImage/water_min.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);
