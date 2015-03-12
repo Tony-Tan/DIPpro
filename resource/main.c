@@ -34,8 +34,42 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/watershed_water.png", 0);
-   
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.png", 1);
+    
+    int width=src->width, height=src->height;
+    RGB * srcarry=(RGB *)malloc(sizeof(RGB)*width*height);
+    RGB * dst1arry=(RGB *)malloc(sizeof(RGB)*width*height);
+    RGB * dst2arry=(RGB *)malloc(sizeof(RGB)*width*height);
+    IplImage *dst1_r =cvCreateImage(cvSize(width, height), src->depth, 1);
+    IplImage *dst1_g =cvCreateImage(cvSize(width, height), src->depth, 1);
+    IplImage *dst1_b =cvCreateImage(cvSize(width, height), src->depth, 1);
+    IplImage *dst1 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
+    IplImage *dst2_r =cvCreateImage(cvSize(width, height), src->depth, 1);
+    IplImage *dst2_g =cvCreateImage(cvSize(width, height), src->depth, 1);
+    IplImage *dst2_b =cvCreateImage(cvSize(width, height), src->depth, 1);
+    IplImage *dst2 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
+    for (int j=0;j<height; j++) {
+        for(int i=0;i<width;i++){
+            CvScalar s = cvGet2D(src,j,i);
+            srcarry[j*width+i].c1=s.val[0];
+            srcarry[j*width+i].c2=s.val[1];
+            srcarry[j*width+i].c3=s.val[2];
+            
+        }
+    }
+    //double* dst1arry_r=(double *)malloc(sizeof(double)*width*height);
+    //double* dst1arry_g=(double *)malloc(sizeof(double)*width*height);
+    //double* dst1arry_b=(double *)malloc(sizeof(double)*width*height);
+    //double* dst2arry_r=(double *)malloc(sizeof(double)*width*height);
+    //double* dst2arry_g=(double *)malloc(sizeof(double)*width*height);
+    //double* dst2arry_b=(double *)malloc(sizeof(double)*width*height);
+    //Split(srcarry, dst1arry_r, dst1arry_g, dst1arry_b, width, height);
+    //Zero(dst1arry_b, width, height);
+    RGB2sRGB(srcarry, dst1arry, width, height);
+    sRGB2RGB(dst1arry, dst2arry, width, height);
+    //Merge(dst1arry_r, dst1arry_g, dst1arry_b,dst1arry, width, height);
+    //////////////////////gray/////////////////////////////////////
+    /*
     int width=src->width, height=src->height;
     
     double* srcarry=(double *)malloc(sizeof(double)*width*height);
@@ -46,6 +80,8 @@ int main(int argc, const char * argv[]) {
         for(int i=0;i<width;i++)
             srcarry[j*width+i]=cvGetReal2D(src, j, i);
     }
+     */
+    ////////////////////////////////////////////////////////
     //Position p;
     //p.x=128;
     //p.y=128;
@@ -65,8 +101,8 @@ int main(int argc, const char * argv[]) {
     //GaussianFilter(srcarry, dst2arry, width, height, 15, 15, 2.4);
     //findMinimal(srcarry, dst2arry, width, height);
     //Canny(srcarry, dst1arry, width,height, 50, 600,THRESHOLD_TYPE3);
-    GaussianFilter(srcarry, dst1arry, width, height, 15, 15, 2.4);
-    MeyerWatershed(dst1arry, dst2arry, width, height);
+    //GaussianFilter(srcarry, dst1arry, width, height, 15, 15, 2.4);
+    //MeyerWatershed(dst1arry, dst2arry, width, height);
     //matrixAdd(srcarry, dst2arry, dst2arry, width, height);
     //RegionGrow(srcarry, dst1arry, seed_arry, width, height, 50);
     //matrixCopy(seed_arry, dst2arry, width, height);
@@ -94,19 +130,26 @@ int main(int argc, const char * argv[]) {
     /////////////////////////////////////////////////////////////////
     //RegionSplit(srcarry, dst1arry, width, height, 10, 50, 10, 25);
     //RegionSplit(srcarry, dst1arry, width, height, 10, 30, 0, 15);
-    IplImage *dst1 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     
     for (int j=0;j<height; j++) {
-        for(int i=0;i<width;i++)
-            cvSetReal2D(dst1, j, i,dst1arry[j*width+i]);
+        for(int i=0;i<width;i++){
+            cvSetReal2D(dst1_r, j, i,dst1arry[j*width+i].c1);
+            cvSetReal2D(dst1_g, j, i,dst1arry[j*width+i].c2);
+            cvSetReal2D(dst1_b, j, i,dst1arry[j*width+i].c3);
+        }
+
     }
     
-    IplImage *dst2 =cvCreateImage(cvSize(width, height), src->depth, src->nChannels);
     for (int j=0;j<height; j++) {
-        for(int i=0;i<width;i++)
-            cvSetReal2D(dst2, j, i,dst2arry[j*width+i]);
+        for(int i=0;i<width;i++){
+            cvSetReal2D(dst2_r, j, i,dst2arry[j*width+i].c1);
+            cvSetReal2D(dst2_g, j, i,dst2arry[j*width+i].c2);
+            cvSetReal2D(dst2_b, j, i,dst2arry[j*width+i].c3);
+        }
     }
-    cvSaveImage("/Users/Tony/DIPImage/xingyun2_dst.png", dst1, 0);
+    cvMerge(dst1_r, dst1_g, dst1_b, NULL, dst1);
+    cvMerge(dst2_r, dst2_g, dst2_b, NULL, dst2);
+    //cvSaveImage("/Users/Tony/DIPImage/xingyun2_dst.png", dst1, 0);
     //cvSaveImage("/Users/Tony/DIPImage/water_min.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);
@@ -135,8 +178,7 @@ int main(int argc, const char * argv[]) {
     
     cvWaitKey(0);
     free(srcarry);
-    free(dst1arry);
-    free(dst2arry);
+
     return 0;
 }
 
