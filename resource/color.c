@@ -26,20 +26,21 @@
 
 void Split(C3 *src ,double *dst1,double *dst2,double *dst3,int width,int height){
     for(int i=0;i<width*height;i++){
-        dst1[i]=src[i].c1;
-        dst2[i]=src[i].c2;
-        dst3[i]=src[i].c3;
+        if(dst1!=NULL)dst1[i]=src[i].c1;
+        if(dst2!=NULL)dst2[i]=src[i].c2;
+        if(dst3!=NULL)dst3[i]=src[i].c3;
     }
     
 }
 void Merge(double *src1,double *src2,double *src3,C3 *dst ,int width,int height){
     for(int i=0;i<width*height;i++){
-        dst[i].c1=src1[i];
-        dst[i].c2=src1[i];
-        dst[i].c3=src2[i];
+        dst[i].c1=(src1!=NULL?src1[i]:0.0);
+        dst[i].c2=(src2!=NULL?src2[i]:0.0);
+        dst[i].c3=(src3!=NULL?src3[i]:0.0);
     }
 }
-//本文见出现的为声明的常数都为转换系数，详情可以根据函数功能查询原公式
+//本文见出现的未声明的常数都为转换系数，详情可以根据函数功能查询原公式
+/**********************************************************************************************************************/
 void RGB2XYZ(RGB *src ,XYZ *dst,int width,int height){
     double r,g,b;
     for(int i=0;i<width*height;i++){
@@ -48,7 +49,7 @@ void RGB2XYZ(RGB *src ,XYZ *dst,int width,int height){
         b=src[i].c3;
         dst[i].c1=0.49000*r+0.31000*g+0.20000*b;
         dst[i].c2=0.17697*r+0.81240*g+0.01063*b;
-        dst[i].c3=0.01000*g+0.99000+b;
+        dst[i].c3=          0.01000*g+0.99000*b;
     }
     
 }
@@ -63,6 +64,32 @@ void XYZ2RGB(XYZ *src ,RGB *dst,int width,int height){
         dst[i].c3=0.005203699075231*x-0.014408162665216*y+1.009204463589985*z;
     }
 }
+/**********************************************************************************************************************/
+
+void RGB2nRGB(RGB *src ,nRGB *dst,int width,int height){
+    double r,g,b;
+    for(int i=0;i<width*height;i++){
+        r=src[i].c1;
+        g=src[i].c2;
+        b=src[i].c3;
+        dst[i].c1= 0.842*r+0.156*g+0.091*b;
+        dst[i].c2=-0.129*r+1.320*g-0.203*b;
+        dst[i].c3= 0.008*r-0.069*g+0.897*b;
+    }
+    
+}
+void nRGB2RGB(nRGB *src ,RGB *dst,int width,int height){
+    double nr,ng,nb;
+    for(int i=0;i<width*height;i++){
+        nr=src[i].c1;
+        ng=src[i].c2;
+        nb=src[i].c3;
+        dst[i].c1=1.166653319332446*nr-0.142379679989947*ng-0.086134199577807*nb;
+        dst[i].c2=0.114262295661615*nr+0.734773840666534*ng-0.177878437637139*nb;
+        dst[i].c3=-0.001615527484959*nr+0.057790894588529*ng+1.101912443031951*nb;
+    }
+}
+/**********************************************************************************************************************/
 
 void RGB2CMY(RGB *src ,CMY *dst,int width,int height){
     for(int i=0;i<width*height;i++){
@@ -78,6 +105,7 @@ void CMY2RGB(CMY *src ,RGB *dst,int width,int height){
         dst[i].c3=GMAX-src[i].c3;
     }
 }
+/**********************************************************************************************************************/
 
 void RGB2sRGB(RGB *src ,sRGB *dst,int width,int height){
     XYZ *temp=(XYZ *)malloc(sizeof(XYZ)*width*height);
@@ -114,42 +142,95 @@ void sRGB2RGB(sRGB *src ,RGB *dst,int width,int height){
     XYZ2RGB(temp, dst, width, height);
     free(temp);
 }
-void RGB2YIQ(RGB *src ,YIQ *dst,int width,int height){
+/**********************************************************************************************************************/
 
+void RGB2YIQ(RGB *src ,YIQ *dst,int width,int height){
+    double r,g,b;
+    for(int i=0;i<width*height;i++){
+        r=src[i].c1;
+        g=src[i].c2;
+        b=src[i].c3;
+        dst[i].c1=0.299*r+0.587*g+0.114*b;
+        dst[i].c2=0.596*r-0.275*g-0.321*b;
+        dst[i].c3=0.212*r-0.528*g+0.311*b;
+    }
 
 }
 void YIQ2RGB(YIQ *src ,RGB *dst,int width,int height){
-
-
+    double sy,si,sq;
+    for(int i=0;i<width*height;i++){
+        sy=src[i].c1;
+        si=src[i].c2;
+        sq=src[i].c3;
+        dst[i].c1=sy+0.956*si+0.620*sq;
+        dst[i].c2=sy-0.272*si-0.647*sq;
+        dst[i].c3=sy-1.108*si+1.705*sq;
+    }
 }
+/**********************************************************************************************************************/
 
 void RGB2YUV(RGB *src ,YUV *dst,int width,int height){
+    double r,g,b;
+    for(int i=0;i<width*height;i++){
+        r=src[i].c1;
+        g=src[i].c2;
+        b=src[i].c3;
+        dst[i].c1=0.299*r+0.587*g+0.114*b;
+        dst[i].c2=-0.169*r-0.331*g+0.5*b+128.;
+        dst[i].c3=0.5*g-0.419*g-0.081*b+128;
+    }
 
 
 }
 void YUV2RGB(YUV *src ,RGB *dst,int width,int height){
-
+    double sy,su,sv;
+    for(int i=0;i<width*height;i++){
+        sy=src[i].c1;
+        su=src[i].c2;
+        sv=src[i].c3;
+        dst[i].c1=sy+1.13983*(sv-128.0);
+        dst[i].c1=sy-0.39465*(su-128.0)-0.58060*(sv-128.0);
+        dst[i].c1=sy+2.03211*(su-128.0);
+    }
 
 
 }
+/**********************************************************************************************************************/
 
 void RGB2YCbCr(RGB *src ,YCbCr *dst,int width,int height){
-
+    double r,g,b;
+    for(int i=0;i<width*height;i++){
+        r=src[i].c1;
+        g=src[i].c2;
+        b=src[i].c3;
+        dst[i].c1=0.257*r+0.564*g+0.098*b+16;
+        dst[i].c2=-0.148*r-0.291*g+0.439*b+128;
+        dst[i].c3=0.439*r-0.368*g-0.071*b+128;
+    }
 
 }
 void YCbCr2RGB(YCbCr *src ,RGB *dst,int width,int height){
-
-
+    double y,cb,cr;
+    for(int i=0;i<width*height;i++){
+        y =src[i].c1;
+        cb=src[i].c2;
+        cr=src[i].c3;
+        dst[i].c1 = 1.164*(y-16)+1.596*(cr-128);
+        dst[i].c2 = 1.164*(y-16)-0.392*(cb-128)-0.813*(cr-128);
+        dst[i].c3 = 1.164*(y-16)+2.017*(cb-128);
+    }
 }
+/**********************************************************************************************************************/
 
 void RGB2YC1C2(RGB *src ,YC1C2 *dst,int width,int height){
-
+    //todo something
 
 }
 void YC1C22RGB(YC1C2 *src ,RGB *dst,int width,int height){
-
+    //todo something
 
 }
+/**********************************************************************************************************************/
 
 void RGB2LAB(RGB *src ,LAB *dst,int width,int height){
 
@@ -159,6 +240,7 @@ void LAB2RGB(LAB *src ,RGB *dst,int width,int height){
 
 
 }
+/**********************************************************************************************************************/
 
 void RGB2LUV(RGB *src ,LUV *dst,int width,int height){
 
@@ -172,10 +254,11 @@ void LUV2RGB(LUV *src ,RGB *dst,int width,int height){
 
 
 
+/**********************************************************************************************************************/
 
 
  
-void RGB2HSV(RGB *src ,HSI *dst,int width,int height){
+void RGB2HSI(RGB *src ,HSI *dst,int width,int height){
     double r,g,b;
     for(int i=0;i<width*height;i++){
         r=src[i].c1;
@@ -184,46 +267,106 @@ void RGB2HSV(RGB *src ,HSI *dst,int width,int height){
         double delta=acos((2*r-g-b)/(2*sqrt((r-g)*(r-g)+(r-b)*(g-b))));
         dst[i].c1=b<=g?delta:2*M_PI-delta;
         dst[i].c2=1.0-3.0*(MIN3(r,g,b)/(r+g+b));
-        dst[i].c2=(r+g+b)/3.0;
+        dst[i].c3=(r+g+b)/3.0;
     }
 
 }
-void HSV2RGB(HSI *src ,RGB *dst,int width,int height){
+void HSI2RGB(HSI *src ,RGB *dst,int width,int height){
     double src_h,src_s,src_i;
     double r,g,b;
     for(int i=0;i<width*height;i++){
         src_h=src[i].c1;
         src_s=src[i].c2;
         src_i=src[i].c3;
-        if(src_h>=0&&src_h<(2./3.*M_PI)){
+        if(src_h>=0.0&&src_h<(2./3.*M_PI)){
             b=src_i*(1.0-src_s);
             r=src_i*(1.0+(src_s*cos(src_h)/cos(1./3.*M_PI-src_h)));
-            g=3*src_i-(r+b);
+            g=3.0*src_i-(r+b);
         }else if(src_h>=(2./3.*M_PI)&&src_h<(4./3.*M_PI)){
             src_h-=(2./3.*M_PI);
             r=src_i*(1.0-src_s);
             g=src_i*(1.0+(src_s*cos(src_h)/cos(1./3.*M_PI-src_h)));
-            b=3*src_i-(r+g);
+            b=3.0*src_i-(r+g);
         }else if(src_h>=(4./3.*M_PI)&&src_h<(2.*M_PI)){
             src_h-=(4./3.*M_PI);
             g=src_i*(1.0-src_s);
             b=src_i*(1.0+(src_s*cos(src_h)/cos(1./3.*M_PI-src_h)));
-            r=3*src_i-(r+b);
+            r=3.0*src_i-(g+b);
         }
         dst[i].c1=r;
         dst[i].c2=g;
         dst[i].c3=b;
     }
 }
+/**********************************************************************************************************************/
 
-void RGB2HSI(RGB *src ,HSI *dst,int width,int height){
+void RGB2HSV(RGB *src ,HSV *dst,int width,int height){
+    double max=0.0,min=0.0;
+    double r,g,b;
+    for(int i=0;i<width*height;i++){
+        r=src[i].c1;
+        g=src[i].c2;
+        b=src[i].c3;
+        max=MAX3(r, g, b);
+        min=MIN3(r, g, b);
+        dst[i].c3=max/(double)(GRAY_LEVEL-1.0);//h
+        if(max!=0)
+            dst[i].c2=(max-min)/max;
+        else{
+            dst[i].c2=0.0;
+            dst[i].c1=0.0;
+        }
+        if(dst[i].c2>0.0){
+            double delta=max-min;
+            double dr=(max-r)/delta;
+            double dg=(max-g)/delta;
+            double db=(max-b)/delta;
+            if(r==max)
+                dst[i].c1=(g==min?5.+db:1.-dg);
+            else if(g==max)
+                dst[i].c1=(b==min?1.+dr:3.-db);
+            else if(r==min)
+                dst[i].c1=(r==min?3.+dg:5.-dr);
 
-
-
-
+            dst[i].c1*=(dst[i].c1<6.0?60.0:0.0);
+           
+        }
+    
+    }
 }
-void HSI2RGB(HSI *src ,RGB *dst,int width,int height){
-
-
-
+void HSV2RGB(HSV *src ,RGB *dst,int width,int height){
+    int *temp_int=(int *)malloc(sizeof(int)*width*height);
+    double *temp_double=(double *)malloc(sizeof(double)*width*height);
+    Split(src, temp_double, NULL, NULL, width, height);
+    matrixDBL2INT(temp_double, temp_int, width, height);
+    double h,s,v;
+    double r,g,b;
+    int h_int;
+    for(int i=0;i<width*height;i++){
+        h=src[i].c1;
+        s=src[i].c2;
+        v=src[i].c3;
+        h_int=temp_int[i];
+        int Hi=((int)h_int/60)%6;
+        double f=(double)(h/60.-Hi);
+        double p=v*(1.-s);
+        double q=v*(1.-f*s);
+        double t=v*(1.-(1.-f)*s);
+        switch (Hi) {
+            case 0:r=v;g=t;b=p;break;
+            case 1:r=q;g=v;b=p;break;
+            case 2:r=p;g=v;b=t;break;
+            case 3:r=p;g=q;b=v;break;
+            case 4:r=t;g=p;b=v;break;
+            case 5:r=v;g=p;b=q;break;
+            default:
+                break;
+        }
+        dst[i].c1=r*(GRAY_LEVEL-1);
+        dst[i].c2=g*(GRAY_LEVEL-1);
+        dst[i].c3=b*(GRAY_LEVEL-1);
+        
+    }
+    free(temp_int);
+    free(temp_double);
 }

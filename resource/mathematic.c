@@ -125,6 +125,10 @@ double matrixMean(double *mat,int width,int height){
         sum+=mat[i];
     return sum/(double)(width*height);
 }
+void matrixDBL2INT(double *src,int *dst,int width,int height){
+    for(int i=0;i<width*height;i++)
+        dst[i]=(int)src[i];
+}
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 

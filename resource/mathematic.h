@@ -41,6 +41,7 @@ void matrixAdd(double *src1,double *src2,double *dst,int width,int height);
 void matrixSub(double *src1,double *src2,double *dst,int width,int height);
 void matrixCopy(double *src,double *dst,int width,int height);
 void matrixMultreal(double *src,double *dst,double k,int width,int height);
+void matrixDBL2INT(double *src,int *dst,int width,int height);
 double matrixMean(double *mat,int width,int height);
 double findMatrixMax(double *src,int width,int height);
 double findMatrixMin(double *src,int width,int height);

@@ -7,8 +7,10 @@
 #include <limits.h>
 #include <float.h>
 #define MIN3(x,y,z) (((x)>(y))?(((y)>(z))?(z):(y)):((x)>(z)?(z):(x)))
+#define MAX3(x,y,z) (((x)<(y))?(((y)<(z))?(z):(y)):((x)<(z)?(z):(x)))
 #define GMAX 255
 typedef struct Chanel3_ RGB;
+typedef struct Chanel3_ nRGB;
 typedef struct Chanel3_ XYZ;
 typedef struct Chanel3_ CMY;
 typedef struct Chanel3_ sRGB;
@@ -41,6 +43,9 @@ void Merge(double *src1,double *src2,double *src3,C3 *dst ,int width,int height)
 
 void RGB2XYZ(RGB *src ,XYZ *dst,int width,int height);
 void XYZ2RGB(XYZ *src ,RGB *dst,int width,int height);
+
+void RGB2nRGB(RGB *src ,nRGB *dst,int width,int height);
+void nRGB2RGB(nRGB *src ,RGB *dst,int width,int height);
 
 void RGB2CMY(RGB *src ,CMY *dst,int width,int height);
 void CMY2RGB(CMY *src ,RGB *dst,int width,int height);

@@ -45,7 +45,7 @@ void ContrastStretch(double *src,double *dst,int width,int height,int method,dou
     }
     else if(method==CONTRASTFUNC2){//对数
         for(int i=0;i<MAX_PVALUE;i++)
-            ContrastTable[i]=46*log((double)(1+i));//46*log(256)近似于256
+            ContrastTable[i]=46.*log((double)(1+i));//46*log(256)近似于256
         
     }else if(method==CONTRASTFUNC3){//反对数
         for(int i=0;i<MAX_PVALUE;i++)
