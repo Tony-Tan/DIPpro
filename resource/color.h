@@ -9,6 +9,10 @@
 #define MIN3(x,y,z) (((x)>(y))?(((y)>(z))?(z):(y)):((x)>(z)?(z):(x)))
 #define MAX3(x,y,z) (((x)<(y))?(((y)<(z))?(z):(y)):((x)<(z)?(z):(x)))
 #define GMAX 255
+#define COLOR_SPACE_RGB 0
+#define COLOR_SPACE_CMY 1
+#define COLOR_SPACE_HSI 2
+#define COLOR_SPACE_HSV 3
 typedef struct Chanel3_ RGB;
 typedef struct Chanel3_ nRGB;
 typedef struct Chanel3_ XYZ;
@@ -37,6 +41,7 @@ struct Chanel4_{
     double c4;
 };
 
+/**************************************色彩空间转换**************************************************/
 
 void Split(C3 *src ,double *dst1,double *dst2,double *dst3,int width,int height);
 void Merge(double *src1,double *src2,double *src3,C3 *dst ,int width,int height);
@@ -76,4 +81,6 @@ void HSV2RGB(HSV *src ,RGB *dst,int width,int height);
 
 void RGB2HSI(RGB *src ,HSI *dst,int width,int height);
 void HSI2RGB(HSI *src ,RGB *dst,int width,int height);
+/****************************************补色操作*****************************************************/
+void Complementary_Color(C3 *src,C3 *dst,int width,int height,int color_space_type);
 #endif

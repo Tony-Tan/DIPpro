@@ -35,7 +35,7 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/pseudo5.png", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.png", 1);
     
     int width=src->width, height=src->height;
     RGB * srcarry=(RGB *)malloc(sizeof(RGB)*width*height);
@@ -56,20 +56,23 @@ int main(int argc, const char * argv[]) {
     IplImage *dst3 =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst4 =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst5 =cvCreateImage(cvSize(width, height), src->depth, 1);
-    /*for (int j=0;j<height; j++) {
-        for(int i=0;i<width;i++){
-            CvScalar s = cvGet2D(src,j,i);
-            srcarry[j*width+i].c1=s.val[2];
-            srcarry[j*width+i].c2=s.val[1];
-            srcarry[j*width+i].c3=s.val[0];
+    if(src->nChannels==3){
+        for (int j=0;j<height; j++) {
+            for(int i=0;i<width;i++){
+                CvScalar s = cvGet2D(src,j,i);
+                srcarry[j*width+i].c1=s.val[2];
+                srcarry[j*width+i].c2=s.val[1];
+                srcarry[j*width+i].c3=s.val[0];
             
+            }
         }
-     }*/
-    for (int j=0;j<height; j++) {
-         for(int i=0;i<width;i++){
-             srcarry_dbl[j*width+i]=cvGetReal2D(src,j,i);
+    }else {
+        for (int j=0;j<height; j++) {
+            for(int i=0;i<width;i++){
+                srcarry_dbl[j*width+i]=cvGetReal2D(src,j,i);
              
-         }
+            }
+        }
     }
     //double* dst1arry_r=(double *)malloc(sizeof(double)*width*height);
     //double* dst1arry_g=(double *)malloc(sizeof(double)*width*height);
@@ -84,9 +87,10 @@ int main(int argc, const char * argv[]) {
     //RGB2YIQ(srcarry , dst1arry, width, height);
     //Split(dst1arry, dst3arry, dst4arry, dst5arry, width, height);
     //Zero(dst4arry, width, height);
-    Gray2Color(srcarry_dbl, dst1arry, width, height,1);
-  
-    
+    //Gray2Color(srcarry_dbl, dst1arry, width, height,1);
+    RGB2HSV(srcarry, dst2arry, width, height);
+    Complementary_Color(dst2arry, dst2arry, width, height, COLOR_SPACE_HSV);
+    HSV2RGB(dst2arry, dst1arry, width, height);
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++){
             cvSetReal2D(dst1_r, j, i,dst1arry[j*width+i].c3);
@@ -110,7 +114,7 @@ int main(int argc, const char * argv[]) {
  
     cvMerge(dst1_r, dst1_g, dst1_b, NULL, dst1);
     cvMerge(dst2_r, dst2_g, dst2_b, NULL, dst2);
-    //cvSaveImage("/Users/Tony/DIPImage/pseudo5_dst_1.png", dst1, 0);
+    cvSaveImage("/Users/Tony/DIPImage/lena_complementary_dst_HSV.png", dst1, 0);
     //cvSaveImage("/Users/Tony/DIPImage/water_min.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);

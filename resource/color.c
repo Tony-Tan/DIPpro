@@ -175,9 +175,9 @@ void RGB2YUV(RGB *src ,YUV *dst,int width,int height){
         r=src[i].c1;
         g=src[i].c2;
         b=src[i].c3;
-        dst[i].c1=0.299*r+0.587*g+0.114*b;
-        dst[i].c2=-0.169*r-0.331*g+0.5*b+128.;
-        dst[i].c3=0.5*g-0.419*g-0.081*b+128;
+        dst[i].c1=0.299*r+0.587*g+0.114*b;              //0~255
+        dst[i].c2=-0.169*r-0.331*g+0.5*b+128.;          //0~255
+        dst[i].c3=0.5*g-0.419*g-0.081*b+128;            //0~255
     }
 
 
@@ -369,4 +369,44 @@ void HSV2RGB(HSV *src ,RGB *dst,int width,int height){
     }
     free(temp_int);
     free(temp_double);
+}
+
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
+void Complementary_Color(C3 *src,C3 *dst,int width,int height,int color_space_type){
+    switch (color_space_type) {
+        case COLOR_SPACE_RGB:
+            RGB2CMY(src, dst, width, height);
+            break;
+        case COLOR_SPACE_CMY:
+            CMY2RGB(src, dst, width, height);
+            break;
+        case COLOR_SPACE_HSI:{
+            for(int i=0;i<width*height;i++){
+                double h=src[i].c1;
+                if(h>=M_PI)
+                    dst[i].c1=h-M_PI;
+                else
+                    dst[i].c1=M_PI+h;
+                dst[i].c2=src[i].c2;
+                dst[i].c3=255.-src[i].c3;
+            }
+            break;
+        }
+        case COLOR_SPACE_HSV:{
+            for(int i=0;i<width*height;i++){
+                double h=src[i].c1;
+                if(h>=180.0)
+                    dst[i].c1=h-180.0;
+                else
+                    dst[i].c1=180.0+h;
+                dst[i].c2=src[i].c2;
+                dst[i].c3=1.0-src[i].c3;
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }
