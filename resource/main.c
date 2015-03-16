@@ -15,6 +15,7 @@
 #include "watershed.h"
 #include "color.h"
 #include "Pseudo_Color.h"
+#include "ColorProcess.h"
 #define HIGH_FR 1
 #define LOW_FR 2
 #define SIZE_WH 256
@@ -80,7 +81,11 @@ int main(int argc, const char * argv[]) {
     //double* dst2arry_r=(double *)malloc(sizeof(double)*width*height);
     //double* dst2arry_g=(double *)malloc(sizeof(double)*width*height);
     //double* dst2arry_b=(double *)malloc(sizeof(double)*width*height);
-    
+    //SharpenRGB(srcarry, dst1arry, width, height, 1, SHARPEN_SOBEL);
+    RGB2HSI(srcarry, dst1arry, width, height);
+    //SharpenHSI(dst1arry, dst1arry, width, height, 1, SHARPEN_SOBEL);
+    SmoothHSI(dst1arry, dst2arry, width, height, 5, 5, 0.8, 30, SMOOTH_MEAN);
+    HSI2RGB(dst2arry, dst1arry, width, height);
     //Zero(dst1arry_b, width, height);
     //RGB2sRGB(srcarry, dst1arry, width, height);
     //sRGB2RGB(dst1arry, dst2arry, width, height);
@@ -88,9 +93,13 @@ int main(int argc, const char * argv[]) {
     //Split(dst1arry, dst3arry, dst4arry, dst5arry, width, height);
     //Zero(dst4arry, width, height);
     //Gray2Color(srcarry_dbl, dst1arry, width, height,1);
-    RGB2HSV(srcarry, dst2arry, width, height);
-    Complementary_Color(dst2arry, dst2arry, width, height, COLOR_SPACE_HSV);
-    HSV2RGB(dst2arry, dst1arry, width, height);
+    //RGB2HSV(srcarry, dst2arry, width, height);
+    //Complementary_Color(dst2arry, dst2arry, width, height, COLOR_SPACE_HSV);
+    //HSV2RGB(dst2arry, dst1arry, width, height);
+    //HistEqualRGB(srcarry, dst2arry, width, height);
+    //RGB2HSI(srcarry, dst1arry, width, height);
+    //Split(dst1arry, dst3arry, dst4arry, dst5arry, width, height);
+    //HSI2RGB(dst2arry, dst1arry, width, height);
     for (int j=0;j<height; j++) {
         for(int i=0;i<width;i++){
             cvSetReal2D(dst1_r, j, i,dst1arry[j*width+i].c3);
@@ -114,7 +123,7 @@ int main(int argc, const char * argv[]) {
  
     cvMerge(dst1_r, dst1_g, dst1_b, NULL, dst1);
     cvMerge(dst2_r, dst2_g, dst2_b, NULL, dst2);
-    cvSaveImage("/Users/Tony/DIPImage/lena_complementary_dst_HSV.png", dst1, 0);
+    cvSaveImage("/Users/Tony/DIPImage/lena_smooth_hsi_m.png", dst1, 0);
     //cvSaveImage("/Users/Tony/DIPImage/water_min.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);
@@ -132,21 +141,6 @@ int main(int argc, const char * argv[]) {
     cvShowImage("dst4", dst4);
     cvNamedWindow("dst5", 1);
     cvShowImage("dst5", dst5);
-    //cvSaveImage("/Users/Tony/DIPImage/log_cross_0.225.jpg",dst2, 0);
-    //cvSaveImage("/Users/Tony/DIPImage/sample_sobel_edge.jpg",dst2, 0);
-    //cvSub(dst2,dst1,dst2,NULL);
-
-    //cvSub( dstcv,dst, dstcv, NULL);
-    //HistogramEqualization(dstcv,dstcv);
-    //cvNamedWindow("dstsub", 1);
-    //cvShowImage("dstsub", dstcv);
-    
-    //HistogramEqualization(cvdst, cvdst);
-    //cvNamedWindow("dst2", 1);
-    //cvShowImage("dst2", dst2);
-    //HistogramEqualization(dst,dst);
-    //printf("work done\n");
-    
     cvWaitKey(0);
     free(srcarry);
 
