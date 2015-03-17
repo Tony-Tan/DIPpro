@@ -23,7 +23,7 @@
 //
 
 #include "ColorProcess.h"
-
+/*********************************************************************************************************************/
 void HistEqualRGB(RGB *src,RGB *dst,int width,int height){
     HSI *temp=(HSI*)malloc(sizeof(HSI)*width*height);
     double *chanel_i=(double *)malloc(sizeof(double)*width*height);
@@ -40,6 +40,8 @@ void HistEqualRGB(RGB *src,RGB *dst,int width,int height){
     free(chanel_i);
     
 }
+/*********************************************************************************************************************/
+
 void SmoothRGB(RGB *src,RGB *dst,int width,int height,int m_width,int m_height,double param1,double param2,int Smooth_type){
     double *chanel_r=(double*)malloc(sizeof(double)*width*height);
     double *chanel_g=(double*)malloc(sizeof(double)*width*height);
@@ -87,6 +89,7 @@ void SmoothRGB(RGB *src,RGB *dst,int width,int height,int m_width,int m_height,d
     free(chanel_b_dst);
 }
 
+/*********************************************************************************************************************/
 
 void SmoothHSI(HSI *src,HSI *dst,int width,int height,int m_width,int m_height,double param1,double param2,int Smooth_type){
     double *chanel_i=(double*)malloc(sizeof(double)*width*height);
@@ -121,6 +124,8 @@ void SmoothHSI(HSI *src,HSI *dst,int width,int height,int m_width,int m_height,d
     free(chanel_i_dst);
 }
 
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
 
 
 void SharpenRGB(RGB *src,RGB *dst,int width,int height,double c,int Sharpen_type){
@@ -162,6 +167,8 @@ void SharpenRGB(RGB *src,RGB *dst,int width,int height,double c,int Sharpen_type
     free(chanel_g_dst);
     free(chanel_b_dst);
 }
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
 
 void SharpenHSI(HSI *src,HSI *dst,int width,int height,double c,int Sharpen_type){
     double *chanel_i=(double*)malloc(sizeof(double)*width*height);
@@ -190,4 +197,86 @@ void SharpenHSI(HSI *src,HSI *dst,int width,int height,double c,int Sharpen_type
     }
     free(chanel_i);
     free(chanel_i_dst);
+}
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+//3通道向量距离，
+//对于点x，y有彩色向量（c1,c2,c3）
+//给定标准颜色（r,g,b）
+//其距离为|(c1,c2,c3)-(r,g,b)|
+double Chanel3Distance(RGB point1,RGB point2){
+    return sqrt((point1.c1-point2.c1)*(point1.c1-point2.c1)+
+                (point1.c2-point2.c2)*(point1.c2-point2.c2)+
+                (point1.c3-point2.c3)*(point1.c3-point2.c3));
+
+
+}
+void SegmentRGB(RGB* src,RGB *dst,int width,int height,RGB * color_center,double threshold){
+    double distance=0.0;
+    for(int i=0;i<width*height;i++){
+        distance=Chanel3Distance(src[i], *color_center);
+        if(distance<=threshold){
+            dst[i].c1=src[i].c1;
+            dst[i].c2=src[i].c2;
+            dst[i].c3=src[i].c3;
+        }else{
+            dst[i].c1=0.;
+            dst[i].c2=0.;
+            dst[i].c3=0.;
+        }
+    }
+}
+/*********************************************************************************************************************/
+/*********************************************************************************************************************/
+void Cover_RGB(RGB *src,RGB *dst,RGB *cover,int width,int height){
+    double cover_c1,cover_c2,cover_c3;
+    for(int i=0;i<width*height;i++){
+        cover_c1=cover[i].c1;
+        cover_c2=cover[i].c2;
+        cover_c3=cover[i].c3;
+        if(cover_c1!=0.0&&cover_c2!=0.0&&cover_c3!=0.0){
+            dst[i].c1=cover_c1;
+            dst[i].c2=cover_c2;
+            dst[i].c3=cover_c3;
+        }else {
+            dst[i].c1=src[i].c1;
+            dst[i].c2=src[i].c2;
+            dst[i].c3=src[i].c3;
+        }
+    }
+}
+void Zero_RGB(RGB *src,int width,int height){
+    for(int i=0;i<width*height;i++){
+        src[i].c1=0.0;
+        src[i].c2=0.0;
+        src[i].c3=0.0;
+    }
+
+}
+void Copy_RGB(RGB *src,RGB *dst,int width,int height){
+    for(int i=0;i<width*height;i++){
+        dst[i].c1=src[i].c1;
+        dst[i].c2=src[i].c2;
+        dst[i].c3=src[i].c3;
+    }
+    
+}
+void Threshold_RGB(RGB *src,RGB *dst,RGB *threshold,int width,int height){
+    RGB *temp=(RGB *)malloc(sizeof(RGB)*width*height);
+    Zero_RGB(temp,width,height);
+    double threshold_c1=threshold->c1;
+    double threshold_c2=threshold->c2;
+    double threshold_c3=threshold->c3;
+    for(int i=0;i<width*height;i++){
+        if(src[i].c1>=threshold_c1&&
+           src[i].c2>=threshold_c2&&
+           src[i].c3>=threshold_c3){
+            temp[i].c1=src[i].c1;
+            temp[i].c2=src[i].c2;
+            temp[i].c3=src[i].c3;
+        }
+            
+    }
+    Copy_RGB(temp,dst,width, height);
+    free(temp);
 }

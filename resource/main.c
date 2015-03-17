@@ -82,13 +82,23 @@ int main(int argc, const char * argv[]) {
     //double* dst2arry_g=(double *)malloc(sizeof(double)*width*height);
     //double* dst2arry_b=(double *)malloc(sizeof(double)*width*height);
     //SharpenRGB(srcarry, dst1arry, width, height, 1, SHARPEN_SOBEL);
-    RGB2HSI(srcarry, dst1arry, width, height);
+    //RGB2HSI(srcarry, dst1arry, width, height);
     //SharpenHSI(dst1arry, dst1arry, width, height, 1, SHARPEN_SOBEL);
-    SmoothHSI(dst1arry, dst2arry, width, height, 5, 5, 0.8, 30, SMOOTH_MEAN);
-    HSI2RGB(dst2arry, dst1arry, width, height);
+    //SmoothHSI(dst1arry, dst2arry, width, height, 5, 5, 0.8, 30, SMOOTH_MEAN);
+    //HSI2RGB(dst2arry, dst1arry, width, height);
     //Zero(dst1arry_b, width, height);
     //RGB2sRGB(srcarry, dst1arry, width, height);
     //sRGB2RGB(dst1arry, dst2arry, width, height);
+    //RGB skin_rgb;
+    //skin_rgb.c1=185;
+    //skin_rgb.c2=0;
+    //skin_rgb.c3=0;
+    
+    //double distance=130;
+    //SegmentRGB(srcarry, dst1arry, width, height, &skin_rgb, distance);
+    //SmoothRGB(dst2arry,dst1arry, width, height, 15, 15, 2.4, 0, SMOOTH_GAUSSIAN);
+    //Threshold_RGB(dst1arry, dst1arry, &threshold, width, height);
+    //Cover_RGB(srcarry,dst2arry, dst1arry, width, height);
     //RGB2YIQ(srcarry , dst1arry, width, height);
     //Split(dst1arry, dst3arry, dst4arry, dst5arry, width, height);
     //Zero(dst4arry, width, height);
@@ -96,7 +106,7 @@ int main(int argc, const char * argv[]) {
     //RGB2HSV(srcarry, dst2arry, width, height);
     //Complementary_Color(dst2arry, dst2arry, width, height, COLOR_SPACE_HSV);
     //HSV2RGB(dst2arry, dst1arry, width, height);
-    //HistEqualRGB(srcarry, dst2arry, width, height);
+    HistEqualRGB(srcarry, dst2arry, width, height);
     //RGB2HSI(srcarry, dst1arry, width, height);
     //Split(dst1arry, dst3arry, dst4arry, dst5arry, width, height);
     //HSI2RGB(dst2arry, dst1arry, width, height);
@@ -123,8 +133,8 @@ int main(int argc, const char * argv[]) {
  
     cvMerge(dst1_r, dst1_g, dst1_b, NULL, dst1);
     cvMerge(dst2_r, dst2_g, dst2_b, NULL, dst2);
-    cvSaveImage("/Users/Tony/DIPImage/lena_smooth_hsi_m.png", dst1, 0);
-    //cvSaveImage("/Users/Tony/DIPImage/water_min.png", dst2, 0);
+    cvSaveImage("/Users/Tony/DIPImage/lena_dst.png", dst2, 0);
+    //cvSaveImage("/Users/Tony/DIPImage/segment_RGB_ban1_dst.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);
     //cvCanny(src, dst2, 200, 150,3);
@@ -135,12 +145,12 @@ int main(int argc, const char * argv[]) {
     cvShowImage("dst1", dst1);
     cvNamedWindow("dst2", 1);
     cvShowImage("dst2", dst2);
-    cvNamedWindow("dst3", 1);
+    /*cvNamedWindow("dst3", 1);
     cvShowImage("dst3", dst3);
     cvNamedWindow("dst4", 1);
     cvShowImage("dst4", dst4);
     cvNamedWindow("dst5", 1);
-    cvShowImage("dst5", dst5);
+    cvShowImage("dst5", dst5);*/
     cvWaitKey(0);
     free(srcarry);
 
