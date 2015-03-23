@@ -16,9 +16,12 @@
 #include "color.h"
 #include "Pseudo_Color.h"
 #include "ColorProcess.h"
+#include "Resize.h"
 #define HIGH_FR 1
 #define LOW_FR 2
 #define SIZE_WH 256
+
+#define RESIZE 2.5
 
 void showfilter(double *filter,int width,int height){
     IplImage *show=cvCreateImage(cvSize(width, height),8,1);
@@ -34,9 +37,9 @@ void showfilter(double *filter,int width,int height){
 }
 
 int main(int argc, const char * argv[]) {
+    int r_width=50,r_height=50;
     
-    
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.png", 1);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.png", 0);
     
     int width=src->width, height=src->height;
     RGB * srcarry=(RGB *)malloc(sizeof(RGB)*width*height);
@@ -46,6 +49,7 @@ int main(int argc, const char * argv[]) {
     double * dst3arry=(double *)malloc(sizeof(double)*width*height);
     double * dst4arry=(double *)malloc(sizeof(double)*width*height);
     double * dst5arry=(double *)malloc(sizeof(double)*width*height);
+    double * dst6arry=(double *)malloc(sizeof(double)*r_width*r_height);
     IplImage *dst1_r =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst1_g =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst1_b =cvCreateImage(cvSize(width, height), src->depth, 1);
@@ -57,6 +61,7 @@ int main(int argc, const char * argv[]) {
     IplImage *dst3 =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst4 =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst5 =cvCreateImage(cvSize(width, height), src->depth, 1);
+    IplImage *dst6 =cvCreateImage(cvSize(r_width, r_height), src->depth, 1);
     if(src->nChannels==3){
         for (int j=0;j<height; j++) {
             for(int i=0;i<width;i++){
@@ -93,7 +98,7 @@ int main(int argc, const char * argv[]) {
     //skin_rgb.c1=185;
     //skin_rgb.c2=0;
     //skin_rgb.c3=0;
-    
+    Resize(srcarry_dbl, width, height, dst6arry, r_width, r_height);
     //double distance=130;
     //SegmentRGB(srcarry, dst1arry, width, height, &skin_rgb, distance);
     //SmoothRGB(dst2arry,dst1arry, width, height, 15, 15, 2.4, 0, SMOOTH_GAUSSIAN);
@@ -106,7 +111,7 @@ int main(int argc, const char * argv[]) {
     //RGB2HSV(srcarry, dst2arry, width, height);
     //Complementary_Color(dst2arry, dst2arry, width, height, COLOR_SPACE_HSV);
     //HSV2RGB(dst2arry, dst1arry, width, height);
-    HistEqualRGB(srcarry, dst2arry, width, height);
+    //HistEqualRGB(srcarry, dst2arry, width, height);
     //RGB2HSI(srcarry, dst1arry, width, height);
     //Split(dst1arry, dst3arry, dst4arry, dst5arry, width, height);
     //HSI2RGB(dst2arry, dst1arry, width, height);
@@ -129,11 +134,15 @@ int main(int argc, const char * argv[]) {
         }
 
     }
+    for (int j=0;j<r_height; j++) {
+        for(int i=0;i<r_width;i++){
+            cvSetReal2D(dst6, j, i,dst6arry[j*r_width+i]);
+        }
     
- 
+    }
     cvMerge(dst1_r, dst1_g, dst1_b, NULL, dst1);
     cvMerge(dst2_r, dst2_g, dst2_b, NULL, dst2);
-    cvSaveImage("/Users/Tony/DIPImage/lena_dst.png", dst2, 0);
+    cvSaveImage("/Users/Tony/DIPImage/lena_resize.png", dst6, 0);
     //cvSaveImage("/Users/Tony/DIPImage/segment_RGB_ban1_dst.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);
@@ -145,12 +154,14 @@ int main(int argc, const char * argv[]) {
     cvShowImage("dst1", dst1);
     cvNamedWindow("dst2", 1);
     cvShowImage("dst2", dst2);
-    /*cvNamedWindow("dst3", 1);
+    cvNamedWindow("dst3", 1);
     cvShowImage("dst3", dst3);
     cvNamedWindow("dst4", 1);
     cvShowImage("dst4", dst4);
     cvNamedWindow("dst5", 1);
-    cvShowImage("dst5", dst5);*/
+    cvShowImage("dst5", dst5);
+    cvNamedWindow("dst6", 1);
+    cvShowImage("dst6", dst6);
     cvWaitKey(0);
     free(srcarry);
 
