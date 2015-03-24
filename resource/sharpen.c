@@ -36,7 +36,7 @@ void LaplaceSharpen(double *src,double *dst,int width,int height,double c){
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-
+//非锐化掩蔽
 void UnsharpMasking(double *src,double *dst,int width,int height,int smooth_type,int smooth_mask_width,int smooth_mask_height,double gaussian_deta,double k){
     switch (smooth_type) {
         case SMOOTH_GAUSSIAN:

@@ -17,6 +17,7 @@
 #include "Pseudo_Color.h"
 #include "ColorProcess.h"
 #include "Resize.h"
+#include "SIFT.h"
 #define HIGH_FR 1
 #define LOW_FR 2
 #define SIZE_WH 256
@@ -39,7 +40,7 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     int r_width=50,r_height=50;
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.png", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/SIFT_test.png", 0);
     
     int width=src->width, height=src->height;
     RGB * srcarry=(RGB *)malloc(sizeof(RGB)*width*height);
@@ -49,7 +50,7 @@ int main(int argc, const char * argv[]) {
     double * dst3arry=(double *)malloc(sizeof(double)*width*height);
     double * dst4arry=(double *)malloc(sizeof(double)*width*height);
     double * dst5arry=(double *)malloc(sizeof(double)*width*height);
-    double * dst6arry=(double *)malloc(sizeof(double)*r_width*r_height);
+    double * dst6arry=(double *)malloc(sizeof(double)*width*height*4);
     IplImage *dst1_r =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst1_g =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst1_b =cvCreateImage(cvSize(width, height), src->depth, 1);
@@ -61,7 +62,7 @@ int main(int argc, const char * argv[]) {
     IplImage *dst3 =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst4 =cvCreateImage(cvSize(width, height), src->depth, 1);
     IplImage *dst5 =cvCreateImage(cvSize(width, height), src->depth, 1);
-    IplImage *dst6 =cvCreateImage(cvSize(r_width, r_height), src->depth, 1);
+    IplImage *dst6 =cvCreateImage(cvSize(width*2, height*2), src->depth, 1);
     if(src->nChannels==3){
         for (int j=0;j<height; j++) {
             for(int i=0;i<width;i++){
@@ -98,7 +99,19 @@ int main(int argc, const char * argv[]) {
     //skin_rgb.c1=185;
     //skin_rgb.c2=0;
     //skin_rgb.c3=0;
-    Resize(srcarry_dbl, width, height, dst6arry, r_width, r_height);
+    //Resize(srcarry_dbl, width, height, dst6arry, r_width, r_height);
+    //printf("%d\n",isEVEN(3));
+    //Resize(srcarry_dbl, 256, 256,dst6arry, 512, 512);
+    SIFT(srcarry_dbl,dst3arry, width, height, 5, 5);
+    //double * space[5];
+    //double * dog[4];
+    //ScaleSpace(srcarry_dbl, space, width, height, 1.6, 5);
+    //DOG_Scale(space, dog, width, height, 5);
+    //dst3arry=dog[0];
+    //printf("%lf\n",delta);
+    //dst4arry=space[1];
+    //matrixSub(dst4arry,dst3arry,dst5arry, width, height);
+   // HistogramEqualization(dst3arry, dst3arry, width, height);
     //double distance=130;
     //SegmentRGB(srcarry, dst1arry, width, height, &skin_rgb, distance);
     //SmoothRGB(dst2arry,dst1arry, width, height, 15, 15, 2.4, 0, SMOOTH_GAUSSIAN);
@@ -134,15 +147,16 @@ int main(int argc, const char * argv[]) {
         }
 
     }
-    for (int j=0;j<r_height; j++) {
-        for(int i=0;i<r_width;i++){
-            cvSetReal2D(dst6, j, i,dst6arry[j*r_width+i]);
+    for (int j=0;j<height*2; j++) {
+        for(int i=0;i<width*2;i++){
+            
+            cvSetReal2D(dst6, j, i,dst6arry[j*(width*2)+i]);
         }
     
     }
     cvMerge(dst1_r, dst1_g, dst1_b, NULL, dst1);
     cvMerge(dst2_r, dst2_g, dst2_b, NULL, dst2);
-    cvSaveImage("/Users/Tony/DIPImage/lena_resize.png", dst6, 0);
+    cvSaveImage("/Users/Tony/DIPImage/SIFT_TEST_DIP_2.png", dst3, 0);
     //cvSaveImage("/Users/Tony/DIPImage/segment_RGB_ban1_dst.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);
@@ -150,21 +164,29 @@ int main(int argc, const char * argv[]) {
     //Thinning(dst2, dst2);
     cvNamedWindow("src", 1);
     cvShowImage("src", src);
+    
     cvNamedWindow("dst1", 1);
     cvShowImage("dst1", dst1);
+    
     cvNamedWindow("dst2", 1);
     cvShowImage("dst2", dst2);
+    
     cvNamedWindow("dst3", 1);
     cvShowImage("dst3", dst3);
+    
     cvNamedWindow("dst4", 1);
     cvShowImage("dst4", dst4);
+    
     cvNamedWindow("dst5", 1);
     cvShowImage("dst5", dst5);
+    
     cvNamedWindow("dst6", 1);
     cvShowImage("dst6", dst6);
+    
     cvWaitKey(0);
     free(srcarry);
-
+    //ReleaseMatArr(space, 5);
+    //ReleaseMatArr(dog, 4);
     return 0;
 }
 

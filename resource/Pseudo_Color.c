@@ -23,7 +23,8 @@
 //
 
 #include "Pseudo_Color.h"
-
+//生成伪彩色图像，灰度0~255 映射到色相0~270°
+//HSV空间
 void Gray2Color(double *src,RGB* dst,int width,int height,int type){
     HSV* temp=(HSV*)malloc(sizeof(HSV)*width*height);
     for(int i=0;i<width*height;i++){

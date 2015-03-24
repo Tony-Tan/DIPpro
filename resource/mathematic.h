@@ -2,10 +2,9 @@
 #define MATHEMATIC_H
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-
-#define GRAY_LEVEL 256
-
 #endif
+#define GRAY_LEVEL 256
+#define isEVEN(x) (!(x%2))
 #include <math.h>
 #include <stdlib.h> 
 #include <limits.h>
