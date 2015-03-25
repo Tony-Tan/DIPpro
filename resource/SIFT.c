@@ -132,7 +132,7 @@ int Accurate_Position(double *src,double *dst,double * extremum){
     return 0;
 }
 /***********************************************************************************************************/
-int findOrientation(double *src,int width,int height,Position_DBL *position,double delta,double ** orientation){
+int findOrientation(double *src,int width,int height,Position_DBL *position,double delta,double * orientation){
     int orientation_count=0;
     int position_x_int=(int)(position->x);
     int position_y_int=(int)(position->y);
@@ -190,13 +190,12 @@ int findOrientation(double *src,int width,int height,Position_DBL *position,doub
     }
     if(hist_max2/hist_max>0.8){
         orientation_count=2;
-        (*orientation) =(double *)malloc(sizeof(double)*2);
-        (*orientation)[0]=angle;
-        (*orientation)[1]=angle2;
+        
+        orientation[0]=angle;
+        orientation[1]=angle2;
     }else{
         orientation_count=1;
-        (*orientation)=(double *)malloc(sizeof(double));
-        (*orientation)[0]=angle;
+        orientation[0]=angle;
     }
     
     free(temp_angle);
@@ -210,7 +209,8 @@ int findOrientation(double *src,int width,int height,Position_DBL *position,doub
 }
 /***********************************************************************************************************/
 int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL position,double delta,double orientation){
-    if(position.x+8>width||position.y+8>height||position.x<8||position.y<8)
+    if(position.x+8>width||position.y+8>height||
+       position.x<8      ||position.y<8)
         return 0;
     
     
@@ -245,7 +245,7 @@ int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL
     for(int j=down;j<up;j++){
         for(int i=down;i<up;i++){
             double temp_orientation=temp_angle[j*w_width+i]-orientation;
-            descriptor[((int)(j/4)*4+(int)(i/4))*8+(int)(temp_orientation/45.0)]+=(int)temp_range[j*w_width+i];
+            descriptor[((int)((j-down)/4)*4+(int)((i-down)/4))*8+(int)(temp_orientation/45.0)]+=(int)temp_range[j*w_width+i];
         }
     }
     
@@ -259,6 +259,8 @@ int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL
 
 /***********************************************************************************************************/
 void findCandideat(double *DoG[],double *delta_arry,double *src,double *test,int width,int height,int DoG_level){
+    double orientation[2];
+    int descriptor[128];
     int isMoreorLess=0;
     int timetoBreak=0;
     int num=0;
@@ -271,7 +273,7 @@ void findCandideat(double *DoG[],double *delta_arry,double *src,double *test,int
                 isMoreorLess=0;
                 timetoBreak=0;
                 double value=(DoG[l])[j*width+i];
-                
+        
                 
                 for(int d=-1;d<2&&!timetoBreak;d++)
                     for(int m=-1;m<2&&!timetoBreak;m++)
@@ -301,18 +303,14 @@ void findCandideat(double *DoG[],double *delta_arry,double *src,double *test,int
                         Position_DBL p_d;
                         p_d.x=i+theta_position[0];
                         p_d.y=j+theta_position[1];
-                        double *orientation=NULL;
-                        int descriptor[128];
-                        findOrientation(src, width, height, &p_d, delta_arry[l]+theta_position[2],&orientation );
                         
-                        if(orientation!=NULL){
-                            printf("%g:",*orientation);
-                            getDescriptor(src,descriptor, width, height, p_d,delta_arry[l]+theta_position[2], orientation[0]);
-                            for(int i=0;i<128;i++)
-                                printf("\t%d",descriptor[i]);
+                        int o_num=findOrientation(src, width, height, &p_d, delta_arry[l]+theta_position[2],orientation );
+                        
+                        while(o_num--){
+                            getDescriptor(src,descriptor, width, height, p_d,delta_arry[l]+theta_position[2], orientation[o_num]);
+                            for(int x=0;x<128;x++)
+                                printf("%d\t",descriptor[x]);
                             printf("\n");
-                       
-                            free(orientation);
                         }
                         test[j*width+i]=255.0;
                         num++;
