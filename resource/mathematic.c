@@ -38,7 +38,7 @@ int isBase2(int size_n){
         return k;
 }
 
-double Distance(int x,int y,int c_x,int c_y){
+double Distance(double x,double y,double c_x,double c_y){
     
     return sqrt((x-c_x)*(x-c_x)+(y-c_y)*(y-c_y));
 }
@@ -89,23 +89,37 @@ void Show_Complex(Complex * src,int size_n){
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 void matrixAdd(double *src1,double *src2,double *dst,int width,int height){
-    
     for(int i=0;i<width*height;i++)
         dst[i]=src1[i]+src2[i];
 }
 void matrixSub(double *src1,double *src2,double *dst,int width,int height){
-    
     for(int i=0;i<width*height;i++)
         dst[i]=src1[i]-src2[i];
 }
 void matrixCopy(double *src,double *dst,int width,int height){
-    
     for(int i=0;i<width*height;i++)
         dst[i]=src[i];
 }
+
+int matrixCopyLocal(double *src,double *dst,int width,int height,int w_width,int w_height,Position *lefttoppoint){
+    if(lefttoppoint->x+w_width<width&&lefttoppoint->y+w_height<height){
+        for(int j=0;j<w_height;j++)
+            for(int i=0;i<w_width;i++){
+                dst[j*w_width+i]=src[(j+lefttoppoint->y)*width+i+lefttoppoint->x];
+            }
+        return 1;
+    }
+    else
+        return 0;
+}
+
 void matrixMultreal(double *src,double *dst,double k,int width,int height){
     for(int i=0;i<width*height;i++)
         dst[i]=src[i]*k;
+}
+void matrixMul_matrix(double *src1,double *src2,double *dst,int width,int height){
+    for(int i=0;i<width*height;i++)
+        dst[i]=src1[i]*src2[i];
 }
 double findMatrixMax(double *src,int width,int height){
     double max=-1.0;
@@ -169,4 +183,21 @@ void Mask(double *src,double *dst,double *mask,int width,int height){
     matrixCopy(temp, dst, width, height);
     free(temp);
 }
-
+//一般差分，返回幅度值和方向矩阵
+void matrixOrdinaryDiff(double *src,double *range,double* angle,int width,int height){
+    double *temp_rang=(double *)malloc(sizeof(double)*width*height);
+    double *temp_angle=(double *)malloc(sizeof(double)*width*height);
+    Zero(temp_angle, width, height);
+    Zero(temp_rang, width, height);
+    for(int j=1;j<height-1;j++)
+        for(int i=1;i<width-1;i++){
+            double d_x=src[j*width+i+1]-src[j*width+i-1];
+            double d_y=src[(j+1)*width+i]-src[(j-1)*width+i];
+            temp_rang[j*width+i]=fabs(d_x)+fabs(d_y);
+            temp_angle[j*width+i]=atan2(d_y, d_x)*W_PI+180;// atan2(double y,double x)
+        }
+    matrixCopy(temp_angle, angle, width, height);
+    matrixCopy(temp_rang, range, width, height);
+    free(temp_rang);
+    free(temp_angle);
+}

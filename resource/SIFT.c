@@ -23,6 +23,10 @@
 //
 
 #include "SIFT.h"
+#define ANGLEHISTSIZE 360
+
+#include <cv.h>
+#include <highgui.h>
 //sift中降采样，最邻近取一半
 double * SIFT_Resize(double *src,int width,int height){
     int d_width=width/2;
@@ -37,6 +41,7 @@ double * SIFT_Resize(double *src,int width,int height){
     return dst;
 
 }
+/***********************************************************************************************************/
 int getGaussianSize(double delta){
     int size=0;
     if(delta<0.17)
@@ -48,20 +53,22 @@ int getGaussianSize(double delta){
     return size;
 
 }
+/***********************************************************************************************************/
 //尺度空间，返回一个指针数组，每个指针指向一层
-double ScaleSpace(double *src,double * dst[],int width,int height,double delta_max,int k){
+void ScaleSpace(double *src,double * dst[],double *delta_arry,int width,int height,double delta_max,int k){
     double delta=pow(delta_max, 1./(double)k);
     double delta_thistime=delta;
     int gaussian_size=0;
     for(int l=0;l<k;l++){
+        delta_arry[l]=delta_thistime;
         dst[l]=(double *)malloc(sizeof(double)*width*height);
         gaussian_size=getGaussianSize(delta_thistime);
         GaussianFilter(src, dst[l], width, height, gaussian_size, gaussian_size, delta_thistime);
         delta_thistime*=delta;
     }
 
-    return delta;
 }
+/***********************************************************************************************************/
 //k是原始空间的层数，DOG为k-1层
 void DOG_Scale(double *src[],double * dst[],int width,int height,int scale_level){
     for(int i=0;i<scale_level-1;i++){
@@ -69,11 +76,12 @@ void DOG_Scale(double *src[],double * dst[],int width,int height,int scale_level
         matrixSub(src[i+1], src[i], dst[i], width, height);
     }
 }
-
+/***********************************************************************************************************/
 void ReleaseMatArr(double * dst[],int k){
     for(int i=0;i<k;i++)
         free(dst[i]);
 }
+/***********************************************************************************************************/
 /////
 ///3x3x3的立方体做泰勒展开找到亚像素级的极值点，并筛选不稳定的特征点
 #define HESSIAN_THRESHOLD 12.1  //(lamda+1)^2/lamda  lamda=10.0
@@ -109,8 +117,8 @@ int Accurate_Position(double *src,double *dst,double * extremum){
         dst[0]=src_1[0]*dx+src_1[1]*dy+src_1[2]*dd;
         dst[1]=src_1[3]*dx+src_1[4]*dy+src_1[5]*dd;
         dst[2]=src_1[6]*dx+src_1[7]*dy+src_1[8]*dd;
-        if( dst[0]>0.5 ||dst[1]>0.5 ||dst[2]>0.5 ||
-            dst[0]<-0.5||dst[1]<-0.5||dst[2]<-0.5)
+        if( dst[0]>0.5 ||dst[1]>0.5||
+            dst[0]<-0.5||dst[1]<-0.5)
             return 0;
         else{
             *extremum=src[13]+dx*dst[0]+dy*dst[1]+dd*dst[2];
@@ -124,12 +132,138 @@ int Accurate_Position(double *src,double *dst,double * extremum){
     return 0;
 }
 /***********************************************************************************************************/
-void findCandideat(double *DoG[],double *test,int width,int height,int DoG_level){
+int findOrientation(double *src,int width,int height,Position_DBL *position,double delta,double ** orientation){
+    int orientation_count=0;
+    int position_x_int=(int)(position->x);
+    int position_y_int=(int)(position->y);
+    int w_width=(int)(delta*12.0);
+    w_width+=isEVEN(w_width)?0:1;
+    int w_height=w_width;
+    int g_size=(int)(6.0*delta);
+    g_size+=isEVEN(g_size)?1:2;
+
+    
+    if(position_x_int+w_width/2>width||position_x_int-w_width/2<0 ||
+       position_y_int+w_height/2>width||position_y_int-w_height/2<0)
+        return 0;
+    
+
+    double* temp_src=(double *)malloc(sizeof(double)*w_width*w_height);
+    double* temp_scale=(double *)malloc(sizeof(double)*w_width*w_height);
+    double* temp_angle=(double *)malloc(sizeof(double)*w_width*w_height);
+    double* temp_range=(double *)malloc(sizeof(double)*w_width*w_height);
+    double* gaussian_kernel=(double *)malloc(sizeof(double)*w_width*w_height);
+    Position p;
+    p.x=position_x_int-(int)(w_width/2)-1;
+    p.y=position_y_int-(int)(w_height/2)-1;
+    
+    matrixCopyLocal(src, temp_src, width, height, w_width, w_height, &p);
+    GaussianFilter(temp_src, temp_scale, w_width, w_height, g_size, g_size, delta);
+    matrixOrdinaryDiff(temp_scale, temp_range, temp_angle, w_width, w_height);
+    GaussianMask(gaussian_kernel, w_width, w_height, delta*1.5);
+    matrixMul_matrix(temp_range, gaussian_kernel, temp_range, w_width, w_height);
+    double angle_hist[ANGLEHISTSIZE];
+    for(int i=0;i<ANGLEHISTSIZE;i++)
+        angle_hist[i]=0.0;
+    for(int j=0;j<w_height;j++){
+        for(int i=0;i<w_width;i++){
+            double distanc=Distance(i, j, w_width/2+0.5, w_height/2+0.5);
+            if(distanc<4.5*delta)
+                angle_hist[((int)temp_angle[j*w_width+i])]+=temp_range[j*w_width+i];
+        }
+    
+    }
+    double angle=0.0;
+    double angle2=0.0;
+    double hist_max=-1.0;
+    double hist_max2=-1.0;
+    for(int i=0;i<ANGLEHISTSIZE;i++){
+        if(angle_hist[i]>=hist_max){
+            angle=i;
+            hist_max=angle_hist[i];
+        
+        }else if(angle_hist[i]>hist_max2){
+            angle2=i;
+            hist_max2=angle_hist[i];
+            
+        }
+    }
+    if(hist_max2/hist_max>0.8){
+        orientation_count=2;
+        (*orientation) =(double *)malloc(sizeof(double)*2);
+        (*orientation)[0]=angle;
+        (*orientation)[1]=angle2;
+    }else{
+        orientation_count=1;
+        (*orientation)=(double *)malloc(sizeof(double));
+        (*orientation)[0]=angle;
+    }
+    
+    free(temp_angle);
+    free(temp_range);
+    free(temp_scale);
+    free(temp_src);
+    free(gaussian_kernel);
+    
+    
+    return orientation_count;
+}
+/***********************************************************************************************************/
+int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL position,double delta,double orientation){
+    if(position.x+8>width||position.y+8>height||position.x<8||position.y<8)
+        return 0;
+    
+    
+    int g_size=(int)(delta*6.0);
+    g_size+=isEVEN(g_size)?1:2;
+    int w_width=g_size+15;
+    int w_height=w_width;
+    
+
+    
+    
+    double* temp_src=(double *)malloc(sizeof(double)*w_width*w_height);
+    double* temp_scale=(double *)malloc(sizeof(double)*w_width*w_height);
+    double* temp_angle=(double *)malloc(sizeof(double)*w_width*w_height);
+    double* temp_range=(double *)malloc(sizeof(double)*w_width*w_height);
+    
+    
+    for(int i=0;i<128;i++)
+        descriptor[i]=0;
+    
+    Position lefttop;
+    lefttop.x=(int)position.x-w_width-1;
+    lefttop.y=(int)position.y-w_height-1;
+    
+    
+    
+    matrixCopyLocal(src, temp_src, width, height, w_width, w_height, &lefttop);
+    GaussianFilter(temp_src, temp_scale, w_width, w_height, g_size, g_size, delta);
+    matrixOrdinaryDiff(temp_scale, temp_range, temp_angle, w_width,w_height);
+    int up=w_height/2+9;
+    int down=w_height/2-7;
+    for(int j=down;j<up;j++){
+        for(int i=down;i<up;i++){
+            double temp_orientation=temp_angle[j*w_width+i]-orientation;
+            descriptor[((int)(j/4)*4+(int)(i/4))*8+(int)(temp_orientation/45.0)]+=(int)temp_range[j*w_width+i];
+        }
+    }
+    
+    free(temp_angle);
+    free(temp_range);
+    free(temp_scale);
+    free(temp_src);
+    
+    return 1;
+}
+
+/***********************************************************************************************************/
+void findCandideat(double *DoG[],double *delta_arry,double *src,double *test,int width,int height,int DoG_level){
     int isMoreorLess=0;
     int timetoBreak=0;
     int num=0;
     double extremum=0.0;
-    double delta_position[3];
+    double theta_position[3];
     double N_temp[27];//邻域3x3x3区域
     for(int l=1;l<DoG_level-1;l++){
         for(int j=1;j<height-1;j++){
@@ -162,8 +296,24 @@ void findCandideat(double *DoG[],double *test,int width,int height,int DoG_level
                             for(int n=-1;n<2;n++){
                                 N_temp[(d+1)*9+(m+1)*3+n+1]=(DoG[l+d])[(j+m)*width+i+n];
                             }
-                    if(Accurate_Position(N_temp, delta_position,&extremum)){
-                        printf("isMore:%5d-------l:%10g  [%g,%g]  value:%10g\n",isMoreorLess,(l+delta_position[2]),j+delta_position[1],i+delta_position[0],extremum);
+                    if(Accurate_Position(N_temp, theta_position,&extremum)){
+                        printf("isMore:%5d\t[%g,\t%g,\t%g] \t\t value:%10g\n",isMoreorLess,j+theta_position[1],i+theta_position[0],(delta_arry[l]+theta_position[2]),extremum);
+                        Position_DBL p_d;
+                        p_d.x=i+theta_position[0];
+                        p_d.y=j+theta_position[1];
+                        double *orientation=NULL;
+                        int descriptor[128];
+                        findOrientation(src, width, height, &p_d, delta_arry[l]+theta_position[2],&orientation );
+                        
+                        if(orientation!=NULL){
+                            printf("%g:",*orientation);
+                            getDescriptor(src,descriptor, width, height, p_d,delta_arry[l]+theta_position[2], orientation[0]);
+                            for(int i=0;i<128;i++)
+                                printf("\t%d",descriptor[i]);
+                            printf("\n");
+                       
+                            free(orientation);
+                        }
                         test[j*width+i]=255.0;
                         num++;
                     }
@@ -176,15 +326,14 @@ void findCandideat(double *DoG[],double *test,int width,int height,int DoG_level
     printf("with acc total num :%d\n",num);
     
 }
+/***********************************************************************************************************/
 void SIFT(double *src,double *dst,int width,int height,int scale_k,int octave){
+    double *delta_arry=(double *)malloc(sizeof(double)*scale_k);
     double** scale=malloc(sizeof(double*)*scale_k);
     double** dog=malloc(sizeof(double*)*(scale_k-1));
-    ScaleSpace(src, scale, width, height,1.7, scale_k);
+    ScaleSpace(src, scale,delta_arry,width, height,1.7, scale_k);
     DOG_Scale(scale, dog, width,height, scale_k);
-    
-    findCandideat(dog,dst, width, height, scale_k-1);
-    
+    findCandideat(dog,delta_arry,src,dst, width, height, scale_k-1);
     ReleaseMatArr(scale, scale_k);
     ReleaseMatArr(dog, scale_k-1);
-
 }
