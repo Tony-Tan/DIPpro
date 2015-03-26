@@ -201,3 +201,65 @@ void matrixOrdinaryDiff(double *src,double *range,double* angle,int width,int he
     free(temp_rang);
     free(temp_angle);
 }
+
+//矩阵旋转
+void matrixRotation(double *src,double *dst,int s_width,int s_height,int d_width,int d_height,double theta,Position_DBL* center){
+    theta/=W_PI;
+    double cos_theta=cos(theta);
+    double sin_theta=sin(theta);
+    double src_x,src_y;
+    int src_x_int,src_y_int;
+    double *temp_dst=(double *)malloc(sizeof(double)*d_width*d_height);
+    double v11,v12,v21,v22;
+    double value=0.0;
+    double center_x=(double)center->x;
+    double center_y=(double)center->y;
+    double dw=center_x/s_width;
+    double dh=center_y/s_height;
+    Zero(temp_dst, d_width, d_height);
+    for(int j=0;j<d_height;j++){
+        for(int i=0;i<d_width;i++){
+            if(j==128&&i==88)
+                printf("stop\n");
+            value=0.0;
+            src_x=(i-dw*d_width)*cos_theta+(dh*d_height-j)*sin_theta+dw*s_width;
+            src_y=(i-dw*d_width)*sin_theta-(dh*d_height-j)*cos_theta+dh*s_height;
+            src_x_int=(int)src_x;
+            src_y_int=(int)src_y;
+            if(src_x<0.0||src_y<0.0||src_x>d_width||src_y>d_height)
+                ;//nothing to do
+            else{
+                double delta_x=(src_x-(double)(src_x_int));
+                double delta_y=(src_y-(double)(src_y_int));
+                if(delta_x==0.0&&src_y_int<d_height-1){
+                    v11=src[src_y_int*s_width+src_x_int];
+                    v21=src[(src_y_int+1)*s_width+src_x_int];
+                    value=v11*(1.0-delta_y)+delta_y*v21;
+                }else if(delta_x<d_width-1&&delta_y==0){
+                    v11=src[src_y_int*s_width+src_x_int];
+                    v12=src[(src_y_int)*s_width+src_x_int+1];
+                    value=v11*(1.0-delta_x)+delta_x*v12;
+                }else if(delta_x==0&&src_y_int==0){
+                    value=src[(src_y_int)*s_width+src_x_int];
+                }
+                else if(delta_y>0.0&&delta_x>0.0&&src_y_int<d_height-1&&src_x_int<d_width-1){
+                    v11=src[src_y_int*s_width+src_x_int];
+                    v12=src[(src_y_int)*s_width+src_x_int+1];
+                    v21=src[(src_y_int+1)*s_width+src_x_int];
+                    v22=src[(src_y_int+1)*s_width+src_x_int+1];
+                    double v1=v12*delta_x+(1-delta_x)*v11;
+                    double v2=v22*delta_x+(1-delta_x)*v21;
+                    value=v2*delta_y+(1-delta_y)*v1;
+                }
+            }
+            
+            
+            temp_dst[j*d_width+i]=value;
+            //printf("%d ",(int)value);
+        }
+        //printf("\n");
+    }
+    matrixCopy(temp_dst, dst, d_width, d_height);
+    free(temp_dst);
+
+}

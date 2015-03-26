@@ -33,8 +33,8 @@ void GaussianMask(double *mask,int width,int height,double deta){
     double deta_2=deta*deta;
     double center_x=(double)width/2.0;
     double center_y=(double)height/2.0;
-    center_x+=isEVEN(width)?0.5:1.0;
-    center_y+=isEVEN(height)?0.5:1.0;
+    center_x-=isEVEN(width)?0.5:0;
+    center_y-=isEVEN(height)?0.5:0;
     double param=1.0/(2*M_PI*deta_2);
     for(int i=0;i<height;i++)
         for(int j=0;j<width;j++){

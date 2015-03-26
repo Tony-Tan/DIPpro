@@ -23,7 +23,7 @@
 //
 
 #include "SIFT.h"
-#define ANGLEHISTSIZE 360
+#define ANGLEHISTSIZE 180
 
 #include <cv.h>
 #include <highgui.h>
@@ -65,6 +65,8 @@ void ScaleSpace(double *src,double * dst[],double *delta_arry,int width,int heig
         gaussian_size=getGaussianSize(delta_thistime);
         GaussianFilter(src, dst[l], width, height, gaussian_size, gaussian_size, delta_thistime);
         delta_thistime*=delta;
+        
+        
     }
 
 }
@@ -74,6 +76,9 @@ void DOG_Scale(double *src[],double * dst[],int width,int height,int scale_level
     for(int i=0;i<scale_level-1;i++){
         dst[i]=(double *)malloc(sizeof(double)*width*height);
         matrixSub(src[i+1], src[i], dst[i], width, height);
+        
+        
+        
     }
 }
 /***********************************************************************************************************/
@@ -140,7 +145,7 @@ int findOrientation(double *src,int width,int height,Position_DBL *position,doub
     w_width+=isEVEN(w_width)?0:1;
     int w_height=w_width;
     int g_size=(int)(6.0*delta);
-    g_size+=isEVEN(g_size)?1:2;
+    g_size+=isEVEN(g_size)?0:1;
 
     
     if(position_x_int+w_width/2>width||position_x_int-w_width/2<0 ||
@@ -162,14 +167,18 @@ int findOrientation(double *src,int width,int height,Position_DBL *position,doub
     matrixOrdinaryDiff(temp_scale, temp_range, temp_angle, w_width, w_height);
     GaussianMask(gaussian_kernel, w_width, w_height, delta*1.5);
     matrixMul_matrix(temp_range, gaussian_kernel, temp_range, w_width, w_height);
+    
     double angle_hist[ANGLEHISTSIZE];
     for(int i=0;i<ANGLEHISTSIZE;i++)
         angle_hist[i]=0.0;
     for(int j=0;j<w_height;j++){
         for(int i=0;i<w_width;i++){
-            double distanc=Distance(i, j, w_width/2+0.5, w_height/2+0.5);
-            if(distanc<4.5*delta)
-                angle_hist[((int)temp_angle[j*w_width+i])]+=temp_range[j*w_width+i];
+            double distanc=Distance(i, j, w_width/2-0.5, w_height/2-0.5);
+            if(distanc<4.5*delta){
+                int angle_value=(int)temp_angle[j*w_width+i];
+                angle_hist[(angle_value-1)/(360/ANGLEHISTSIZE)]+=temp_range[j*w_width+i];
+                
+            }
         }
     
     }
@@ -182,7 +191,7 @@ int findOrientation(double *src,int width,int height,Position_DBL *position,doub
             angle=i;
             hist_max=angle_hist[i];
         
-        }else if(angle_hist[i]>hist_max2){
+        }else if(angle_hist[i]>=hist_max2){
             angle2=i;
             hist_max2=angle_hist[i];
             
@@ -238,13 +247,18 @@ int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL
     
     
     matrixCopyLocal(src, temp_src, width, height, w_width, w_height, &lefttop);
+    Position_DBL  rotation_center;
+    rotation_center.x=w_width/2-0.5;
+    rotation_center.y=w_height/2-0.5;
+    matrixRotation(temp_src, temp_src, w_width, w_height, w_width, w_height, orientation, &rotation_center);
     GaussianFilter(temp_src, temp_scale, w_width, w_height, g_size, g_size, delta);
     matrixOrdinaryDiff(temp_scale, temp_range, temp_angle, w_width,w_height);
+    
     int up=w_height/2+9;
     int down=w_height/2-7;
     for(int j=down;j<up;j++){
         for(int i=down;i<up;i++){
-            double temp_orientation=temp_angle[j*w_width+i]-orientation;
+            double temp_orientation=temp_angle[j*w_width+i];
             descriptor[((int)((j-down)/4)*4+(int)((i-down)/4))*8+(int)(temp_orientation/45.0)]+=(int)temp_range[j*w_width+i];
         }
     }
@@ -299,7 +313,7 @@ void findCandideat(double *DoG[],double *delta_arry,double *src,double *test,int
                                 N_temp[(d+1)*9+(m+1)*3+n+1]=(DoG[l+d])[(j+m)*width+i+n];
                             }
                     if(Accurate_Position(N_temp, theta_position,&extremum)){
-                        printf("isMore:%5d\t[%g,\t%g,\t%g] \t\t value:%10g\n",isMoreorLess,j+theta_position[1],i+theta_position[0],(delta_arry[l]+theta_position[2]),extremum);
+                        
                         Position_DBL p_d;
                         p_d.x=i+theta_position[0];
                         p_d.y=j+theta_position[1];
@@ -307,29 +321,29 @@ void findCandideat(double *DoG[],double *delta_arry,double *src,double *test,int
                         int o_num=findOrientation(src, width, height, &p_d, delta_arry[l]+theta_position[2],orientation );
                         
                         while(o_num--){
+                            
+                            
+                            printf("isMore:%5d\t[%g,\t%g,\t%g] \t\t value:%10g\t theta:%g\n",isMoreorLess,j+theta_position[1],i+theta_position[0],(delta_arry[l]+theta_position[2]),extremum,orientation[o_num]);
                             getDescriptor(src,descriptor, width, height, p_d,delta_arry[l]+theta_position[2], orientation[o_num]);
-                            for(int x=0;x<128;x++)
-                                printf("%d\t",descriptor[x]);
-                            printf("\n");
+                            //for(int x=0;x<128;x++)
+                                //printf("%d\t",descriptor[x]);
+                            //printf("\n");
                         }
                         test[j*width+i]=255.0;
                         num++;
                     }
-                
                 }
-                
             }
         }
     }
     printf("with acc total num :%d\n",num);
-    
 }
 /***********************************************************************************************************/
 void SIFT(double *src,double *dst,int width,int height,int scale_k,int octave){
     double *delta_arry=(double *)malloc(sizeof(double)*scale_k);
     double** scale=malloc(sizeof(double*)*scale_k);
     double** dog=malloc(sizeof(double*)*(scale_k-1));
-    ScaleSpace(src, scale,delta_arry,width, height,1.7, scale_k);
+    ScaleSpace(src, scale,delta_arry,width, height,3.0, scale_k);
     DOG_Scale(scale, dog, width,height, scale_k);
     findCandideat(dog,delta_arry,src,dst, width, height, scale_k-1);
     ReleaseMatArr(scale, scale_k);

@@ -50,8 +50,7 @@ void matrixMultreal(double *src,double *dst,double k,int width,int height);
 void matrixMul_matrix(double *src1,double *src2,double *dst,int width,int height);
 void matrixDBL2INT(double *src,int *dst,int width,int height);
 double matrixMean(double *mat,int width,int height);
-
-
+void matrixRotation(double *src,double *dst,int s_width,int s_height,int d_width,int d_height,double theta,Position_DBL* center);
 
 
 double findMatrixMax(double *src,int width,int height);

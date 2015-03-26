@@ -107,6 +107,10 @@ int main(int argc, const char * argv[]) {
     //printf("%d\n",isEVEN(3));
     //Resize(srcarry_dbl, 256, 256,dst6arry, 512, 512);
     SIFT(srcarry_dbl,dst3arry, width, height, 5, 5);
+    //Position_DBL p;
+    //p.x=5;
+    //p.y=5;
+    //matrixRotation(srcarry_dbl, dst3arry, width, height, width, height,45,&p);
     //double * space[5];
     //double * dog[4];
     //ScaleSpace(srcarry_dbl, space, width, height, 1.6, 5);
@@ -160,7 +164,7 @@ int main(int argc, const char * argv[]) {
     }
     cvMerge(dst1_r, dst1_g, dst1_b, NULL, dst1);
     cvMerge(dst2_r, dst2_g, dst2_b, NULL, dst2);
-    //cvSaveImage("/Users/Tony/DIPImage/SIFT_TEST_DIP_2.png", dst3, 0);
+    cvSaveImage("/Users/Tony/DIPImage/sift_lena_dst.png", dst3, 0);
     //cvSaveImage("/Users/Tony/DIPImage/segment_RGB_ban1_dst.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);

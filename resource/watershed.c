@@ -240,8 +240,6 @@ void InitPriQueue(PriQueueHead* priQueue,Pix_Label *srclabel,int width,int heigh
                 }
             }
         }
-    //for(int i=0;i<GRAY_LEVEL;i++)
-    //    printf("g:%d  NumofNode:%d\n",i,priQueue[i].nodeNum);
 
 }
 
