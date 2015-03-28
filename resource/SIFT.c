@@ -317,7 +317,7 @@ int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL
     for(int j=down;j<up;j++){
         for(int i=down;i<up;i++){
             double temp_orientation=temp_angle[j*w_width+i];
-            descriptor[((int)((j-down)/4)*4+(int)((i-down)/4))*8+(int)(temp_orientation/45.0)]+=(int)temp_range[j*w_width+i];
+            descriptor[((int)((j-down)/4)*4+(int)((i-down)/4))*8+(int)(temp_orientation/45.0)]+=(int)(temp_range[j*w_width+i]*10.0);
         }
     
     }
@@ -412,12 +412,13 @@ void SIFT(double *src,SIFT_Feature **dst,int width,int height,int scale_k,int oc
     }
     double sizeRatio=2.0;
     double delta=1.6;
+    double *src_temp;
+    int realtime_width=(int)(((double)width)*sizeRatio);
+    int realtime_height=(int)(((double)height)*sizeRatio);
+    src_temp=(double *)malloc(sizeof(double)*realtime_width*realtime_height);
+    Zero(src_temp, realtime_width,realtime_height);
+    Resize(src, width, height, src_temp, realtime_width, realtime_height);
     for(int i=0;i<octave;i++){
-        int realtime_width=(int)(((double)width)*sizeRatio);
-        int realtime_height=(int)(((double)height)*sizeRatio);
-        double *src_temp=(double *)malloc(sizeof(double)*realtime_width*realtime_height);
-        Zero(src_temp, realtime_width,realtime_height);
-        Resize(src, width, height, src_temp, realtime_width, realtime_height);
         
         double *delta_arry=(double *)malloc(sizeof(double)*scale_k);
         double** scale=malloc(sizeof(double*)*scale_k);
@@ -425,10 +426,17 @@ void SIFT(double *src,SIFT_Feature **dst,int width,int height,int scale_k,int oc
         ScaleSpace(src_temp, scale,delta_arry,realtime_width, realtime_height,delta*(1<<i), scale_k);
         DOG_Scale(scale, dog, realtime_width,realtime_height, scale_k);
         findCandideat(dog,delta_arry,src,dst , realtime_width, realtime_height, scale_k-1,sizeRatio);
-        ReleaseMatArr(scale, scale_k);
-        ReleaseMatArr(dog, scale_k-1);
+        
         free(delta_arry);
         free(src_temp);
         sizeRatio/=2.0;
+        int temp_width=realtime_width;
+        int temp_height=realtime_height;
+        realtime_width=(int)(((double)width)*sizeRatio);
+        realtime_height=(int)(((double)height)*sizeRatio);
+        src_temp=(double *)malloc(sizeof(double)*realtime_width*realtime_height);
+        Resize(scale[scale_k-2], temp_width, temp_height, src_temp, realtime_width, realtime_height);
+        ReleaseMatArr(scale, scale_k);
+        ReleaseMatArr(dog, scale_k-1);
     }
 }
