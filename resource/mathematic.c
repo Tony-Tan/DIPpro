@@ -191,8 +191,8 @@ void matrixOrdinaryDiff(double *src,double *range,double* angle,int width,int he
     Zero(temp_rang, width, height);
     for(int j=1;j<height-1;j++)
         for(int i=1;i<width-1;i++){
-            double d_x=src[j*width+i+1]-src[j*width+i-1];
-            double d_y=src[(j+1)*width+i]-src[(j-1)*width+i];
+            double d_x=(src[j*width+i+1]-src[j*width+i-1])/2.0;
+            double d_y=(src[(j+1)*width+i]-src[(j-1)*width+i])/2.0;
             temp_rang[j*width+i]=fabs(d_x)+fabs(d_y);
             temp_angle[j*width+i]=atan2(d_y, d_x)*W_PI+180;// atan2(double y,double x)
         }

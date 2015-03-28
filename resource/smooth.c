@@ -31,10 +31,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 void GaussianMask(double *mask,int width,int height,double deta){
     double deta_2=deta*deta;
-    double center_x=(double)width/2.0;
-    double center_y=(double)height/2.0;
-    center_x-=isEVEN(width)?0.5:0;
-    center_y-=isEVEN(height)?0.5:0;
+    double center_x=(double)width/2.0-0.5;
+    double center_y=(double)height/2.0-0.5;
     double param=1.0/(2*M_PI*deta_2);
     for(int i=0;i<height;i++)
         for(int j=0;j<width;j++){
@@ -53,6 +51,14 @@ void GaussianMask(double *mask,int width,int height,double deta){
 void GaussianFilter(double *src,double *dst,int width,int height,int m_width,int m_height,double deta){
     double * mask=(double *)malloc(sizeof(double)*m_width*m_height);
     GaussianMask(mask, m_width, m_height, deta);
+    ///for test
+    //for(int j=0;j<m_height;j++){
+    //    for(int i=0;i<m_width;i++){
+    //        printf("%g ",mask[j*m_width+i]);
+        
+    //    }
+    //    printf("\n");
+    //}
     RealRelevant(src,dst,mask,width,height,m_width,m_height);
     free(mask);
 }

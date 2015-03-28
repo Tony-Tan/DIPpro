@@ -40,7 +40,7 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     int r_width=50,r_height=50;
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.png", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena_90.png", 0);
     
     int width=src->width, height=src->height;
     RGB * srcarry=(RGB *)malloc(sizeof(RGB)*width*height);
@@ -106,7 +106,18 @@ int main(int argc, const char * argv[]) {
     //matrixCopyLocal(srcarry_dbl, dst6arry, width, height, width/2, height/2, &p);
     //printf("%d\n",isEVEN(3));
     //Resize(srcarry_dbl, 256, 256,dst6arry, 512, 512);
-    SIFT(srcarry_dbl,dst3arry, width, height, 5, 5);
+    SIFT_Feature * sift=NULL;
+    //Resize(srcarry_dbl, width, height, temp_src, width*2, height*2);
+    SIFT(srcarry_dbl,&sift, width, height, 5, 5);
+    SIFT_Feature *temp=sift;
+    while (temp!=NULL) {
+        printf("x:%g\t y:%g\t scale:%g\t orientation:%g\t\n",temp->x,temp->y,temp->scale,temp->orientation);
+        for(int i=0;i<128;i++)
+            printf("%d \t",temp->des_vector[i]);
+        printf("\n");
+        temp=temp->next;
+    }
+    ReleaseSIFTlist(sift);
     //Position_DBL p;
     //p.x=5;
     //p.y=5;
@@ -164,7 +175,7 @@ int main(int argc, const char * argv[]) {
     }
     cvMerge(dst1_r, dst1_g, dst1_b, NULL, dst1);
     cvMerge(dst2_r, dst2_g, dst2_b, NULL, dst2);
-    cvSaveImage("/Users/Tony/DIPImage/sift_lena_dst.png", dst3, 0);
+    //cvSaveImage("/Users/Tony/DIPImage/sift_lena_90_dst.png", dst3, 0);
     //cvSaveImage("/Users/Tony/DIPImage/segment_RGB_ban1_dst.png", dst2, 0);
     //cvSaveImage("/Users/Tony/DIPImage/hough_edge3.jpg", dst2, 0);
     //printf("%lf",M_PI_2);
