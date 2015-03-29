@@ -304,9 +304,10 @@ int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL
     matrixOrdinaryDiff(temp_scale, temp_range, temp_angle, w_width,w_height);
     //IplImage *test=cvCreateImage(cvSize(w_width, w_height), 8, 1);
     //for(int j=0;j<w_height;j++){
-     //   for(int i=0;i<w_width;i++){
-     //       cvSetReal2D(test, j, i, temp_angle[j*w_width+i]);
-    //    }
+    //    for(int i=0;i<w_width;i++){
+     //       printf("%g ",temp_angle[j*w_width+i]);
+     //   }
+    //    printf("\n");
     //}
     //cvSetReal2D(test, w_height/2, w_width/2, 255);
     //cvNamedWindow("test", 1);

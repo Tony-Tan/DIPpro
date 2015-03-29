@@ -121,6 +121,24 @@ void matrixMul_matrix(double *src1,double *src2,double *dst,int width,int height
     for(int i=0;i<width*height;i++)
         dst[i]=src1[i]*src2[i];
 }
+
+/*
+ 图像积分，即一个像素点等于其左上方全部像素值之和
+ */
+void matrixIntegral(double * src,double *dst,int width,int height){
+    dst[0]=src[0];
+    for(int i=1;i<width;i++)
+        dst[i]=dst[i-1]+src[i];
+    for(int j=1;j<height;j++)
+        dst[j*width]=dst[(j-1)*width]+src[j*width];
+    for(int j=1;j<height;j++){
+        for(int i=1;i<width;i++){
+            dst[j*width+i]=dst[(j-1)*width+i]+dst[j*width+i-1]+src[j*width+i]-dst[(j-1)*width+i-1];
+        }
+    }
+}
+
+
 double findMatrixMax(double *src,int width,int height){
     double max=-1.0;
     for(int i=0;i<width*height;i++)

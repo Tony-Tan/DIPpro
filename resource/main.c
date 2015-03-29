@@ -18,6 +18,7 @@
 #include "ColorProcess.h"
 #include "Resize.h"
 #include "SIFT.h"
+
 #define HIGH_FR 1
 #define LOW_FR 2
 #define SIZE_WH 256
@@ -40,7 +41,7 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     int r_width=50,r_height=50;
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena_90.png", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena128.png", 0);
     
     int width=src->width, height=src->height;
     RGB * srcarry=(RGB *)malloc(sizeof(RGB)*width*height);
@@ -103,21 +104,29 @@ int main(int argc, const char * argv[]) {
     //Position p;
     //p.x=20;
     //p.y=20;
+    //InteImage(srcarry_dbl, dst3arry, width, height);
+    //for(int j=0;j<height;j++){
+    //    for(int i=0;i<width;i++){
+    //        printf("%d ",(int)dst3arry[j*width+i]);
+    //    }
+    //    printf("\n");
+    //}
+    //matrixMultreal(dst3arry, dst3arry, 0.0000000001, width, height);
     //matrixCopyLocal(srcarry_dbl, dst6arry, width, height, width/2, height/2, &p);
     //printf("%d\n",isEVEN(3));
     //Resize(srcarry_dbl, 256, 256,dst6arry, 512, 512);
-    SIFT_Feature * sift=NULL;
+    //SIFT_Feature * sift=NULL;
     //Resize(srcarry_dbl, width, height, temp_src, width*2, height*2);
-    SIFT(srcarry_dbl,&sift, width, height, 5, 5);
-    SIFT_Feature *temp=sift;
-    while (temp!=NULL) {
-        printf("x:%g\t y:%g\t scale:%g\t orientation:%g\t\n",temp->x,temp->y,temp->scale,temp->orientation);
-        for(int i=0;i<128;i++)
-            printf("%d \t",temp->des_vector[i]);
-        printf("\n");
-        temp=temp->next;
-    }
-    ReleaseSIFTlist(sift);
+    //SIFT(srcarry_dbl,&sift, width, height, 5, 5);
+    //SIFT_Feature *temp=sift;
+   // while (temp!=NULL) {
+     //   printf("x:%g\t y:%g\t scale:%g\t orientation:%g\t\n",temp->x,temp->y,temp->scale,temp->orientation);
+     //   for(int i=0;i<128;i++)
+     //       printf("%d \t",temp->des_vector[i]);
+     //   printf("\n");
+    //    temp=temp->next;
+    //}
+    //ReleaseSIFTlist(sift);
     //Position_DBL p;
     //p.x=5;
     //p.y=5;
