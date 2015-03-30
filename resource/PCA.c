@@ -16,21 +16,24 @@
  * to Intel company, will remove these functions in subsequent versions, hereby declare
  */
 //
-//  SURF
+//  PCA
 //  tony.sheng.tan@gmail.com
-//  Created by 谭升 on 15/03/29.
+//  Created by 谭升 on 15/03/30.
 //  Copyright (c) 2015年 谭升. All rights reserved.
 //
 
-#include "SURF.h"
-typedef struct SURF_Feature_ SURF_Feature;
-struct SURF_Feature_{
-    double x;
-    double y;
-};
-
-/***********************************************************************************************************/
-void SURF(double *src,SURF_Feature **dst,int width,int height,int scale_k,int octave);
-
-
-
+#include "PCA.h"
+#define MIN_EIG_THRESHOLD 0.0000001
+void PCA(double *src,int width,int height,double *dst,int feature_num){
+    double* covariance=(double *)malloc(sizeof(double)*height*height);
+    double* eigenvalue=(double *)malloc(sizeof(double)*height);
+    double* eigenvector=(double *)malloc(sizeof(double)*height*height);
+    double* temp_num=(double *)malloc(sizeof(double)*feature_num);
+    matrixCovariance(src, covariance, width, height);
+    matrixEigen_Jacobi(covariance, eigenvalue, eigenvector,MIN_EIG_THRESHOLD , height, height);
+    matrixCopy(eigenvector, dst, feature_num, height);
+    
+    free(covariance);
+    free(eigenvector);
+    free(eigenvalue);
+}

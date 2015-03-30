@@ -121,7 +121,20 @@ void matrixMul_matrix(double *src1,double *src2,double *dst,int width,int height
     for(int i=0;i<width*height;i++)
         dst[i]=src1[i]*src2[i];
 }
-
+void matrixMulmatrix(double *src1,double *src2,double *dst,int width,int height){
+    double *temp=(double *)malloc(sizeof(double)*height*height);
+    Zero(temp, height, height);
+    for(int j=0;j<height;j++){
+         for(int k=0;k<height;k++){
+             for(int i=0;i<width;i++){
+                temp[j*width+i]+=src1[j*width+k]*src2[k*width+i];
+            }
+        }
+    
+    }
+    matrixCopy(temp, dst, height, height);
+    free(temp);
+}
 /*
  图像积分，即一个像素点等于其左上方全部像素值之和
  */
@@ -139,17 +152,45 @@ void matrixIntegral(double * src,double *dst,int width,int height){
 }
 
 
-double findMatrixMax(double *src,int width,int height){
+double findMatrixMax(double *src,int width,int height,Position *max_position){
     double max=-1.0;
-    for(int i=0;i<width*height;i++)
-        max=src[i]>max?src[i]:max;
+    double value=0.0;
+    int x,y;
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            value=src[j*width+i];
+            if(value>max){
+                value=max;
+                x=i;
+                y=j;
+            }
+        
+        }
+    if(max_position!=NULL){
+        max_position->x=x;
+        max_position->y=y;
+    }
     return max;
 }
-double findMatrixMin(double *src,int width,int height){
-    double max=DBL_MAX;
-    for(int i=0;i<width*height;i++)
-        max=src[i]<max?src[i]:max;
-    return max;
+double findMatrixMin(double *src,int width,int height,Position *min_position){
+    double min=DBL_MAX;
+    double value=0.0;
+    int x,y;
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            value=src[j*width+i];
+            if(value>min){
+                value=min;
+                x=i;
+                y=j;
+            }
+            
+        }
+    if(min_position!=NULL){
+        min_position->x=x;
+        min_position->y=y;
+    }
+    return min;
 }
 double matrixMean(double *mat,int width,int height){
     double sum=0.0;
@@ -201,6 +242,17 @@ void Mask(double *src,double *dst,double *mask,int width,int height){
     matrixCopy(temp, dst, width, height);
     free(temp);
 }
+void matrixE(double *src,int width,int height){
+    Zero(src, width, height);
+    for(int j=0;j<height;j++){
+        for(int i=0;i<width;i++){
+            src[j*width+i]=j==i?1.0:0.0;
+        
+        }
+    }
+
+
+}
 //一般差分，返回幅度值和方向矩阵
 void matrixOrdinaryDiff(double *src,double *range,double* angle,int width,int height){
     double *temp_rang=(double *)malloc(sizeof(double)*width*height);
@@ -211,7 +263,7 @@ void matrixOrdinaryDiff(double *src,double *range,double* angle,int width,int he
         for(int i=1;i<width-1;i++){
             double d_x=(src[j*width+i+1]-src[j*width+i-1])/2.0;
             double d_y=(src[(j+1)*width+i]-src[(j-1)*width+i])/2.0;
-            temp_rang[j*width+i]=fabs(d_x)+fabs(d_y);
+            temp_rang[j*width+i]=sqrt((d_x*d_x)+(d_y*d_y));
             temp_angle[j*width+i]=atan2(d_y, d_x)*W_PI+180;// atan2(double y,double x)
         }
     matrixCopy(temp_angle, angle, width, height);
@@ -280,4 +332,156 @@ void matrixRotation(double *src,double *dst,int s_width,int s_height,int d_width
     matrixCopy(temp_dst, dst, d_width, d_height);
     free(temp_dst);
 
+}
+
+/****************************************************************************************/
+/****************************************************************************************/
+/****************************************************************************************/
+
+double findMatMaxbutDiagonal(double *src,int width,int height,Position *max_position){
+    double max=DBL_MIN;
+    double real_max;
+    double value=0.0;
+    int x,y;
+    for(int j=0;j<height;j++)
+        for(int i=0;i<width;i++){
+            if(j!=i){
+                value=fabs(src[j*width+i]);
+                if(value>max){
+                    max=value;
+                    real_max=src[j*width+i];
+                    x=i;
+                    y=j;
+                }
+            }
+        }
+    if(max_position!=NULL){
+        max_position->x=x;
+        max_position->y=y;
+    }
+    return real_max;
+
+}
+
+#define LOOP_MAX 1000
+
+void matrixEigen_Jacobi(double * src,double *EigenValue,double *EigenVector,double threshold,int width,int height){
+    Position max_position;
+    int p,q;
+    double vpp,vqq;
+    double fi;//角度
+    double vpq=DBL_MAX;
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+    double *temp2=(double *)malloc(sizeof(double)*width*height);
+    double *temp_EigenVector=(double *)malloc(sizeof(double)*width*height);
+    double *temp_U=(double *)malloc(sizeof(double)*width*height);
+    matrixE(temp_EigenVector, width,height);
+    
+    double cos_fi=0.0;
+    double sin_fi=0.0;
+    matrixCopy(src, temp, width, height);
+    matrixCopy(temp,temp2, width, height);
+    for(int k=0;k<LOOP_MAX;k++){
+        
+        vpq=findMatMaxbutDiagonal(temp, width,height, &max_position);
+        if(fabs(vpq)<=threshold)
+            break;
+        if(max_position.x>max_position.y){
+            q=max_position.x;
+            p=max_position.y;
+        }else{
+            p=max_position.x;
+            q=max_position.y;
+        
+        }
+        vpp=temp[p*width+p];
+        vqq=temp[q*width+q];
+        
+        fi=0.5*atan2(2*vpq, vpp-vqq);
+        cos_fi=cos(fi);
+        sin_fi=sin(fi);
+        double debug=vpp*cos_fi*cos_fi+vqq*sin_fi*sin_fi+2*vpq*cos_fi*sin_fi;
+        temp2[p*width+p]=debug;
+        debug=vpp*sin_fi*sin_fi+vqq*cos_fi*cos_fi-2*vpq*cos_fi*sin_fi;
+        temp2[q*width+q]=debug;
+        
+        for(int i=0;i<width;i++){
+            if(i==p||i==q)
+                continue;
+            double vpi=temp[p*width+i]*cos_fi+temp[q*width+i]*sin_fi;
+            temp2[i*width+p]=vpi;
+            temp2[p*width+i]=vpi;
+            double vqi=-temp[p*width+i]*sin_fi+temp[q*width+i]*cos_fi;
+            temp2[i*width+q]=vqi;
+            temp2[q*width+i]=vqi;
+        }
+        temp2[p*width+q]=0.5*(vqq-vpp)*sin(2*fi)+vpq*cos(2*fi);
+        temp2[q*width+p]=temp2[p*width+q];
+        
+        if(EigenVector!=NULL){
+            matrixE(temp_U, width, height);
+            temp_U[p*width+p]=cos_fi;
+            temp_U[p*width+q]=-sin_fi;
+            temp_U[q*width+p]=sin_fi;
+            temp_U[q*width+q]=cos_fi;
+            matrixMulmatrix(temp_EigenVector, temp_U, temp_EigenVector, width, height);
+        }
+        matrixCopy(temp2, temp, width, height);
+    }
+    for(int i=0;i<width;i++){
+        EigenValue[i]=temp[i*width+i];
+    }
+    if(EigenVector!=NULL){
+        matrixCopy(temp_EigenVector, EigenVector, width, height);
+    }
+    free(temp);
+    free(temp2);
+    free(temp_EigenVector);
+    free(temp_U);
+    
+}
+
+/*********************************************************************************************************/
+void matrixTranspose(double *src,double *dst,int width,int height){
+    double *temp=(double *)malloc(sizeof(double)*width*height);
+    Zero(temp, width,height);
+    for(int j=0;j<height;j++){
+        for(int i=0;i<width;i++)
+            temp[j*width+i]=src[i*width+j];
+    }
+    matrixCopy(temp, dst, width, height);
+    free(temp);
+}
+
+/*********************************************************************************************************/
+void matrixCovariance(double *src,double *dst,int width,int height){
+    double* mean=(double *)malloc(sizeof(double)*height);
+    double* temp_mat=(double *)malloc(sizeof(double)*width*height);
+    double* temp_mat_transpose=(double *)malloc(sizeof(double)*width*height);
+    double* covariance=(double *)malloc(sizeof(double)*height*height);
+    
+    Zero(temp_mat, width, height);
+    Zero(mean,1,height);
+    
+    for(int j=0;j<height;j++){
+        double sum=0.0;
+        for(int i=0;i<width;i++){
+            sum+=src[j*width+i];
+        }
+        mean[j]=sum/width;
+    }
+    for(int j=0;j<height;j++){
+        double average=mean[j];
+        for(int i=0;i<width;i++){
+            temp_mat[j*width+i]=src[j*width+i]-average;
+        }
+    }
+    matrixTranspose(temp_mat, temp_mat_transpose, width, height);
+    matrixMulmatrix(temp_mat, temp_mat_transpose, covariance, width, height);
+    matrixMultreal(covariance, covariance, 1.0/((double)width-1.0), height, height);
+    matrixCopy(covariance, dst, height, height);
+    free(mean);
+    free(temp_mat);
+    free(temp_mat_transpose);
+    free(covariance);
 }

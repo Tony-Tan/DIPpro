@@ -222,8 +222,7 @@ int findOrientation(double *src,int width,int height,Position_DBL *position,doub
             if(distanc<4.5*delta){
                 int angle_value=(int)temp_angle[j*w_width+i];
                 int num=angle_value*ANGLEZOOM-1;
-                double test=temp_range[j*w_width+i];
-                angle_hist[num]+=test;
+                angle_hist[num]+=temp_range[j*w_width+i];
                 
             }
         }
@@ -302,17 +301,6 @@ int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL
     matrixRotation(temp_src, temp_src, w_width, w_height, w_width, w_height, orientation, &rotation_center);
     GaussianFilter(temp_src, temp_scale, w_width, w_height, g_size, g_size, delta);
     matrixOrdinaryDiff(temp_scale, temp_range, temp_angle, w_width,w_height);
-    //IplImage *test=cvCreateImage(cvSize(w_width, w_height), 8, 1);
-    //for(int j=0;j<w_height;j++){
-    //    for(int i=0;i<w_width;i++){
-     //       printf("%g ",temp_angle[j*w_width+i]);
-     //   }
-    //    printf("\n");
-    //}
-    //cvSetReal2D(test, w_height/2, w_width/2, 255);
-    //cvNamedWindow("test", 1);
-    //cvShowImage("test", test);
-    //cvWaitKey(0);
     int up=w_height/2+9;
     int down=w_height/2-7;
     for(int j=down;j<up;j++){

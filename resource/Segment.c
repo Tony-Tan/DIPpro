@@ -66,7 +66,7 @@ double Robert(double *src,double *dst,double *edgedriction,int width,int height)
         }
     free(dst_x);
     free(dst_y);
-    return findMatrixMax(dst,width,height);
+    return findMatrixMax(dst,width,height,NULL);
     
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@ double Sobel(double *src,double *dst,double *edgedriction,int width,int height,i
         }
     free(dst_x);
     free(dst_y);
-    return findMatrixMax(dst,width,height);
+    return findMatrixMax(dst,width,height,NULL);
 }
 
 
@@ -151,7 +151,7 @@ double Scharr(double *src,double *dst,double *edgedriction,int width,int height)
     free(dst_x);
     free(dst_y);
     //matrixMultreal(dst, dst, 1.0/16.0, width, height);
-    return findMatrixMax(dst,width,height);
+    return findMatrixMax(dst,width,height,NULL);
 }
 
 
@@ -161,7 +161,7 @@ double Scharr(double *src,double *dst,double *edgedriction,int width,int height)
 double Laplace(double *src,double *dst,int width,int height){
     double LaplaceMask[9]={-1,-1,-1,-1,8,-1,-1,-1,-1};
     RealRelevant(src, dst, LaplaceMask, width, height, LAPLACE_MASK_SIZE, LAPLACE_MASK_SIZE);
-    return findMatrixMax(dst,width,height);
+    return findMatrixMax(dst,width,height,NULL);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,7 +182,7 @@ double Prewitt(double *src,double *dst,int width,int height){
         }
     free(dst_x);
     free(dst_y);
-    return findMatrixMax(dst,width,height);
+    return findMatrixMax(dst,width,height,NULL);
 
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +221,7 @@ double Kirsch(double *src,double *dst,int width,int height){
         MaxPix(temp, maxtemp, maxtemp, width, height);
     }
     matrixCopy(maxtemp, dst, width, height);
-    return findMatrixMax(dst,width,height);
+    return findMatrixMax(dst,width,height,NULL);
 
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,7 +294,7 @@ double LoG(double *src,double *dst,int width,int height,int m_width,int m_height
     findCross(dsttemp,dst,width,height,threshold);
     free(dsttemp);
     free(mask);
-    return findMatrixMax(dst,width,height);
+    return findMatrixMax(dst,width,height,NULL);
     
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -338,7 +338,7 @@ double DoG(double *src,double *dst,int width,int height,int m_width,int m_height
     findCross(dsttemp, dst, width, height,threshold);
     free(dsttemp);
     free(mask);
-    return findMatrixMax(dst,width,height);
+    return findMatrixMax(dst,width,height,NULL);
     
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
