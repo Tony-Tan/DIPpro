@@ -4,8 +4,63 @@ if(COMMAND cmake_policy)
     endif(COMMAND cmake_policy)
 FIND_PACKAGE(OpenCV REQUIRED)
 
-ADD_EXECUTABLE(DIPdev Contrast.c Contrast.h FFT_1D.c FFT_2D.c Fourer.h Image_FFT.c Image_FFT.h main.c adaboost.c adaboost.h  lowpassfilter.c lowpassfilter.h highpassfilter.h highpassfilter.c convolution.c convolution.h filter.c filter.h Homomorphicfilter.c Homomorphicfilter.h GrayMorphology.c
-GrayMorphology.h morphology.c morphology.h smooth.h smooth.c sharpen.h sharpen.c Histogram.c Histogram.h Segment.c Segment.h mathematic.c mathematic.h Hough.c Hough.h Threshold.c Threshold.h watershed.h watershed.c regionSegment.c regionSegment.h color.h color.c Pseudo_Color.h Pseudo_Color.c ColorProcess.c ColorProcess.h Resize.h Resize.c SIFT.c SIFT.h SURF.h SURF.c PCA.c PCA.h)
+ADD_EXECUTABLE(DIPdev Adaboost.c
+Adaboost.h
+Color.c
+Color.h
+ColorProcess.c
+ColorProcess.h
+Contrast.c
+Contrast.h
+Convolution.c
+Convolution.h
+FFT_1D.c
+FFT_2D.c
+Filter.c
+Filter.h
+Fourer.h
+GrayMorphology.c
+GrayMorphology.h
+Highpassfilter.c
+Highpassfilter.h
+Histogram.c
+Histogram.h
+Homomorphicfilter.c
+Homomorphicfilter.h
+Hough.c
+Hough.h
+Image_FFT.c
+Image_FFT.h
+License.txt
+Lowpassfilter.c
+Lowpassfilter.h
+Mathematic.c
+Mathematic.h
+Morphology.c
+Morphology.h
+PCA.c
+PCA.h
+Pseudo_Color.c
+Pseudo_Color.h
+RegionSegment.c
+RegionSegment.h
+Resize.c
+Resize.h
+SIFT.c
+SIFT.h
+SURF.c
+SURF.h
+Segment.c
+Segment.h
+Sharpen.c
+Sharpen.h
+Smooth.c
+Smooth.h
+Threshold.c
+Threshold.h
+Watershed.c
+Watershed.h
+main.c)
 
 
 TARGET_LINK_LIBRARIES(DIPdev ${OpenCV_LIBS})

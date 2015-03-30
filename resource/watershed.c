@@ -147,7 +147,7 @@ void findMinimal(double *src,double *dst,int width,int height){
     Double2Int(src, temp, width, height);
     int lessthan=0;
     int equ=0;
-    double min=findMatrixMin(src, width, height);
+    double min=findMatrixMin(src, width, height,NULL);
     for(int i=0;i<width*height;i++)
         if(src[i]==min)
             dsttemp[i]=255.0;
