@@ -29,7 +29,7 @@ struct SURF_Feature_{
     double y;
 };
 
-/***********************************************************************************************************/
+/*****************************************************/
 void SURF(double *src,SURF_Feature **dst,int width,int height,int scale_k,int octave);
 
 

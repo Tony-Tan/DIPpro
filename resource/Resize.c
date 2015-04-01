@@ -62,7 +62,6 @@ void Resize(double *src,int s_width,int s_height,double *dst,int d_width,int d_h
                 double d_x=x-(double)((int)x);
                 double d_y=y-(double)((int)y);
                 value=(v22*d_x+(1-d_x)*v21)*d_y+(1-d_y)*(v12*d_x+(1-d_x)*v11);
-                //value=0.0;
             }
             dst[j*d_width+i]=value;
         }

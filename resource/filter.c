@@ -117,7 +117,6 @@ double FrequencyFiltering(double *src,int width,int height,double *dst,int filte
             break;
 
     }
-    //showfilter(filter,fft_width,fft_height);
     //FFT
     Complex *temp_complex=(Complex*)malloc(sizeof(Complex)*fft_height*fft_width);
     //fft结果
@@ -134,10 +133,8 @@ double FrequencyFiltering(double *src,int width,int height,double *dst,int filte
     ImageIFFT(temp_complex, temp, fft_width, fft_height);
    
     //还原图像
-    //IplImage *result2=cvCreateImage(cvSize(temp->width/2, temp->height/2), temp->depth, temp->nChannels);
     double *result2=(double *)malloc(sizeof(double)*width*height);
     CutImage421(temp,fft_width,fft_height,result2,width,height);
-    //cvResize(result2, dst, 0);
     matrixCopy(result2, dst, width, height);
     free(result2);
     free(filter);

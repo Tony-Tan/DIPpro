@@ -76,7 +76,7 @@ void ContrastStretch(double *src,double *dst,int width,int height,int method,dou
         
     }
     
-    ///////////////////////////////重新映射/////////////////////////////////////////////
+    ///////////////////////////////重新映射/////////////////////////////////////
     for(int j=0;j<height;j++)
         for(int i=0;i<width;i++)
             dst[j*width+i]= ContrastTable[(int)src[j*width+i]];

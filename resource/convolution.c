@@ -96,7 +96,7 @@ void RealRelevant(double *src,double *dst,double *mask,
 
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 void ComplexRelevant(Complex* src,Complex *dst,Complex *mask,
                      int width,int height,int m_width,int m_height){
     Complex *temp=(Complex *)malloc(sizeof(Complex)*width*height);

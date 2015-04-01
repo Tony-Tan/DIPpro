@@ -170,7 +170,6 @@ void findMinimal(double *src,double *dst,int width,int height){
                 
                 if(equ==1&&lessthan==0){
                     if(isPan(temp, width, height,pix, i, j)){
-                        //repairPan(temp,width, height, -pix, i,j);
                         setMinimal(temp,dsttemp, width, height, -pix, i, j);
                     }else {
                         repairPan(temp,width, height, -pix, i,j);
@@ -320,22 +319,7 @@ void MeyerWatershed(double *src,double *dst,int width,int height){
     Zero(minimal, width, height);
     findMinimal(src, minimal, width, height);
     InitLabelMat(src, srclabel, minimal, width, height);
-    //for(int j=0;j<height;j++){
-    //    for(int i=0;i<width;i++)
-    //        printf("  l:%3d|",srclabel[j*width+i].label);
-    //    printf("\n");
-    //}
     InitPriQueue(priqueue, srclabel, width, height);
-    /*for(int i=0;i<GRAY_LEVEL;i++){
-        NLevelPriNode *node=priqueue[i].head;
-        printf("%d:",i);
-        while (node!=NULL) {
-            printf("x:%d,y:%d   ",node->x,node->y);
-            node=node->next;
-        }
-        printf("\n");
-    
-    }*/
     findWaterShed(srclabel, priqueue, width, height);
     for(int i=0;i<width*height;i++)
         if(srclabel[i].label==WATERSHED)

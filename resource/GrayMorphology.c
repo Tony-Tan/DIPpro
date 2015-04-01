@@ -22,13 +22,12 @@
 //  Created by 谭升 on 14/11/28.
 //  Copyright (c) 2014年 谭升. All rights reserved.
 //
-#include <cv.h>
-#include <highgui.h>
+
 #include <stdio.h>
 #include "GrayMorphology.h"
 #define TOFINDMAX 0
 #define TOFINDMIN 1
-#define isSIZEEQU(x,y) (((x)->width)==((y)->width)&&((x)->height)==((y)->height))
+
 
 //判断结构元是否平滑
 int isSmooth(double *src,int width,int height){
@@ -78,8 +77,6 @@ void G_Translation(double *src,double *dst,int width,int height,double SEvalue,P
 //灰度图像膨胀
 void Dilate_Gray(double *src,double *dst,int width,int height,double *se,int sewidth,int seheight,Position *center){
     int SEissmooth=isSmooth(se,sewidth,seheight);
-    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double *temp=(double*)(malloc(sizeof(double)*width*height));
     double *temp_last=(double*)(malloc(sizeof(double)*width*height));
     Position centerde;
@@ -92,7 +89,7 @@ void Dilate_Gray(double *src,double *dst,int width,int height,double *se,int sew
     for(int j=0;j<seheight;j++)
         for(int i=0;i<sewidth;i++){
             matrixCopy(src,temp,width,height);
-            double value=se[j*width+i];//cvGetReal2D(se, j, i);
+            double value=se[j*width+i];
             if(value!=0.0){
                 Position d;
                 d.x=center->x-i;

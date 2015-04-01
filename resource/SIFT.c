@@ -67,7 +67,7 @@ double * SIFT_Resize(double *src,int width,int height){
     return dst;
 
 }
-/***********************************************************************************************************/
+/****************************************************************/
 int getGaussianSize(double delta){
     int size=0;
     if(delta<0.17)
@@ -79,7 +79,7 @@ int getGaussianSize(double delta){
     return size;
 
 }
-/***********************************************************************************************************/
+/****************************************************************/
 //尺度空间，返回一个指针数组，每个指针指向一层
 void ScaleSpace(double *src,double * dst[],double *delta_arry,int width,int height,double delta_max,int k){
     double delta=pow(delta_max, 1./(double)k);
@@ -98,7 +98,7 @@ void ScaleSpace(double *src,double * dst[],double *delta_arry,int width,int heig
     }
 
 }
-/***********************************************************************************************************/
+/**************************************************************/
 //k是原始空间的层数，DOG为k-1层
 void DOG_Scale(double *src[],double * dst[],int width,int height,int scale_level){
     for(int i=0;i<scale_level-1;i++){
@@ -114,12 +114,12 @@ void DOG_Scale(double *src[],double * dst[],int width,int height,int scale_level
         
     }
 }
-/***********************************************************************************************************/
+/**************************************************************/
 void ReleaseMatArr(double * dst[],int k){
     for(int i=0;i<k;i++)
         free(dst[i]);
 }
-/***********************************************************************************************************/
+/**************************************************************/
 /////
 ///3x3x3的立方体做泰勒展开找到亚像素级的极值点，并筛选不稳定的特征点
 #define HESSIAN_THRESHOLD 12.1  //(lamda+1)^2/lamda  lamda=10.0
@@ -179,7 +179,7 @@ int Accurate_Position(double *src,double *dst,double * extremum){
     }
     return 0;
 }
-/***********************************************************************************************************/
+/************************************************************/
 int findOrientation(double *src,int width,int height,Position_DBL *position,double delta,double * orientation){
     int orientation_count=0;
     int position_x_int=(int)(position->x);
@@ -264,7 +264,7 @@ int findOrientation(double *src,int width,int height,Position_DBL *position,doub
     
     return orientation_count;
 }
-/***********************************************************************************************************/
+/***************************************************************/
 int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL position,double delta,double orientation){
     if(position.x+8>width||position.y+8>height||
        position.x<8      ||position.y<8)
@@ -319,7 +319,7 @@ int  getDescriptor(double *src,int *descriptor,int width,int height,Position_DBL
     return 1;
 }
 
-/***********************************************************************************************************/
+/**************************************************************/
 void findCandideat(double *DoG[],double *delta_arry,double *src,SIFT_Feature ** dst,int width,int height,int DoG_level,double sizeRatio){
     double orientation[2];
     int isMoreorLess=0;
@@ -372,9 +372,6 @@ void findCandideat(double *DoG[],double *delta_arry,double *src,SIFT_Feature ** 
                         int o_num=findOrientation(src, width, height, &p_d, delta_arry[l]+theta_position[2],orientation );
                         
                         while(o_num--){
-                            
-                            
-                            //printf("[%5.5lf,%5.5lf,%5.5lf] \t\t theta:%g\n",i+theta_position[0],j+theta_position[1],(delta_arry[l]+theta_position[2]),orientation[o_num]/ANGLEZOOM);
                             SIFT_Feature *new=createNewSIFTnode();
                             new->x=p_d.x/sizeRatio;
                             new->y=p_d.y/sizeRatio;
@@ -384,16 +381,14 @@ void findCandideat(double *DoG[],double *delta_arry,double *src,SIFT_Feature ** 
                             getDescriptor(src,new->des_vector, width, height, p_d,new->scale,new->orientation);
                             addSIFTnode(dst,new);
                         }
-                        //test[j*width+i]=255.0;
-                        //num++;
+                        
                     }
                 }
             }
         }
     }
-    //printf("with acc total num :%d\n",num);
 }
-/***********************************************************************************************************/
+/**************************************************************/
 void SIFT(double *src,SIFT_Feature **dst,int width,int height,int scale_k,int octave){
     if((*dst)!=NULL){
         printf("sift dst must be NULL!\n");

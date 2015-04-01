@@ -22,9 +22,9 @@
 //  Copyright (c) 2015年 谭升. All rights reserved.
 //
 #include "Histogram.h"
-/********************************************************************************************
+/*************************************
  直方图基本操作
- *******************************************************************************************/
+ *************************************/
 void InitMappingTable(void * arry,int size,int Data_type){
     if(Data_type==TABLE_INT)
         for(int i=0;i<size;i++)
@@ -74,9 +74,9 @@ void fillMaptable(double * map){
     }
 
 }
-/********************************************************************************************
+/**********************************
  直方图均衡
- *******************************************************************************************/
+ **********************************/
 //均衡直方图，将原图直方图，经过公式得到目标直方图
 void EqualizationHist(int *src_hist,double *dst_map){
     int temphist[GRAY_LEVEL];
@@ -106,9 +106,9 @@ void HistogramEqualization(double *src,double *dst,int width,int height){
             dst[j*width+i]=GrayMappingTable[(int)src[j*width+i]];
     
 }
-/********************************************************************************************
+/******************************
  直方图归一化
- *******************************************************************************************/
+ ******************************/
 void HistogramSpecification(double *src,double *dst,int* hist,int width,int height){
     int src_hist[GRAY_LEVEL];
     setHistogram(src, src_hist, width, height);

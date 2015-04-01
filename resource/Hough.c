@@ -23,8 +23,6 @@
 //
 
 #include "Hough.h"
-#include <cv.h>
-#include <highgui.h>
 #include "Histogram.h"
 #define POLARWIDTH (180)
 #define POLARSTEP (M_PI/POLARWIDTH)
@@ -59,20 +57,7 @@ void SHT(int x,int y,int zero,double * polar){
     }
 }
 
-///////////////////////////////for test//////////////////////////////////////
-void show_polar(double *src,int width,int height){
-    IplImage *show=cvCreateImage(cvSize(width, height), 8, 1);
-    for(int j=0;j<height;j++)
-        for(int i=0;i<width;i++)
-            if(src[j*width+i]>0)
-                cvSetReal2D(show, j, i, src[j*width+i]+128);
-    cvSaveImage("/Users/Tony/DIPImage/matlab_polar.jpg", show, 0);
-    cvNamedWindow("Polar", 1);
-    cvShowImage("Polar",show);
-    cvWaitKey(0);
 
-
-}
 
 
 

@@ -63,9 +63,6 @@ void RegionGrow(double *src,double *dst,Position * position,int p_size,int width
 /*
  *
  *
- *
- *
- *
  */
 //区域均值
 double RegionMean(double *src,int width,int height,int x,int y,int w_width,int w_height){

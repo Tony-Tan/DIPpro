@@ -202,9 +202,7 @@ void Adaboost(TrainData *data,int T){
         else
             printf("|<=|   |Threshold:%9lf|error:%9lf |Alpha:%9lf|\n",theta,error,getAlpha(beta));
         
-        //if(error>=0.5)
-          //  break;
-        
+      
     }
 
 }

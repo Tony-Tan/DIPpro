@@ -27,8 +27,7 @@
 
 
 
-//////////////////////////////////////高斯滤波模板生成/////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
+////////////////////高斯滤波模板生成/////////////////////
 void GaussianMask(double *mask,int width,int height,double deta){
     double deta_2=deta*deta;
     double center_x=(double)width/2.0-0.5;
@@ -51,19 +50,10 @@ void GaussianMask(double *mask,int width,int height,double deta){
 void GaussianFilter(double *src,double *dst,int width,int height,int m_width,int m_height,double deta){
     double * mask=(double *)malloc(sizeof(double)*m_width*m_height);
     GaussianMask(mask, m_width, m_height, deta);
-    ///for test
-    //for(int j=0;j<m_height;j++){
-    //    for(int i=0;i<m_width;i++){
-    //        printf("%g ",mask[j*m_width+i]);
-        
-    //    }
-    //    printf("\n");
-    //}
     RealRelevant(src,dst,mask,width,height,m_width,m_height);
     free(mask);
 }
-//////////////////////////////////////均值滤波模板生成/////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////均值滤波模板生成///////////////////////
 void MeanMask(double *mask,int width,int height){
     double w=width;
     double h=height;
@@ -80,66 +70,9 @@ void MeanFilter(double *src,double *dst,int width,int height,int m_width,int m_h
     
     free(mask);
 }
-//////////////////////////////////中值滤波及其相关函数/////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
-/*
-//以下为低速普通中值滤波，排序使用计数排序
- void initHist(int *hist,int size){
-    for(int i=0;i<size;i++)
-        hist[i]=0;
-}
-int sort(int *src,int size){
-    int hist[GRAY_LEVEL];
-    int m=0;
-    initHist(hist, GRAY_LEVEL);
-    for(int i=0;i<size;i++)
-        hist[src[i]]++;
-    for(int i=0;i<GRAY_LEVEL;i++){
-        m+=hist[i];
-        if(m>size/2)
-            return i;
-    
-    }
-    return 0;
-}
-void MedianFilter(IplImage *src,IplImage *dst,int width,int height){
-    IplImage* temp=cvCreateImage(cvSize(src->width+width, src->height+height), src->depth, src->nChannels);
-    IplImage* dsttemp=cvCreateImage(cvSize(src->width+width, src->height+height), src->depth, src->nChannels);
-    cvZero(temp);
-    for(int j=0;j<src->height;j++){
-        for(int i=0;i<src->width;i++){
-            double value=cvGetReal2D(src, j, i);
-            cvSetReal2D(temp, j+height/2, i+width/2, value);
-        
-        }
-    }
-    int *window=(int *)malloc(sizeof(int)*width*height);
-    if(window==NULL){
-        printf(" ");
-        exit(0);
-    
-    }
-    for(int j=height/2;j<temp->height-height/2-1;j++){
-        for(int i=width/2;i<temp->width-width/2-1;i++){
-            for(int n=-height/2;n<height/2+1;n++)
-                for(int m=-width/2;m<width/2+1;m++){
-                    window[(n+height/2)*width+m+width/2]=cvGetReal2D(temp, j+n, i+m);
-                }
-            double pix=sort(window,width*height);
-            cvSetReal2D(dsttemp, j, i, pix);
-        }
-    }
-    for(int j=height/2;j<temp->height-height/2-1;j++){
-        for(int i=width/2;i<temp->width-width/2-1;i++){
-            double value=cvGetReal2D(dsttemp, j, i);
-            cvSetReal2D(dst, j-height/2, i-width/2, value);
-            
-        }
-    }
-    free(window);
-        
-}
-*/
+///////////////////////////中值滤波及其相关函数/////////////////////////////
+
+
 //迭代，快速算法
 int findMedian(int *hist,int *movein,int *moveout,int movesize,int *cursor,int median,int t){
     for(int i=0;i<movesize;i++){
@@ -215,8 +148,6 @@ void MedianFilter(double *src,double *dst,int width,int height,int m_width,int m
         dsttemp[j*width+m_width/2]=median;
         for(int i=m_width/2+1;i<width-m_width/2-1;i++){
             for(int k=-m_height/2;k<m_height/2+1;k++){
-                //movein[k+m_height/2]=cvGetReal2D(src, j+k, i+m_width/2);
-                //moveout[k+m_height/2]=cvGetReal2D(src, j+k, i-m_width/2-1);
                 movein[k+m_height/2]=src[(j+k)*width+i+m_width/2];
                 moveout[k+m_height/2]=src[(j+k)*width+i-m_width/2-1];
             }
@@ -235,10 +166,9 @@ void MedianFilter(double *src,double *dst,int width,int height,int m_width,int m
     free(moveout);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////双边性滤波///////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////双边性滤波///////////////////////////////
+
 
 //高斯函数
 double gaussian(double x,double deta){
@@ -286,8 +216,8 @@ void BilateralFilter(double *src,double *dst,int width,int height,int m_width,in
 }
 
 
-////////////////////////////////NoLinearMeanFilter//////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////NoLinearMeanFilter////////////////////////////
+
 void HarmonicAve(double *src,int width,int height){
     for(int i=0;i<width*height;i++)
         if(src[i]!=0)
@@ -381,8 +311,7 @@ void NoLinearMeanFilter(IplImage *src,IplImage *dst,int width,int height,int Mas
 
 
 
-///////////////////////////////robust smoothing filter//////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////robust smoothing filter/////////////////////////
 void findMaxMin(double *src,int width,int height,double *max,double *min){
     int mid=width*height/2;
     double max_t=-1,min_t=256;
@@ -392,53 +321,8 @@ void findMaxMin(double *src,int width,int height,double *max,double *min){
             min_t=src[i]<min_t?src[i]:min_t;
             
         }
-        //printf("%lf\n",src[i]);
     }
     *min=min_t;
     *max=max_t;
-
-}
-void RobustSmoothFilter(IplImage *src,IplImage *dst,int width,int height){
-    double * pixarry=(double *)malloc(sizeof(double)*src->width*src->height);
-    double * dstarry=(double *)malloc(sizeof(double)*src->width*src->height);
-    double * mask=(double *)malloc(sizeof(double)*width*height);
-    double max,min;
-    for(int j=0;j<src->height;j++)
-        for(int i=0;i<src->width;i++){
-            pixarry[j*src->width+i]=cvGetReal2D(src, j, i);
-        }
-    for(int j=height/2;j<src->height-height/2;j++)
-        for(int i=width/2;i<src->width-width/2;i++){
-            for(int m=0;m<height;m++)
-                for(int n=0;n<width;n++){
-                    mask[m*width+n]=pixarry[(j-height/2+m)*src->width+(i-width/2+n)];
-                }
-            findMaxMin(mask, width, height, &max, &min);
-            //printf("max:%d,min:%d,pix:%d\n",(int)max,(int)min,(int)pixarry[j*src->width+i]);
-            if(pixarry[j*src->width+i]>max)
-                dstarry[j*src->width+i]=max;
-            else if(pixarry[j*src->width+i]<min)
-                dstarry[j*src->width+i]=min;
-            else
-                dstarry[j*src->width+i]=pixarry[j*src->width+i];
-            //printf("max:%d,min:%d,srcpix:%d,dstpix:%d\n",(int)max,(int)min,(int)pixarry[j*src->width+i],(int)dstarry[j*src->width+i]);
-        }
-    for(int j=0;j<src->height;j++)
-        for(int i=0;i<src->width;i++){
-            cvSetReal2D( dst,j,i,dstarry[j*src->width+i]);
-        }
-    
-    free(pixarry);
-    free(dstarry);
-    free(mask);
-
-}
-////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
-void Smooth(IplImage *src,IplImage *dst,int Smooth_type,int width,int height){
-
-
-
-
 
 }

@@ -24,7 +24,7 @@
 //
 
 #include "morphology.h"
-
+#include <stdio.h>
 //位移操作，将图像整体移动，如果超出边界舍去
 //检测图像是否为空
 
@@ -36,7 +36,7 @@ void Translation(double *src,double *dst,int width,int height,MoveDirection *dir
         for(int i=0;i<width;i++){
             int new_x=i+direction->x;
             int new_y=j+direction->y;
-                if(new_y<height &&new_x<width&&new_y>=0&&new_x>=0        )
+                if(new_y<height &&new_x<width&&new_y>=0&&new_x>=0)
                     temp[new_y*width+new_x]=src[j*width+i];
         }
     matrixCopy(temp, dst, width, height);
@@ -114,14 +114,9 @@ void Dilate(double *src,int s_width,int s_height,double *dst,int d_width,int d_h
         temp.y=se_height/2;
         center=&temp;
     }
-    //printf("%d,%d",center->x,center->y);
     MoveDirection m;
-    //IplImage *temp=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
     double *temp=(double *)malloc(sizeof(double)*d_width*d_height);
-    //IplImage *tempdst=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
     double *tempdst=(double *)malloc(sizeof(double)*d_width*d_height);
-
-    //IplImage *realdst=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
     double *realdst=(double *)malloc(sizeof(double)*d_width*d_height);
 
     Zero(realdst, d_width, d_height);
@@ -138,7 +133,6 @@ void Dilate(double *src,int s_width,int s_height,double *dst,int d_width,int d_h
         }
     }
     matrixCopy(realdst, dst, d_width, d_height);
-    cvCopy(realdst, dst, NULL);
     free(temp);
     free(realdst);
     free(tempdst);
@@ -153,19 +147,12 @@ void Erode(double *src,int s_width,int s_height,double *dst,int d_width,int d_he
         temp.y=se_height/2;
         center=&temp;
     }
-    //printf("%d,%d",center->x,center->y);
     MoveDirection m;
-    //IplImage *temp=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
     double *temp=(double *)malloc(sizeof(double)*d_width*d_height);
-    //IplImage *tempdst=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
     double *tempdst=(double *)malloc(sizeof(double)*d_width*d_height);
-    
-    //IplImage *realdst=cvCreateImage(cvGetSize(dst), dst->depth,dst->nChannels);
     double *realdst=(double *)malloc(sizeof(double)*d_width*d_height);
-    
     Zero(realdst, d_width, d_height);
     Zoom(src,s_width,s_height,temp,d_width,d_height);
-    
     for(int i=0;i<se_width;i++){
         for(int j=0;j<se_height;j++){
             if(se[j*se_width+i]>100.0){
@@ -177,7 +164,6 @@ void Erode(double *src,int s_width,int s_height,double *dst,int d_width,int d_he
         }
     }
     matrixCopy(realdst, dst, d_width, d_height);
-    cvCopy(realdst, dst, NULL);
     free(temp);
     free(realdst);
     free(tempdst);
@@ -197,26 +183,19 @@ void Close(double *src,int width,int height,double *dst,double *se,int se_width,
 }
 //击中与击不中
 void HitorMiss(double *src,int width,int height,double *se1,int se1_width,int se1_height,double *se2,int se2_width,int se2_height,double *dst,Position *se1center,Position *se2center){
-    //IplImage *temp1=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    //IplImage *temp2=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
+    
     double *temp1=(double *)malloc(sizeof(double)*width*height);
     double *temp2=(double *)malloc(sizeof(double)*width*height);
-    //Erode(src, temp1, se1, se1center);
     Erode(src, width, height, temp1, width, height, se1, se1_width, se1_height, se1center);
-    //Not(src, temp2);
     Not(src, temp2, width, height);
-    //Erode(temp2, temp2, se2, se2center);
     Erode(temp2, width, height, temp2, width, height, se2, se2_width, se2_height, se2center);
-    //And(temp1, temp2, dst);
     And(temp1, temp2, dst, width, height);
     free(temp1);
     free(temp2);
 }
 //二值图像，边缘检测
 void BinaryEdge(double *src,int width,int height,double* dst){
-    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double *temp=(double *)malloc(sizeof(double)*width*height);
-    //Erode(src, temp, NULL, NULL);
     double se[9]={255.,255.,255.,255.,255.,255.,255.,255.,255.};
     Erode(src, width, height, temp, width, height,se ,3, 3, NULL);
     matrixSub(src, temp, dst, width, height);
@@ -224,25 +203,16 @@ void BinaryEdge(double *src,int width,int height,double* dst){
 }
 //孔洞填充
 void FillHole(double *src,double *dst,int width,int height,Position *seed){
-    //IplImage * temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double *temp=(double *)malloc(sizeof(double)*width*height);
-    //cvZero(temp);
     Zero(temp, width, height);
-    //IplImage * lasttemp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double *lasttemp=(double *)malloc(sizeof(double)*width*height);
-    //IplImage * nsrc=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double *nsrc=(double *)malloc(sizeof(double)*width*height);
-    //Not(src, nsrc);
     Not(src, nsrc, width, height);
-    //cvSetReal2D(temp, seed->y, seed->x, 255.0);
     temp[seed->y*width+seed->x]=255.;
     double se[9]={255.,255.,255.,255.,255.,255.,255.,255.,255.};
     while(!matrixisEqu(lasttemp, temp, width, height)){
-        //cvCopy(temp, lasttemp, NULL);
         matrixCopy(temp, lasttemp, width, height);
-        //Dilate(temp, temp, se, NULL);
         Dilate(temp, width, height, temp, width, height, se, 3, 3, NULL);
-        //And(temp, nsrc, temp);
         And(temp, nsrc, temp, width, height);
     }
     Or(temp, src, dst, width, height);
@@ -252,51 +222,33 @@ void FillHole(double *src,double *dst,int width,int height,Position *seed){
 }
 //连通分量获取
 void GetConCompG_Onent(double *src,double *dst,int width,int height,Position *seed){
-    //IplImage * temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double *temp=(double *)malloc(sizeof(double)*width*height);
-    
-    //cvZero(temp);
     Zero(temp, width, height);
-    //IplImage * lasttemp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double *lasttemp=(double*)malloc(sizeof(double)*width*height);
-    //cvSetReal2D(temp, seed->y, seed->x, 255.0);
     temp[seed->y*width+seed->x]=255.0;
     double se[9]={255.,255.,255.,255.,255.,255.,255.,255.,255.};
     while(!matrixisEqu(lasttemp, temp, width, height)){
-        //cvCopy(temp, lasttemp, NULL);
         matrixCopy(temp, lasttemp, width, height);
-        //Dilate(temp, temp, se, NULL);
         Dilate(temp, width, height, temp, width, height, se, 3, 3, NULL);
-        //And(temp, src, temp);
         And(temp, src, temp, width, height);
         
     }
-    //cvCopy(temp, dst, NULL);
     matrixCopy(temp, dst, width, height);
     free(temp);
     free(lasttemp);
 }
 //骨架
 void FrameWork(double *src,double *dst,int width,int height,double *se,int se_width,int se_height){
-    //cvZero(dst);
     double *temp_dst=(double*)malloc(sizeof(double)*width*height);
     Zero(temp_dst, width, height);
-    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth,src->nChannels);
-    //IplImage *temp_open=cvCreateImage(cvGetSize(src), src->depth,src->nChannels);
     double *temp=(double *)malloc(sizeof(double)*width*height);
     double *temp_open=(double *)malloc(sizeof(double)*width*height);
-    //cvCopy(src, temp, NULL);
     matrixCopy(src, temp, width, height);
     while(!matrixisEmpty(temp,width,height)){
-        //Erode(temp, temp, se, NULL);
         Erode(temp, width, height, temp, width, height, se, se_width, se_height, NULL);
-        //cvCopy(temp, temp_open, NULL);
         matrixCopy(temp, temp_open, width, height);
-        //Open(temp_open, temp_open, se, NULL);
         Open(temp_open, width, height, temp_open, se, se_width, se_height, NULL);
-        //cvSub(temp, temp_open, temp_open,NULL);
         matrixSub(temp, temp_open,temp_open, width, height);
-        //Or(temp_open, dst, dst);
         Or(temp_open, temp_dst, temp_dst, width, height);
     }
     matrixCopy(temp_dst, dst, width, height);
@@ -306,16 +258,11 @@ void FrameWork(double *src,double *dst,int width,int height,double *se,int se_wi
 }
 //凸壳生成结构元
 double* CreateConvexhullSE(int num){
-    //IplImage *se=cvCreateImage(cvSize(3, 3), 8, 1);
     double *se=(double*)malloc(sizeof(double)*9);
-    //cvZero(se);
     Zero(se, 3, 3);
     switch (num) {
         case 0:
         {
-            //cvSetReal2D(se, 0, 0, 255.0);
-            //cvSetReal2D(se, 1, 0, 255.0);
-            //cvSetReal2D(se, 2, 0, 255.0);
             se[0]=255.0;
             se[3]=255.0;
             se[6]=255.0;
@@ -323,9 +270,6 @@ double* CreateConvexhullSE(int num){
             break;
         case 1:
         {
-            //cvSetReal2D(se, 0, 0, 255.0);
-            //cvSetReal2D(se, 0, 1, 255.0);
-            //cvSetReal2D(se, 0, 2, 255.0);
             se[0]=255.0;
             se[1]=255.0;
             se[2]=255.0;
@@ -334,9 +278,6 @@ double* CreateConvexhullSE(int num){
             break;
         case 2:
         {
-            //cvSetReal2D(se, 0, 2, 255.0);
-            //cvSetReal2D(se, 1, 2, 255.0);
-            //cvSetReal2D(se, 2, 2, 255.0);
             se[2]=255.0;
             se[5]=255.0;
             se[8]=255.0;
@@ -344,9 +285,6 @@ double* CreateConvexhullSE(int num){
             break;
         case 3:
         {
-            //cvSetReal2D(se, 2, 0, 255.0);
-            //cvSetReal2D(se, 2, 1, 255.0);
-            //cvSetReal2D(se, 2, 2, 255.0);
             se[6]=255.0;
             se[7]=255.0;
             se[8]=255.0;
@@ -359,29 +297,20 @@ double* CreateConvexhullSE(int num){
 }
 //凸壳
 void Convexhull(double *src,double *dst,int width,int height){
-    //cvCopy(src, dst, NULL);
     double * temp_dst=(double *)malloc(sizeof(double)*width*height);
     matrixCopy(src, temp_dst, width, height);
     double * se[4];
-    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double * temp=(double *)malloc(sizeof(double)*width*height);
     double * temp_last=(double *)malloc(sizeof(double)*width*height);
-    //cvCopy(src, temp, NULL);
     matrixCopy(src, temp, width,height);
     for(int i=0;i<4;i++){
-        //cvCopy(src, temp, NULL);
         se[i]=CreateConvexhullSE(i);
         while (!matrixisEqu(temp, temp_last, width, height)) {
-            //cvCopy(temp, temp_last, NULL);
             matrixCopy(temp, temp_last, width, height);
-            //Erode(temp, temp, se[i],NULL);
             Erode(temp, width,height, temp, width, height, se[i], 3, 3, NULL);
-            //Or(temp, dst, temp);
             Or(temp, temp_dst, temp, width, height);
           
         }
-        //cvCopy(temp, dst, NULL);
         matrixCopy(temp, temp_dst, width, height);
         free(se[i]);
     }
@@ -392,17 +321,11 @@ void Convexhull(double *src,double *dst,int width,int height){
 }
 //生成细化结构元
 double* CreateThinningSE(int num){
-    //IplImage *se=cvCreateImage(cvSize(3, 3), 8, 1);
     double *se=(double *)malloc(sizeof(double)*9);
-    //cvZero(se);
     Zero(se, 3, 3);
     switch (num) {
         case 0:
         {
-            //cvSetReal2D(se, 2, 0, 255.0);
-            //cvSetReal2D(se, 2, 1, 255.0);
-            //cvSetReal2D(se, 2, 2, 255.0);
-            //cvSetReal2D(se, 1, 1, 255.0);
             se[6]=255.0;
             se[7]=255.0;
             se[8]=255.0;
@@ -411,10 +334,7 @@ double* CreateThinningSE(int num){
             break;
         case 1:
         {
-            //cvSetReal2D(se, 1, 1, 255.0);
-            //cvSetReal2D(se, 1, 0, 255.0);
-            //cvSetReal2D(se, 2, 0, 255.0);
-            //cvSetReal2D(se, 2, 1, 255.0);
+
             se[3]=255.0;
             se[4]=255.0;
             se[6]=255.0;
@@ -424,10 +344,7 @@ double* CreateThinningSE(int num){
             break;
         case 2:
         {
-            //cvSetReal2D(se, 1, 1, 255.0);
-            //cvSetReal2D(se, 1, 0, 255.0);
-            //cvSetReal2D(se, 2, 0, 255.0);
-            //cvSetReal2D(se, 0, 0, 255.0);
+            
             se[3]=255.0;
             se[4]=255.0;
             se[6]=255.0;
@@ -436,10 +353,7 @@ double* CreateThinningSE(int num){
             break;
         case 3:
         {
-            //cvSetReal2D(se, 1, 1, 255.0);
-            //cvSetReal2D(se, 0, 0, 255.0);
-            //cvSetReal2D(se, 0, 1, 255.0);
-            //cvSetReal2D(se, 1, 0, 255.0);
+            
             se[4]=255.0;
             se[0]=255.0;
             se[1]=255.0;
@@ -448,10 +362,7 @@ double* CreateThinningSE(int num){
             break;
         case 4:
         {
-            //cvSetReal2D(se, 1, 1, 255.0);
-            //cvSetReal2D(se, 0, 0, 255.0);
-            //cvSetReal2D(se, 0, 1, 255.0);
-            //cvSetReal2D(se, 0, 2, 255.0);
+            
             se[4]=255.0;
             se[0]=255.0;
             se[1]=255.0;
@@ -460,10 +371,7 @@ double* CreateThinningSE(int num){
             break;
         case 5:
         {
-            //cvSetReal2D(se, 0, 1, 255.0);
-            //cvSetReal2D(se, 0, 2, 255.0);
-            //cvSetReal2D(se, 1, 1, 255.0);
-            //cvSetReal2D(se, 1, 2, 255.0);
+            
             se[1]=255.0;
             se[2]=255.0;
             se[4]=255.0;
@@ -473,10 +381,7 @@ double* CreateThinningSE(int num){
             break;
         case 6:
         {
-            //cvSetReal2D(se, 1, 1, 255.0);
-            //cvSetReal2D(se, 0, 2, 255.0);
-            //cvSetReal2D(se, 1, 2, 255.0);
-            //cvSetReal2D(se, 2, 2, 255.0);
+            
             se[4]=255.0;
             se[2]=255.0;
             se[5]=255.0;
@@ -485,10 +390,7 @@ double* CreateThinningSE(int num){
             break;
         case 7:
         {
-            //cvSetReal2D(se, 1, 1, 255.0);
-            //cvSetReal2D(se, 1, 2, 255.0);
-            //cvSetReal2D(se, 2, 1, 255.0);
-            //cvSetReal2D(se, 2, 2, 255.0);
+            
             se[4]=255.0;
             se[5]=255.0;
             se[7]=255.0;
@@ -501,17 +403,12 @@ double* CreateThinningSE(int num){
     return se;
 }
 double* CreateThinningUSE(int num){
-    //IplImage *se=cvCreateImage(cvSize(3, 3), 8, 1);
     double *se=(double *)malloc(sizeof(double)*9);
-    //cvZero(se);
     Zero(se, 3, 3);
     switch (num) {
         case 0:
         {
             
-            //cvSetReal2D(se, 0, 1, 255.0);
-            //cvSetReal2D(se, 0, 2, 255.0);
-            //cvSetReal2D(se, 0, 0, 255.0);
             se[1]=255.0;
             se[2]=255.0;
             se[0]=255.0;
@@ -519,9 +416,7 @@ double* CreateThinningUSE(int num){
             break;
         case 1:
         {
-            //cvSetReal2D(se, 0, 1, 255.0);
-            //cvSetReal2D(se, 0, 2, 255.0);
-            //cvSetReal2D(se, 1, 2, 255.0);
+            
             se[1]=255.0;
             se[2]=255.0;
             se[5]=255.0;
@@ -530,10 +425,7 @@ double* CreateThinningUSE(int num){
             break;
         case 2:
         {
-            
-            //cvSetReal2D(se, 0, 2, 255.0);
-            //cvSetReal2D(se, 1, 2, 255.0);
-            //cvSetReal2D(se, 2, 2, 255.0);
+           
             se[2]=255.0;
             se[5]=255.0;
             se[8]=255.0;
@@ -541,9 +433,7 @@ double* CreateThinningUSE(int num){
             break;
         case 3:
         {
-            //cvSetReal2D(se, 1, 2, 255.0);
-            //cvSetReal2D(se, 2, 1, 255.0);
-            //cvSetReal2D(se, 2, 2, 255.0);
+            
             se[5]=255.0;
             se[7]=255.0;
             se[8]=255.0;
@@ -552,9 +442,6 @@ double* CreateThinningUSE(int num){
         case 4:
         {
             
-            //cvSetReal2D(se, 2, 0, 255.0);
-            //cvSetReal2D(se, 2, 1, 255.0);
-            //cvSetReal2D(se, 2, 2, 255.0);
             se[6]=255.0;
             se[7]=255.0;
             se[8]=255.0;
@@ -563,9 +450,6 @@ double* CreateThinningUSE(int num){
         case 5:
         {
             
-            //cvSetReal2D(se, 1, 0, 255.0);
-            //cvSetReal2D(se, 2, 0, 255.0);
-            //cvSetReal2D(se, 2, 1, 255.0);
             se[3]=255.0;
             se[6]=255.0;
             se[7]=255.0;
@@ -575,9 +459,6 @@ double* CreateThinningUSE(int num){
         case 6:
         {
            
-            //cvSetReal2D(se, 0, 0, 255.0);
-            //cvSetReal2D(se, 1, 0, 255.0);
-            //cvSetReal2D(se, 2, 0, 255.0);
             se[0]=255.0;
             se[3]=255.0;
             se[6]=255.0;
@@ -585,9 +466,7 @@ double* CreateThinningUSE(int num){
             break;
         case 7:
         {
-            //cvSetReal2D(se, 0, 0, 255.0);
-            //cvSetReal2D(se, 0, 1, 255.0);
-            //cvSetReal2D(se, 1, 0, 255.0);
+            
             se[0]=255.0;
             se[1]=255.0;
             se[3]=255.0;
@@ -601,69 +480,45 @@ double* CreateThinningUSE(int num){
 
 //细化操作
 void Thinning(double *src,double *dst,int width,int height){
-    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    //IplImage *temp_com=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    //cvZero(temp_last);
-    //cvCopy(src, temp, NULL);
+    
     double *temp=(double *)malloc(sizeof(double)*width*height);
     double *temp_last=(double *)malloc(sizeof(double)*width*height);
     double *temp_com=(double *)malloc(sizeof(double)*width*height);
     matrixCopy(src, temp, width, height);
     while(!matrixisEqu(temp, temp_com,width,height)){
-        //cvCopy(temp, temp_com, NULL);
+        
         matrixCopy(temp, temp_com, width, height);
         for(int i=0;i<8;i++){
-            //cvCopy(temp, temp_last, NULL);
-            //IplImage *se1=CreateThinningSE(i);
-            //IplImage *se2=CreateThinningUSE(i);
             matrixCopy(temp, temp_last, width, height);
             double *se1=CreateThinningSE(i);
             double *se2=CreateThinningUSE(i);
-            //HitorMiss(temp, se1, se2, temp, NULL, NULL);
             HitorMiss(temp, width, height, se1, 3, 3, se2, 3, 3, temp, NULL, NULL);
-            //cvSub(temp_last, temp, temp, NULL);
             matrixSub(temp_last, temp, temp, width, height);
-            //cvReleaseImage(&se1);
-            //cvReleaseImage(&se2);
             free(se1);
             free(se2);
         }
         
     }
-    //cvCopy(temp, dst, NULL);
     matrixCopy(temp, dst, width, height);
-    //cvReleaseImage(&temp);
-    //cvReleaseImage(&temp_com);
-    //cvReleaseImage(&temp_last);
     free(temp);
     free(temp_com);
     free(temp_last);
 }
 //重建开操作
 void reBuildOpen(double *src,double *dst,double *ground,int width,int height,double *dilateSE,int dse_width,int dse_height,double *erodeSE,int ese_width,int ese_height,int eroden){
-    //IplImage *temp=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
-    //IplImage *temp_last=cvCreateImage(cvGetSize(src), src->depth, src->nChannels);
     double *temp=(double*)malloc(sizeof(double)*width*height);
     double *temp_last=(double*)malloc(sizeof(double)*width*height);
-    
-    //cvCopy(src, temp, NULL);
     matrixCopy(src, temp, width, height);
     for(int i=0;i<eroden;i++){
-        //Erode(temp, temp, erodeSE, NULL);
         Erode(temp, width, height, temp,width, height, erodeSE, ese_height, ese_height, NULL);
     }
    
     while(!matrixisEqu(temp, temp_last,width,height)){
-        //cvCopy(temp, temp_last, NULL);
         matrixCopy(temp, temp_last, width, height);
-        //Dilate(temp, temp, dilateSE, NULL);
         Dilate(temp, width, height, temp, width, height, dilateSE, dse_width, dse_height, NULL);
-        //And(temp, ground, temp);
         And(temp, ground, temp, width, height);
         
     }
-    //cvCopy(temp, dst, NULL);
     matrixCopy(temp, dst, width, height);
     free(temp);
     free(temp_last);

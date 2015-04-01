@@ -56,7 +56,6 @@ void Erode(double *src,int s_width,int s_height,double *dst,int d_width,int d_he
 void Open(double *src,int width,int height,double *dst,double *se,int se_width,int se_height,Position *center);
 //关操作
 void Close(double *src,int width,int height,double *dst,double *se,int se_width,int se_height,Position *center);
-}
 //击中与击不中
 void HitorMiss(double *src,int width,int height,double *se1,int se1_width,int se1_height,double *se2,int se2_width,int se2_height,double *dst,Position *se1center,Position *se2center);
 //二值图像，边缘检测

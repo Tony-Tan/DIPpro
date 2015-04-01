@@ -28,7 +28,7 @@ void PCA(double *src,int width,int height,double *dst,int feature_num){
     double* covariance=(double *)malloc(sizeof(double)*height*height);
     double* eigenvalue=(double *)malloc(sizeof(double)*height);
     double* eigenvector=(double *)malloc(sizeof(double)*height*height);
-    double* temp_num=(double *)malloc(sizeof(double)*feature_num);
+    //double* temp_num=(double *)malloc(sizeof(double)*feature_num);
     matrixCovariance(src, covariance, width, height);
     matrixEigen_Jacobi(covariance, eigenvalue, eigenvector,MIN_EIG_THRESHOLD , height, height);
     matrixCopy(eigenvector, dst, feature_num, height);

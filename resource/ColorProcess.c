@@ -23,7 +23,7 @@
 //
 
 #include "ColorProcess.h"
-/*********************************************************************************************************************/
+/********************************************************************/
 //直方图均衡RGB，先转换成HSI，然后均衡I通道
 void HistEqualRGB(RGB *src,RGB *dst,int width,int height){
     HSI *temp=(HSI*)malloc(sizeof(HSI)*width*height);
@@ -41,7 +41,7 @@ void HistEqualRGB(RGB *src,RGB *dst,int width,int height){
     free(chanel_i);
     
 }
-/*********************************************************************************************************************/
+/*****************************************************************/
 //平滑RGB三通道模型
 void SmoothRGB(RGB *src,RGB *dst,int width,int height,int m_width,int m_height,double param1,double param2,int Smooth_type){
     double *chanel_r=(double*)malloc(sizeof(double)*width*height);
@@ -90,7 +90,7 @@ void SmoothRGB(RGB *src,RGB *dst,int width,int height,int m_width,int m_height,d
     free(chanel_b_dst);
 }
 
-/*********************************************************************************************************************/
+/********************************************************************/
 //平滑针对HSI中的I通道
 void SmoothHSI(HSI *src,HSI *dst,int width,int height,int m_width,int m_height,double param1,double param2,int Smooth_type){
     double *chanel_i=(double*)malloc(sizeof(double)*width*height);
@@ -125,8 +125,8 @@ void SmoothHSI(HSI *src,HSI *dst,int width,int height,int m_width,int m_height,d
     free(chanel_i_dst);
 }
 
-/*********************************************************************************************************************/
-/*********************************************************************************************************************/
+/********************************************************************/
+
 //分别对RGB进行处理
 
 void SharpenRGB(RGB *src,RGB *dst,int width,int height,double c,int Sharpen_type){
@@ -168,8 +168,8 @@ void SharpenRGB(RGB *src,RGB *dst,int width,int height,double c,int Sharpen_type
     free(chanel_g_dst);
     free(chanel_b_dst);
 }
-/*********************************************************************************************************************/
-/*********************************************************************************************************************/
+/*****************************************************************/
+
 //锐化HSI色彩空间，直接对I进行操作
 void SharpenHSI(HSI *src,HSI *dst,int width,int height,double c,int Sharpen_type){
     double *chanel_i=(double*)malloc(sizeof(double)*width*height);
@@ -199,8 +199,8 @@ void SharpenHSI(HSI *src,HSI *dst,int width,int height,double c,int Sharpen_type
     free(chanel_i);
     free(chanel_i_dst);
 }
-/*********************************************************************************************************************/
-/*********************************************************************************************************************/
+/*********************************************************************/
+
 //3通道向量距离，
 //对于点x，y有彩色向量（c1,c2,c3）
 //给定标准颜色（r,g,b）
@@ -227,8 +227,8 @@ void SegmentRGB(RGB* src,RGB *dst,int width,int height,RGB * color_center,double
         }
     }
 }
-/*********************************************************************************************************************/
-/*********************************************************************************************************************/
+/*********************************************************************/
+
 ///覆盖彩色图像，cover为的0.0的部分表示透明，否则显示Cover颜色
 void Cover_RGB(RGB *src,RGB *dst,RGB *cover,int width,int height){
     double cover_c1,cover_c2,cover_c3;
