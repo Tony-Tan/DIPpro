@@ -485,3 +485,19 @@ void matrixCovariance(double *src,double *dst,int width,int height){
     free(temp_mat_transpose);
     free(covariance);
 }
+
+
+int matrixisEqu(double *src1,double *src2,int width,int height){
+    for(int i=0;i<width*height;i++)
+        if(src1[i]!=src2[i])
+            return 0;
+    return 1;
+
+}
+
+int matrixisEmpty(double *src,int width,int height){
+    for(int i=0;i<height*width;i++)
+        if(0.0!=src[i])
+            return 0;
+    return 1;
+}

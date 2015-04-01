@@ -57,7 +57,7 @@ void matrixEigen_Jacobi(double * src,double *EigenValue,double *EigenVector,doub
 void matrixMulmatrix(double *src1,double *src2,double *dst,int width,int height);
 void matrixTranspose(double *src,double *dst,int width,int height);
 void matrixCovariance(double *src,double *dst,int width,int height);
-
+int matrixisEqu(double *src,double *dst,int width,int height);
 
 double findMatrixMax(double *src,int width,int height,Position *max_posion);
 double findMatrixMin(double *src,int width,int height,Position *min_posion);
@@ -74,4 +74,7 @@ void Mask(double *src,double *dst,double *mask,int width,int height);
 
 //一般差分，返回幅度值和方向矩阵
 void matrixOrdinaryDiff(double *src,double *range,double* angle,int width,int height);
+
+int matrixisEqu(double *src1,double *src2,int width,int height);
+int matrixisEmpty(double *src,int width,int height);
 #endif

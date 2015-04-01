@@ -51,38 +51,34 @@ int ChangtoPower2(int size){
     
 }
 //将图像伸缩到2的幂次大小，并填充
-void ResizeMatrix4FFT(IplImage *src,IplImage **dst){
-    int width=src->width;
-    int height=src->height;
+void ResizeMatrix4FFT(double *src,double **dst,int width,int height){
+    
     int re_width=ChangtoPower2(width);
     int re_height=ChangtoPower2(height);
-    IplImage *temp=cvCreateImage(cvSize(re_width, re_height), src->depth, src->nChannels);
-    cvResize(src, temp, 0);
-    *dst=cvCreateImage(cvSize(re_width*2, re_height*2), src->depth, src->nChannels);
-    cvZero(*dst);
-    for(int i=0;i<re_width;i++)
-        for(int j=0;j<re_height;j++)
-            cvSetReal2D(*dst, j, i, cvGetReal2D(temp, j, i));
-    cvReleaseImage(&temp);
+    double *temp=(double *)malloc(sizeof(double)*re_width*re_height);
+    Resize(src, width, height, temp, re_width, re_height);
+    *dst=(double *)malloc(sizeof(double)*re_width*re_height*4);
+
+    Zero(*dst, re_width*2, re_height*2);
+    matrixCopy(temp, *dst, re_width, re_height);
+    free(temp);
 }
 //将扩充后的图像还原为左上角的
-void CutImage421(IplImage *src,IplImage *dst){
-    //IplImage *temp=cvCreateImage(cvSize(src->width/2, src->height/2), src->depth, src->nChannels);
-    int width=dst->width;
-    int height=dst->height;
-    
-    for(int i=0;i<width;i++)
-        for(int j=0;j<height;j++)
-            cvSetReal2D(dst, j, i, cvGetReal2D(src, j, i));
+void CutImage421(double *src,int s_width,int s_height,double *dst,int d_width,int d_height){
+    Position p;
+    p.x=0;
+    p.y=0;
+    matrixCopyLocal(src, dst, s_width, s_height, d_width, d_height, &p);
 }
 //频域滤波
-double FrequencyFiltering(IplImage *src,IplImage *dst,int filter_type,double param1,int param2,double param3,double param4,double param5,int isgetPower){
-    IplImage *temp=NULL;
+double FrequencyFiltering(double *src,int width,int height,double *dst,int filter_type,double param1,int param2,double param3,double param4,double param5,int isgetPower){
+    //IplImage *temp=NULL;
+    double *temp=NULL;
     double power=0.0;
     //调整至2的幂，并用黑色填充，防止周期缠绕
-    ResizeMatrix4FFT(src, &temp);
-    int fft_width=temp->width;
-    int fft_height=temp->height;
+    ResizeMatrix4FFT(src, &temp, width, height);
+    int fft_width=width*2;
+    int fft_height=height*2;
     //产生滤波器
     double *filter=(double *)malloc(sizeof(double)*fft_height*fft_width);
     if(filter==NULL){
@@ -123,27 +119,30 @@ double FrequencyFiltering(IplImage *src,IplImage *dst,int filter_type,double par
     }
     //showfilter(filter,fft_width,fft_height);
     //FFT
-    Complex *temp_complex=(Complex*)malloc(sizeof(Complex)*fft_height*fft_width);//fft结果
+    Complex *temp_complex=(Complex*)malloc(sizeof(Complex)*fft_height*fft_width);
+    //fft结果
     if(temp_complex==NULL){
         exit(0);
     }
-    ImageFFT(temp, temp_complex);
+    ImageFFT(temp, temp_complex,fft_width,fft_height);
     if(isgetPower)
         power=getPower(temp_complex,fft_width*fft_height);
     //相乘
     MatrixMulti_R_C(filter,temp_complex,temp_complex,fft_width*fft_height);
     
     //IFFT
-    ImageIFFT(temp_complex, temp, temp->width, temp->height);
+    ImageIFFT(temp_complex, temp, fft_width, fft_height);
    
     //还原图像
-    IplImage *result2=cvCreateImage(cvSize(temp->width/2, temp->height/2), temp->depth, temp->nChannels);
-    CutImage421(temp, result2);
-    cvResize(result2, dst, 0);
+    //IplImage *result2=cvCreateImage(cvSize(temp->width/2, temp->height/2), temp->depth, temp->nChannels);
+    double *result2=(double *)malloc(sizeof(double)*width*height);
+    CutImage421(temp,fft_width,fft_height,result2,width,height);
+    //cvResize(result2, dst, 0);
+    matrixCopy(result2, dst, width, height);
+    free(result2);
     free(filter);
     free(temp_complex);
-    cvReleaseImage(&temp);
-    cvReleaseImage(&result2);
+    free(temp);
     if(isgetPower)
         power=getPower(temp_complex,fft_width*fft_height)/power;
     return power;

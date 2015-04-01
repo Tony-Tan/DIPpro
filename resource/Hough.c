@@ -103,19 +103,3 @@ void HoughLine(double *src,double *dst,int width,int height,int lineLength){
         }
     free(polar);
 }
-void HoughCircle(double *src,double *dst,int width,int height){
-
-
-
-}
-void HoughRectangle(double *src,double *dst,int width,int height){
-
-
-
-}
-void HoughSquare(double *src,double *dst,int width,int height){
-
-
-
-
-}

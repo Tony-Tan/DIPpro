@@ -39,12 +39,7 @@ void FFT_Shift(double * src,int size_w,int size_h){
 /*
  图像快速傅里叶变换，图像大小为2的N次幂
  */
-void ImageFFT(IplImage * src,Complex * dst){
-    //FFT_Shift(src, src);
-    if(src->depth!=IPL_DEPTH_8U)
-        exit(0);
-    int width=src->width;
-    int height=src->height;
+void ImageFFT(double * src,int width,int height,Complex * dst){
     double *image_data=(double*)malloc(sizeof(double)*width*height);
     for(int j=0;j<height;j++)
         for(int i=0;i<width;i++){
@@ -77,7 +72,7 @@ void Nomalsize(double *src,double *dst,int size_w,int size_h){
 /*
  获得频谱
  */
-void getAmplitudespectrum(Complex * src,int size_w,int size_h,IplImage *dst){
+void getAmplitudespectrum(Complex * src,double *dst,int size_w,int size_h){
     double *despe=(double *)malloc(sizeof(double)*size_w*size_h);
     if(despe==NULL)
         exit(0);
@@ -92,18 +87,14 @@ void getAmplitudespectrum(Complex * src,int size_w,int size_h,IplImage *dst){
             
         }
     Nomalsize(despe, despe, size_w, size_h);
-    for(int j=0;j<size_h;j++)
-        for(int i=0;i<size_w;i++){
-            cvSetReal2D(dst, j, i, despe[j*size_w+i]);
-            
-        }
+    matrixCopy(despe, dst, size_w, size_h);
     free(despe);
     
 }
 /*
  图像傅里叶反变换
  */
-void ImageIFFT(Complex *src,IplImage *dst,int size_w,int size_h){
+void ImageIFFT(Complex *src,double *dst,int size_w,int size_h){
     Complex *temp_c=(Complex*)malloc(sizeof(Complex)*size_w*size_h);
     if(temp_c==NULL)
         exit(0);
@@ -121,10 +112,7 @@ void ImageIFFT(Complex *src,IplImage *dst,int size_w,int size_h){
             temp_d[j*size_w+i]=temp[j*size_w+i].real;
         }
     FFT_Shift(temp_d, size_w, size_h);
-    for(int j=0;j<size_h;j++)
-        for(int i=0;i<size_w;i++){
-            cvSetReal2D(dst, j, i, temp_d[j*size_w+i]);
-        }
+    matrixCopy(temp_d, dst, size_w, size_h);
     free(temp);
     free(temp_c);
     free(temp_d);

@@ -9,18 +9,19 @@
 #define HIT 1
 #define MISS 0
 //define data type of train data
-struct TrainData{
+typedef struct TrainData_  TrainData;
+struct TrainData_{
     double property;
     double w;
     char status;
     int label;
     
 };
-typedef struct TrainData  TrainData;
+
 //int Data_Size_G=0;
 
 
-TrainData* getTrainData();//get data and label from input
+TrainData * getTrainData();//get data and label from input
 void freeTrainData(TrainData* data);//free memory
 
 void showTrainData(TrainData* data);//showdata//
