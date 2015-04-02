@@ -1,9 +1,7 @@
 #ifndef SMOOTH_H
 #define SMOOTH_H
 #include <stdlib.h>
-#include <cv.h>
 #include "convolution.h"
-
 #include "mathematic.h"
 
 
@@ -24,6 +22,5 @@ void MeanMask(double *mask,int width,int height);
 double BilateralWindow(double *window,int width,int height,double deta_d,double deta_r);
 void BilateralFilter(double *src,double *dst,int width,int height,int m_width,int m_height,double deta_d,double deta_r);
 void MeanFilter(double *src,double *dst,int width,int height,int m_width,int m_height);
-void NoLinearMeanFilter(IplImage *src,IplImage *dst,int width,int height,int Mask_type,int function_type,double param);
-void RobustSmoothFilter(IplImage *src,IplImage *dst,int width,int height);
+void NoLinearMeanFilter(double *src,double *dst,int width,int height,int Mask_type,int m_width,int m_height,int function_type,double param);
 #endif

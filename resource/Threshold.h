@@ -22,7 +22,7 @@
 #define DOUBLEHUMP_BOTTOM 1
 #define DOUBLEHUMP_MEANHUMP 2
 #include "Histogram.h"
-#include "mathematic.h"
+#include "Mathematic.h"
 #include "Segment.h"
 #include <stdlib.h>
 void Threshold(double *src,double *dst,int width,int height,double threshold,int type);

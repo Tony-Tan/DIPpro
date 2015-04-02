@@ -1,7 +1,7 @@
 #ifndef WATERSHED_H
 #define WATERSHED_H
 #include <stdlib.h>
-#include "mathematic.h"
+#include "Mathematic.h"
 #define INIT      1
 #define MINIMAL   2
 #define INQUEUE   3

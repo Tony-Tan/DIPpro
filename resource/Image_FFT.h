@@ -1,7 +1,5 @@
 #ifndef IMAGE_FFT_H
 #define IMAGE_FFT_H
-#include <cv.h>
-#include <highgui.h>
 #include <stdio.h>
 #include <math.h>
 #include "Fourer.h"

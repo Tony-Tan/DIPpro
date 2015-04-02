@@ -242,24 +242,21 @@ void uGeometricMean(double *src,int width,int height){
             src[i]=exp(src[i]);
     
 }
-void NoLinearMeanFilter(IplImage *src,IplImage *dst,int width,int height,int Mask_type,int function_type,double param){
-    double * pixarry=(double *)malloc(sizeof(double)*src->width*src->height);
-    double * dstarry=(double *)malloc(sizeof(double)*src->width*src->height);
+void NoLinearMeanFilter(double *src,double *dst,int width,int height,int Mask_type,int m_width,int m_height,int function_type,double param){
+    double * pixarry=(double *)malloc(sizeof(double)*width*height);
+    double * dstarry=(double *)malloc(sizeof(double)*width*height);
     double * mask=(double *)malloc(sizeof(double)*width*height);
-    for(int j=0;j<src->height;j++)
-        for(int i=0;i<src->width;i++){
-            pixarry[j*src->width+i]=cvGetReal2D(src, j, i);
-        
-        }
+    
+    matrixCopy(src, pixarry, width, height);
     //变换函数
     switch (function_type) {
         case NLMF_FUN_A:
             break;
         case NLMF_FUN_G:
-            GeometricMean(pixarry,src->width,src->height);
+            GeometricMean(pixarry,width,height);
             break;
         case NLMF_FUN_H:
-            HarmonicAve(pixarry,src->width,src->height);
+            HarmonicAve(pixarry,width,height);
             break;
         default:
             break;
@@ -270,19 +267,18 @@ void NoLinearMeanFilter(IplImage *src,IplImage *dst,int width,int height,int Mas
     switch (Mask_type) {
         case NLMF_MASK_G:
         {
-            GaussianMask(mask, width, height, param);
-            RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
+            GaussianMask(mask, m_width, m_height, param);
+            RealRelevant(pixarry,dstarry,mask,width,height,width,height);
             break;
         }
         case NLMF_MASK_M:
         {
-            MeanMask(mask, width, height);
-            RealRelevant(pixarry,dstarry,mask,src->width,src->height,width,height);
+            MeanMask(mask, m_width, m_height);
+            RealRelevant(pixarry,dstarry,mask,width,height,width,height);
             break;
         }
         default:
-            for(int i=0;i<src->width*src->height;i++)
-                dstarry[i]=pixarry[i];
+            matrixCopy(pixarry, dstarry, width, height);
             break;
     }
     
@@ -291,19 +287,15 @@ void NoLinearMeanFilter(IplImage *src,IplImage *dst,int width,int height,int Mas
         case NLMF_FUN_A:
             break;
         case NLMF_FUN_G:
-            uGeometricMean(dstarry,src->width,src->height);
+            uGeometricMean(dstarry,width,height);
             break;
         case NLMF_FUN_H:
-            uHarmonicAve(dstarry,src->width,src->height);
+            uHarmonicAve(dstarry,width,height);
             break;
         default:
             break;
     }
-    for(int j=0;j<src->height;j++){
-        for(int i=0;i<src->width;i++){
-            cvSetReal2D( dst,j,i,dstarry[j*src->width+i]);
-        }
-    }
+    matrixCopy(dstarry, dst, width, height);
     free(pixarry);
     free(dstarry);
     free(mask);

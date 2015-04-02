@@ -26,8 +26,7 @@
 #define ANGLEHISTSIZE 36
 #define ANGLEZOOM (ANGLEHISTSIZE/360.0)
 
-#include <cv.h>
-#include <highgui.h>
+
 SIFT_Feature * createNewSIFTnode(){
     SIFT_Feature* newNode=(SIFT_Feature*)malloc(sizeof(SIFT_Feature));
     return newNode;

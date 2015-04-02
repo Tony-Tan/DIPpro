@@ -23,7 +23,7 @@
 //  Copyright (c) 2014年 谭升. All rights reserved.
 //
 #include "Image_FFT.h"
-
+#include <float.h>
 /*
  中心化，根据傅里叶性质的平移性质
  */
@@ -41,11 +41,8 @@ void FFT_Shift(double * src,int size_w,int size_h){
  */
 void ImageFFT(double * src,int width,int height,Complex * dst){
     double *image_data=(double*)malloc(sizeof(double)*width*height);
-    for(int j=0;j<height;j++)
-        for(int i=0;i<width;i++){
-            image_data[j*width+i]=cvGetReal2D(src, j, i);
-        
-    }
+    
+    matrixCopy(src, image_data, width, height);
     FFT_Shift(image_data,width, height);//图像中心化
     FFT2D(image_data, dst, width, height);
     free(image_data);

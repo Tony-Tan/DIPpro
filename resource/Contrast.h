@@ -1,7 +1,6 @@
 #ifndef CONTRAST_H
 #define CONTRAST_H
-#include <cv.h>
-#include <highgui.h>
+
 #include <stdio.h>
 #include "mathematic.h"
 

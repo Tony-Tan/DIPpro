@@ -29,8 +29,7 @@
  *THRESHOLD_TYPE4       |       dst(x,y)=src(x,y)>T?Minvalue:Maxvalue;          *
  ********************************************************************************/
 #include "Threshold.h"
-#include <cv.h>
-#include <highgui.h>
+
 void Threshold(double *src,double *dst,int width,int height,double threshold,int type){
     if(type==THRESHOLD_TYPE1){
         for(int i=0;i<width*height;i++)

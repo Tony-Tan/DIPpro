@@ -1,7 +1,6 @@
 #ifndef GRAYMORPHOLOGY_H
 #define GRAYMORPHOLOGY_H
-#include <cv.h>
-#include <highgui.h>
+
 #include <stdio.h>
 #include "mathematic.h"
 #define TOFINDMAX 0

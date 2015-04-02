@@ -19,7 +19,8 @@
 #include "Resize.h"
 #include "SIFT.h"
 #include "PCA.h"
-
+#include <cv.h>
+#include <highgui.h>
 
 
 #define HIGH_FR 1
