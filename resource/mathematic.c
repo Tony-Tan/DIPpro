@@ -124,9 +124,9 @@ void matrixMulmatrix(double *src1,double *src2,double *dst,int width,int height)
     double *temp=(double *)malloc(sizeof(double)*height*height);
     Zero(temp, height, height);
     for(int j=0;j<height;j++){
-         for(int k=0;k<height;k++){
-             for(int i=0;i<width;i++){
-                temp[j*width+i]+=src1[j*width+k]*src2[k*width+i];
+        for(int i=0;i<height;i++){
+            for(int k=0;k<width;k++){
+                temp[j*height+i]+=src1[j*width+k]*src2[k*height+i];
             }
         }
     
@@ -444,7 +444,7 @@ void matrixTranspose(double *src,double *dst,int width,int height){
     Zero(temp, width,height);
     for(int j=0;j<height;j++){
         for(int i=0;i<width;i++)
-            temp[j*width+i]=src[i*width+j];
+            temp[i*height+j]=src[j*width+i];
     }
     matrixCopy(temp, dst, width, height);
     free(temp);
@@ -465,11 +465,13 @@ void matrixCovariance(double *src,double *dst,int width,int height){
         for(int i=0;i<width;i++){
             sum+=src[j*width+i];
         }
+        
         mean[j]=sum/width;
     }
     for(int j=0;j<height;j++){
         double average=mean[j];
         for(int i=0;i<width;i++){
+
             temp_mat[j*width+i]=src[j*width+i]-average;
         }
     }

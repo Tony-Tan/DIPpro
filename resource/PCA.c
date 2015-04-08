@@ -24,16 +24,27 @@
 
 #include "PCA.h"
 #define MIN_EIG_THRESHOLD 0.0000001
-void PCA(double *src,int width,int height,double *dst,int feature_num){
+void PCA(double *src,int width,int height,double **dst,int feature_num){
     double* covariance=(double *)malloc(sizeof(double)*height*height);
     double* eigenvalue=(double *)malloc(sizeof(double)*height);
+    double* eigenvalue_sort=(double *)malloc(sizeof(double)*height);
     double* eigenvector=(double *)malloc(sizeof(double)*height*height);
-    //double* temp_num=(double *)malloc(sizeof(double)*feature_num);
+    (*dst)=(double *)malloc(sizeof(double)*height*feature_num);
     matrixCovariance(src, covariance, width, height);
     matrixEigen_Jacobi(covariance, eigenvalue, eigenvector,MIN_EIG_THRESHOLD , height, height);
-    matrixCopy(eigenvector, dst, feature_num, height);
-    
+    Sort_quick(eigenvalue, eigenvalue_sort, height);
+    for(int i=0;i<feature_num;i++){
+        double max_i=eigenvalue_sort[height-i-1];
+        for(int j=0;j<height;j++){
+            if(eigenvalue[j]==max_i){
+                for(int m=0;m<height;m++)
+                    (*dst)[m*feature_num+i]=eigenvector[m*height+j];
+                eigenvalue[j]=DBL_MIN;
+            }
+        }
+    }
     free(covariance);
     free(eigenvector);
     free(eigenvalue);
+    free(eigenvalue_sort);
 }

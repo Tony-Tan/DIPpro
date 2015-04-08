@@ -21,7 +21,7 @@
 #include "PCA.h"
 #include <cv.h>
 #include <highgui.h>
-
+#include "DataOperation.h"
 
 #define HIGH_FR 1
 #define LOW_FR 2
@@ -45,7 +45,7 @@ void showfilter(double *filter,int width,int height){
 int main(int argc, const char * argv[]) {
     int r_width=50,r_height=50;
     
-    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena128_90.png", 0);
+    IplImage *src =cvLoadImage("/Users/Tony/DIPImage/lena.png", 0);
     
     int width=src->width, height=src->height;
     RGB * srcarry=(RGB *)malloc(sizeof(RGB)*width*height);
@@ -134,20 +134,14 @@ int main(int argc, const char * argv[]) {
     //Position_DBL p;
     //p.x=5;
     //p.y=5;
-    double temp[9]={35.5833,-55.7917,55.1250,
-        -55.7917,87.5833,-86.6250,
-        55.1250,-86.6250,85.7500};
-    double res[3];
-    double vector[9];
-    //matrixMulmatrix(temp,vector,vector,3,3);
-    matrixEigen_Jacobi(temp, res,vector, 0.001, 3,3);
-    //PCA(temp, 3, 3, vector, 3);
-    //matrixCovariance(temp, vector, 3, 3);
-    for(int i=0;i<3;i++)
-        printf("%lf \n",res[i]);
-    for(int j=0;j<3;j++){
-        for(int i=0;i<3;i++)
-            printf("%lf  ",vector[j*3+i]);
+    //matrixMulmatrix(srcarry_dbl, srcarry_dbl, dst3arry, width, height);
+    double *dst_pca;
+    double arry[12]={1,3,2,2,4,3,3,1,1,4,2,4};
+    PCA(arry, 3, 4, &dst_pca, 4);
+    //matrixCovariance(arry, dst_pca, 3, 4);
+    for(int j=0;j<4;j++){
+        for(int i=0;i<4;i++)
+            printf("%10g\t",dst_pca[j*4+i]);
         printf("\n");
     }
     //matrixRotation(srcarry_dbl, dst3arry, width, height, width, height,45,&p);

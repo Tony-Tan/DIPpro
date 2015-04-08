@@ -14,6 +14,8 @@ Contrast.c
 Contrast.h
 Convolution.c
 Convolution.h
+DataOperation.c
+DataOperation.h
 FFT_1D.c
 FFT_2D.c
 Filter.c

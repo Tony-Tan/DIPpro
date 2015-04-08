@@ -18,4 +18,4 @@ void ResizeMatrix4FFT(double *src,double **dst,int width,int height);
 
 double FrequencyFiltering(double *src,int width,int height,double *dst,int filter_type,double param1,int param2,double param3,double param4,double param5,int isgetPower);
 double getPower(Complex *src,int totalsize);
-#endif
+#endif 
